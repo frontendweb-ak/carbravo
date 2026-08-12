@@ -1,18 +1,19 @@
 import Header from "@/components/layout/Header";
 import {
+	Button,
 	FormCheckboxGroup,
 	FormDateInput,
 	FormInput,
 	FormRadioGroup,
+	FormSelect,
 	FormTextarea,
 	FormTimeInput,
 	Row,
 } from "@/components/ui";
-import { Button } from "@/components/ui/button";
 import { env } from "@/config/env";
 import { AppProviders } from "@/providers/AppProviders";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FormProvider, useForm } from "react-hook-form";
+import { FormProvider, useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 import "./App.css";
 import { FormDateTimeInput } from "./components/ui/forms/form-datetime-input";
@@ -72,6 +73,9 @@ function App() {
 	const onSubmit = (formData: FormValues) => {
 		console.log("Values", formData);
 	};
+
+	const value = useWatch({ control: form.control, name: "vehicle" });
+	console.log("V", value);
 
 	return (
 		<AppProviders>
@@ -212,7 +216,43 @@ function App() {
 								},
 							]}
 						/>
-
+						<FormSelect
+							control={form.control}
+							name="vehicle"
+							label="Vehicle"
+							required
+							placeholder="Select a vehicle"
+							options={[
+								{
+									id: "car",
+									name: "Car",
+									description: "Passenger car",
+									active: true,
+								},
+								{
+									id: "bike",
+									name: "Bike",
+									description: "Two-wheeler",
+									active: true,
+								},
+								{
+									id: "truck",
+									name: "Truck",
+									description: "Commercial vehicle",
+									active: true,
+								},
+								{
+									id: "bus",
+									name: "Bus",
+									description: "Passenger bus",
+									active: false,
+								},
+							]}
+							getValue={(item) => item.id}
+							getLabel={(item) => item.name}
+							getDescription={(item) => item.description}
+							getDisabled={(item) => item.active === false}
+						/>
 						<FormTextarea
 							control={form.control}
 							name="description"

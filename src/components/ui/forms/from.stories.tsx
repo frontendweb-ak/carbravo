@@ -576,7 +576,7 @@ export const TwoColumn: Story = {
 		});
 
 		return (
-			<div className="w-[720px] max-w-full">
+			<div className="w-180 max-w-full">
 				<form className="space-y-6">
 					<Row gap={12}>
 						<FormInput

@@ -1,7 +1,7 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import { type ComponentProps, forwardRef } from "react";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui";
 
 import { cn } from "@/utils";
 import { Textarea } from "../textarea";
@@ -301,3 +301,4 @@ export {
 	InputGroupText,
 	InputGroupTextarea,
 };
+

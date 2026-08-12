@@ -14,7 +14,39 @@ type DefaultOption = {
 	disabled?: boolean;
 };
 
-function resolveOption<T>(option: T, accessors: OptionGroupAccessors<T>) {
+export interface ResolvedOption<T> {
+	/**
+	 * Original option object.
+	 *
+	 * Useful when a component needs valueType="object".
+	 */
+	original: T;
+
+	/**
+	 * Normalized option value.
+	 */
+	value: string;
+
+	/**
+	 * Display label.
+	 */
+	label: ReactNode;
+
+	/**
+	 * Optional description.
+	 */
+	description: ReactNode;
+
+	/**
+	 * Whether this option is disabled.
+	 */
+	disabled: boolean;
+}
+
+function resolveOption<T>(
+	option: T,
+	accessors: OptionGroupAccessors<T>,
+): ResolvedOption<T> {
 	const { getValue, getLabel, getDescription, getDisabled } = accessors;
 
 	const defaultOption =
@@ -28,13 +60,15 @@ function resolveOption<T>(option: T, accessors: OptionGroupAccessors<T>) {
 			? String(defaultOption.value)
 			: undefined;
 
-	if (!value) {
+	if (value === undefined || value === "") {
 		throw new Error(
 			"OptionGroup requires getValue when options do not contain a value property.",
 		);
 	}
 
 	return {
+		original: option,
+
 		value,
 
 		label: getLabel ? getLabel(option) : (defaultOption?.label ?? null),
