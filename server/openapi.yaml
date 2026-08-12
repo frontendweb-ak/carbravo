@@ -1,0 +1,1586 @@
+openapi: 3.0.0
+info:
+  title: CarBravo Incentives Authoring Service API
+  description: >
+    REST API contract for the CarBravo Incentives Authoring Service (MVP1).
+
+
+    Domain model: a **Program** is the long-lived container (status DRAFT →
+    ACTIVE → EXPIRED). A **Revision** is a posted, immutable snapshot; only one
+    is ACTIVE at a time. A **Draft** is the single in-progress working copy —
+    it is not a revision until Posted to Production, and at most one draft may
+    exist per program. Revisions are numbered `majorRevision.minorRevision`
+    (e.g. "2.1"). Editing a draft resets approval; minor (text-only) revisions
+    are exempt.
+  version: 1.0.0
+  contact:
+    name: CarBravo Incentives Platform
+servers:
+  - url: /api
+    description: Base path (implicit v1)
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Dashboard
+  - name: Program Management
+  - name: Program Setup
+  - name: Vehicle Targeting
+  - name: Geography Targeting
+  - name: Incentive Values
+  - name: Summary Hub
+  - name: Approval Workflow
+  - name: Revision Lifecycle
+  - name: Revision History
+  - name: Reference Data
+
+paths:
+  # ------------------------------------------------------------------ Dashboard
+  /dashboard/summary:
+    get:
+      tags: [Dashboard]
+      operationId: getDashboardSummary
+      summary: Program status counts and pending approval queue depth
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /dashboard/activity:
+    get:
+      tags: [Dashboard]
+      operationId: getDashboardActivity
+      summary: Recent audit events across all programs (last 20)
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: "#/components/schemas/ActivityItem" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /dashboard/expiring:
+    get:
+      tags: [Dashboard]
+      operationId: getExpiringPrograms
+      summary: ACTIVE programs expiring within 30 days
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: "#/components/schemas/ExpiringProgram" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  # --------------------------------------------------------- Program Management
+  /programs:
+    get:
+      tags: [Program Management]
+      operationId: listPrograms
+      summary: Paginated, filtered list of all programs
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema: { $ref: "#/components/schemas/ProgramStatus" }
+        - name: programType
+          in: query
+          required: false
+          schema: { type: string, example: FINANCE }
+        - name: search
+          in: query
+          required: false
+          schema: { type: string }
+        - name: dateFrom
+          in: query
+          required: false
+          schema: { type: string, format: date }
+        - name: dateTo
+          in: query
+          required: false
+          schema: { type: string, format: date }
+        - name: pendingApproval
+          in: query
+          required: false
+          schema: { type: boolean }
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/SizeParam"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  content:
+                    type: array
+                    items: { $ref: "#/components/schemas/ProgramListItem" }
+                  pagination: { $ref: "#/components/schemas/Pagination" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+    post:
+      tags: [Program Management]
+      operationId: createProgram
+      summary: Create a new program with an initial DRAFT (target revision 1.0)
+      description: Roles - AUTHOR, ADMIN
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [programName]
+              properties:
+                programName:
+                  type: string
+                  maxLength: 255
+                  example: "CarBravo Finance — Fall 2026"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  programId: { type: integer }
+                  programIdentifier: { type: string, example: PROG-2026-0003 }
+                  programStatus: { $ref: "#/components/schemas/ProgramStatus" }
+                  revisionId: { type: integer }
+                  revisionStatus: { $ref: "#/components/schemas/RevisionStatus" }
+                  majorRevision: { type: integer, example: 1 }
+                  minorRevision: { type: integer, example: 0 }
+                  revisionLabel: { type: string, example: "1.0" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /programs/{programId}:
+    parameters:
+      - $ref: "#/components/parameters/ProgramId"
+    get:
+      tags: [Program Management]
+      operationId: getProgram
+      summary: Read a single program with its active revision and draft status
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ProgramDetail" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    delete:
+      tags: [Program Management]
+      operationId: deleteProgram
+      summary: Soft-delete a program (only if never posted)
+      description: >
+        Roles - ADMIN only. Guard - program status must be DRAFT
+        (no posted revision exists).
+      responses:
+        "204": { description: No Content }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409": { $ref: "#/components/responses/Conflict" }
+
+  # -------------------------------------------------------------- Program Setup
+  /programs/{programId}/revisions/{revisionId}/setup:
+    parameters:
+      - $ref: "#/components/parameters/ProgramId"
+      - $ref: "#/components/parameters/RevisionId"
+    get:
+      tags: [Program Setup]
+      operationId: getSetup
+      summary: Load full setup page data
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Setup" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    put:
+      tags: [Program Setup]
+      operationId: saveSetup
+      summary: Save all setup fields for a DRAFT revision
+      description: >
+        Roles - AUTHOR, ADMIN. Guard - revision status must be DRAFT.
+        Side effect - approval reset (isSubmitted/approved set to false)
+        unless the draft is a minor revision.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SetupInput" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Setup" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "409": { $ref: "#/components/responses/Conflict" }
+        "422": { $ref: "#/components/responses/UnprocessableEntity" }
+
+  /reference/setup:
+    get:
+      tags: [Reference Data]
+      operationId: getReferenceSetup
+      summary: Load reference data for Program Setup (cacheable, 5-minute TTL)
+      responses:
+        "200":
+          description: OK
+          headers:
+            Cache-Control:
+              schema: { type: string, example: max-age=300 }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ReferenceSetup" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  # ---------------------------------------------------------- Vehicle Targeting
+  /vehicles/years:
+    get:
+      tags: [Vehicle Targeting]
+      operationId: getVehicleYears
+      summary: All distinct model years (descending)
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  years:
+                    type: array
+                    items: { type: integer }
+                    example: [2026, 2025, 2024, 2023, 2022, 2021]
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /vehicles/makes:
+    get:
+      tags: [Vehicle Targeting]
+      operationId: getVehicleMakes
+      summary: Distinct makes for a given year
+      parameters:
+        - name: year
+          in: query
+          required: true
+          schema: { type: integer, example: 2026 }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  makes:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        make: { type: string, example: Chevrolet }
+                        oemCode: { type: string, example: GM }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /vehicles/models:
+    get:
+      tags: [Vehicle Targeting]
+      operationId: getVehicleModels
+      summary: Distinct models for year and make
+      parameters:
+        - name: year
+          in: query
+          required: true
+          schema: { type: integer }
+        - name: make
+          in: query
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  models:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        model: { type: string, example: "Silverado LD" }
+                        division: { type: string, example: Chevrolet }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /vehicles/search:
+    get:
+      tags: [Vehicle Targeting]
+      operationId: searchVehicles
+      summary: Full vehicle catalog search
+      parameters:
+        - name: year
+          in: query
+          schema: { type: integer }
+        - name: make
+          in: query
+          schema: { type: string }
+        - name: model
+          in: query
+          schema: { type: string }
+        - name: segment
+          in: query
+          schema: { type: string }
+        - name: fuelType
+          in: query
+          schema: { type: string }
+        - name: oemCode
+          in: query
+          schema: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  vehicles:
+                    type: array
+                    items: { $ref: "#/components/schemas/Vehicle" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /programs/{programId}/revisions/{revisionId}/vehicles:
+    parameters:
+      - $ref: "#/components/parameters/ProgramId"
+      - $ref: "#/components/parameters/RevisionId"
+    get:
+      tags: [Vehicle Targeting]
+      operationId: getSelectedVehicles
+      summary: Load selected vehicles for a revision
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  selectedVehicles:
+                    type: array
+                    items: { $ref: "#/components/schemas/SelectedVehicle" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    put:
+      tags: [Vehicle Targeting]
+      operationId: replaceVehicles
+      summary: Replace all vehicle selections
+      description: >
+        Roles - AUTHOR, ADMIN. Guard - revision status must be DRAFT.
+        Side effects - deletes component vehicle overrides for removed
+        vehicles; approval reset.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [vehicleCatalogIds]
+              properties:
+                vehicleCatalogIds:
+                  type: array
+                  items: { type: integer }
+                  example: [1, 2, 5]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  selectedVehicles:
+                    type: array
+                    items: { $ref: "#/components/schemas/SelectedVehicle" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "409": { $ref: "#/components/responses/Conflict" }
+
+  # -------------------------------------------------------- Geography Targeting
+  /geography/regions:
+    get:
+      tags: [Geography Targeting]
+      operationId: getRegions
+      summary: All regions (cacheable)
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  regions:
+                    type: array
+                    items: { $ref: "#/components/schemas/GeoNode" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /geography/states:
+    get:
+      tags: [Geography Targeting]
+      operationId: getStates
+      summary: States by region
+      parameters:
+        - name: region
+          in: query
+          required: false
+          schema: { type: string, example: MIDWEST }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  states:
+                    type: array
+                    items: { $ref: "#/components/schemas/GeoNode" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /geography/dmas:
+    get:
+      tags: [Geography Targeting]
+      operationId: getDmas
+      summary: DMAs by state
+      parameters:
+        - name: state
+          in: query
+          required: true
+          schema: { type: string, example: MI }
+        - name: region
+          in: query
+          required: false
+          schema: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  dmas:
+                    type: array
+                    items: { $ref: "#/components/schemas/GeoNode" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /geography/counties:
+    get:
+      tags: [Geography Targeting]
+      operationId: getCounties
+      summary: Counties by state
+      parameters:
+        - name: state
+          in: query
+          required: true
+          schema: { type: string }
+        - name: dma
+          in: query
+          required: false
+          schema: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  counties:
+                    type: array
+                    items: { $ref: "#/components/schemas/GeoNode" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /geography/search:
+    get:
+      tags: [Geography Targeting]
+      operationId: searchGeography
+      summary: Search across all geography tiers (UNION)
+      parameters:
+        - name: search
+          in: query
+          required: true
+          schema: { type: string, example: detroit }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items: { $ref: "#/components/schemas/GeoSearchResult" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /programs/{programId}/revisions/{revisionId}/geography:
+    parameters:
+      - $ref: "#/components/parameters/ProgramId"
+      - $ref: "#/components/parameters/RevisionId"
+    get:
+      tags: [Geography Targeting]
+      operationId: getGeographyRules
+      summary: Load include/exclude rules for a revision
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  geoRules:
+                    type: array
+                    items: { $ref: "#/components/schemas/GeoRule" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    put:
+      tags: [Geography Targeting]
+      operationId: replaceGeographyRules
+      summary: Replace all include/exclude rules
+      description: >
+        Roles - AUTHOR, ADMIN. Guards - revision status must be DRAFT; at
+        least one include rule required. Side effect - approval reset.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [geoRules]
+              properties:
+                geoRules:
+                  type: array
+                  items: { $ref: "#/components/schemas/GeoRuleInput" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  geoRules:
+                    type: array
+                    items: { $ref: "#/components/schemas/GeoRule" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "409": { $ref: "#/components/responses/Conflict" }
+        "422": { $ref: "#/components/responses/UnprocessableEntity" }
+
+  # ----------------------------------------------------------- Incentive Values
+  /programs/{programId}/revisions/{revisionId}/values:
+    parameters:
+      - $ref: "#/components/parameters/ProgramId"
+      - $ref: "#/components/parameters/RevisionId"
+    get:
+      tags: [Incentive Values]
+      operationId: getValues
+      summary: Load components, attributes, and vehicle scope
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ValuesResponse" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    put:
+      tags: [Incentive Values]
+      operationId: replaceValues
+      summary: Replace all components and attributes
+      description: >
+        Roles - AUTHOR, ADMIN. Guard - revision status must be DRAFT.
+        Side effect - approval reset. componentCode must be a stable
+        business key; do not send componentId/attributeId.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [components]
+              properties:
+                components:
+                  type: array
+                  items: { $ref: "#/components/schemas/ComponentInput" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ValuesResponse" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "409": { $ref: "#/components/responses/Conflict" }
+        "422": { $ref: "#/components/responses/UnprocessableEntity" }
+
+  # --------------------------------------------------------------- Summary Hub
+  /programs/{programId}/revisions/{revisionId}/summary:
+    parameters:
+      - $ref: "#/components/parameters/ProgramId"
+      - $ref: "#/components/parameters/RevisionId"
+    get:
+      tags: [Summary Hub]
+      operationId: getSummary
+      summary: Read-only overview of full revision
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RevisionSummary" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    patch:
+      tags: [Summary Hub]
+      operationId: patchMinorRevisionText
+      summary: Edit text-only fields of a minor-revision draft
+      description: >
+        Roles - AUTHOR, ADMIN. Guards - revision status must be DRAFT and
+        isMinorRevision must be true; only non-essential text fields may be
+        changed. Does not trigger approval reset.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mfpnText: { type: string }
+                disclosureText: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mfpnText: { type: string }
+                  disclosureText: { type: string }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "409": { $ref: "#/components/responses/Conflict" }
+
+  # ---------------------------------------------------------- Approval Workflow
+  /programs/{programId}/revisions/{revisionId}/approval:
+    parameters:
+      - $ref: "#/components/parameters/ProgramId"
+      - $ref: "#/components/parameters/RevisionId"
+    get:
+      tags: [Approval Workflow]
+      operationId: getApproval
+      summary: Load approval state and full audit timeline
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ApprovalState" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /programs/{programId}/revisions/{revisionId}/submit:
+    parameters:
+      - $ref: "#/components/parameters/ProgramId"
+      - $ref: "#/components/parameters/RevisionId"
+    post:
+      tags: [Approval Workflow]
+      operationId: submitRevision
+      summary: Submit a DRAFT for approval (Ready for Review)
+      description: >
+        Roles - AUTHOR, ADMIN. Guards - revisionStatus=DRAFT,
+        isSubmitted=false.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/EmptyBody" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ApprovalState" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "409": { $ref: "#/components/responses/Conflict" }
+
+  /programs/{programId}/revisions/{revisionId}/approve:
+    parameters:
+      - $ref: "#/components/parameters/ProgramId"
+      - $ref: "#/components/parameters/RevisionId"
+    post:
+      tags: [Approval Workflow]
+      operationId: approveRevision
+      summary: Approve a submitted draft
+      description: >
+        Roles - APPROVER, ADMIN. Guards - isSubmitted=true, approved=false.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                comment: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ApprovalState" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "409": { $ref: "#/components/responses/Conflict" }
+
+  /programs/{programId}/revisions/{revisionId}/reject:
+    parameters:
+      - $ref: "#/components/parameters/ProgramId"
+      - $ref: "#/components/parameters/RevisionId"
+    post:
+      tags: [Approval Workflow]
+      operationId: rejectRevision
+      summary: Reject a submitted draft that has not yet been approved
+      description: >
+        Roles - APPROVER, ADMIN. Guards - isSubmitted=true, approved=false
+        (an already-approved draft returns 409 ALREADY_APPROVED).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [rejectionReason]
+              properties:
+                rejectionReason: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ApprovalState" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "409": { $ref: "#/components/responses/Conflict" }
+
+  /programs/{programId}/revisions/{revisionId}/post-to-production:
+    parameters:
+      - $ref: "#/components/parameters/ProgramId"
+      - $ref: "#/components/parameters/RevisionId"
+    post:
+      tags: [Approval Workflow]
+      operationId: postToProduction
+      summary: Post an approved draft to production (promote to ACTIVE)
+      description: >
+        Roles - AUTHOR, ADMIN. Guards - revisionStatus=DRAFT; major
+        revisions require approved=true (minor revisions do not). Promotes
+        the draft to ACTIVE, assigns its final Major.Minor, expires the
+        previously active revision, and sets program status to ACTIVE.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/EmptyBody" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RevisionRef" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "409": { $ref: "#/components/responses/Conflict" }
+
+  # --------------------------------------------------------- Revision Lifecycle
+  /programs/{programId}/revise:
+    parameters:
+      - $ref: "#/components/parameters/ProgramId"
+    post:
+      tags: [Revision Lifecycle]
+      operationId: reviseProgram
+      summary: Begin a new major revision of an active program
+      description: >
+        Roles - AUTHOR, ADMIN. Guards - program status must be ACTIVE; no
+        existing draft unless overwrite=true. Creates a DRAFT copied from the
+        active revision (target majorRevision+1.0); requires full approval
+        before posting.
+      parameters:
+        - $ref: "#/components/parameters/OverwriteParam"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/EmptyBody" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DraftCreated" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "409": { $ref: "#/components/responses/Conflict" }
+
+  /programs/{programId}/minor-revise:
+    parameters:
+      - $ref: "#/components/parameters/ProgramId"
+    post:
+      tags: [Revision Lifecycle]
+      operationId: minorReviseProgram
+      summary: Begin a minor (text-only) revision of an active program
+      description: >
+        Roles - AUTHOR, ADMIN. Guards - program status must be ACTIVE; no
+        existing draft unless overwrite=true; active minorRevision < 99.
+        Creates a text-only DRAFT (target Major.minor+1) that does not require
+        approval before posting.
+      parameters:
+        - $ref: "#/components/parameters/OverwriteParam"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/EmptyBody" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DraftCreated" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "409": { $ref: "#/components/responses/Conflict" }
+        "422": { $ref: "#/components/responses/UnprocessableEntity" }
+
+  /programs/{programId}/expire:
+    parameters:
+      - $ref: "#/components/parameters/ProgramId"
+    post:
+      tags: [Revision Lifecycle]
+      operationId: expireProgram
+      summary: Manually expire an active program
+      description: >
+        Roles - ADMIN only. Guard - program status must be ACTIVE. Sets
+        program status to EXPIRED; the active revision is left unchanged.
+        Also occurs automatically when deliveryEndDate passes.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/EmptyBody" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  programId: { type: integer }
+                  programStatus: { $ref: "#/components/schemas/ProgramStatus" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "409": { $ref: "#/components/responses/Conflict" }
+
+  # ----------------------------------------------------------- Revision History
+  /programs/{programId}/revisions:
+    parameters:
+      - $ref: "#/components/parameters/ProgramId"
+    get:
+      tags: [Revision History]
+      operationId: listRevisions
+      summary: List all revisions for a program (descending)
+      parameters:
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/SizeParam"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  content:
+                    type: array
+                    items: { $ref: "#/components/schemas/RevisionHistoryItem" }
+                  pagination: { $ref: "#/components/schemas/Pagination" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /programs/{programId}/revisions/{revisionId}/detail:
+    parameters:
+      - $ref: "#/components/parameters/ProgramId"
+      - $ref: "#/components/parameters/RevisionId"
+    get:
+      tags: [Revision History]
+      operationId: getRevisionDetail
+      summary: Read-only summary of a specific revision
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RevisionDetail" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /programs/{programId}/revisions/{revisionId}/delta:
+    parameters:
+      - $ref: "#/components/parameters/ProgramId"
+      - $ref: "#/components/parameters/RevisionId"
+    get:
+      tags: [Revision History]
+      operationId: getRevisionDelta
+      summary: What changed in this revision vs. the prior revision
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RevisionDelta" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    ProgramId:
+      name: programId
+      in: path
+      required: true
+      schema: { type: integer }
+    RevisionId:
+      name: revisionId
+      in: path
+      required: true
+      schema: { type: integer }
+    PageParam:
+      name: page
+      in: query
+      required: false
+      schema: { type: integer, default: 0, minimum: 0 }
+    SizeParam:
+      name: size
+      in: query
+      required: false
+      schema: { type: integer, default: 25, maximum: 100, minimum: 1 }
+    OverwriteParam:
+      name: overwrite
+      in: query
+      required: false
+      description: If a draft already exists, discard it and start fresh.
+      schema: { type: boolean, default: false }
+
+  responses:
+    BadRequest:
+      description: Invalid input
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ErrorResponse" }
+    Unauthorized:
+      description: Missing or invalid auth token
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ErrorResponse" }
+    Forbidden:
+      description: Insufficient role for the operation
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ErrorResponse" }
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ErrorResponse" }
+    Conflict:
+      description: >
+        State conflict - e.g. draft not editable, a draft already exists,
+        approval required before posting, already approved.
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ErrorResponse" }
+    UnprocessableEntity:
+      description: Well-formed request that violates a business rule
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  schemas:
+    ProgramStatus:
+      type: string
+      enum: [DRAFT, ACTIVE, EXPIRED]
+    RevisionStatus:
+      type: string
+      enum: [DRAFT, ACTIVE, EXPIRED]
+
+    EmptyBody:
+      type: object
+      nullable: true
+      description: Empty object or null.
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              example: REVISION_NOT_EDITABLE
+              enum:
+                - REVISION_NOT_EDITABLE
+                - DRAFT_ALREADY_EXISTS
+                - APPROVAL_REQUIRED
+                - ALREADY_APPROVED
+                - NOT_SUBMITTED
+                - PROGRAM_NOT_ACTIVE
+                - MINOR_LIMIT_EXCEEDED
+                - NO_INCLUDE_RULE
+            message: { type: string }
+            timestamp: { type: string, format: date-time }
+            path: { type: string }
+            details:
+              type: object
+              additionalProperties: true
+
+    Pagination:
+      type: object
+      properties:
+        page: { type: integer }
+        size: { type: integer }
+        totalElements: { type: integer }
+        totalPages: { type: integer }
+
+    RevisionRef:
+      type: object
+      properties:
+        revisionId: { type: integer }
+        majorRevision: { type: integer }
+        minorRevision: { type: integer }
+        revisionLabel: { type: string, example: "2.0" }
+        revisionStatus: { $ref: "#/components/schemas/RevisionStatus" }
+        isMinorRevision: { type: boolean }
+
+    DashboardSummary:
+      type: object
+      properties:
+        counts:
+          type: array
+          items:
+            type: object
+            properties:
+              status: { $ref: "#/components/schemas/ProgramStatus" }
+              total: { type: integer }
+              pendingApproval: { type: integer }
+
+    ActivityItem:
+      type: object
+      properties:
+        id: { type: integer }
+        entityType:
+          type: string
+          enum: [INCENTIVE_REVISION, INCENTIVE_PROGRAM]
+        entityId: { type: integer }
+        operation: { $ref: "#/components/schemas/AuditOperation" }
+        changedBy: { type: string }
+        changedAt: { type: string, format: date-time }
+        programName: { type: string }
+        programIdentifier: { type: string }
+
+    ExpiringProgram:
+      type: object
+      properties:
+        programId: { type: integer }
+        programIdentifier: { type: string }
+        programName: { type: string }
+        revisionId: { type: integer }
+        revisionLabel: { type: string, example: "1.0" }
+        deliveryStartDate: { type: string, format: date }
+        deliveryEndDate: { type: string, format: date }
+        vehicles:
+          type: array
+          items: { $ref: "#/components/schemas/VehicleLabel" }
+        includedStates:
+          type: array
+          items: { type: string }
+
+    ProgramListItem:
+      type: object
+      properties:
+        programId: { type: integer }
+        programIdentifier: { type: string }
+        programName: { type: string }
+        programStatus: { $ref: "#/components/schemas/ProgramStatus" }
+        programType: { type: string }
+        currentRevision:
+          allOf:
+            - $ref: "#/components/schemas/RevisionRef"
+            - type: object
+              properties:
+                isSubmitted: { type: boolean }
+                approved: { type: boolean }
+        hasDraft: { type: boolean }
+        deliveryStartDate: { type: string, format: date }
+        deliveryEndDate: { type: string, format: date }
+        updatedAt: { type: string, format: date-time }
+
+    ProgramDetail:
+      type: object
+      properties:
+        programId: { type: integer }
+        programIdentifier: { type: string }
+        programName: { type: string }
+        programStatus: { $ref: "#/components/schemas/ProgramStatus" }
+        programType: { type: string }
+        activeRevision:
+          nullable: true
+          allOf: [{ $ref: "#/components/schemas/RevisionRef" }]
+        draftRevision:
+          nullable: true
+          allOf:
+            - $ref: "#/components/schemas/RevisionRef"
+            - type: object
+              properties:
+                isSubmitted: { type: boolean }
+                approved: { type: boolean }
+        deliveryStartDate: { type: string, format: date }
+        deliveryEndDate: { type: string, format: date }
+        updatedAt: { type: string, format: date-time }
+
+    DraftCreated:
+      allOf:
+        - type: object
+          properties:
+            programId: { type: integer }
+        - $ref: "#/components/schemas/RevisionRef"
+        - type: object
+          properties:
+            copiedFromRevisionId: { type: integer, nullable: true }
+
+    SetupInput:
+      type: object
+      required:
+        - programName
+        - programTypeCode
+        - customerTypeCodes
+        - deliveryStartDate
+        - deliveryEndDate
+      properties:
+        programName: { type: string, maxLength: 255 }
+        programTypeCode: { type: string }
+        customerTypeCodes:
+          type: array
+          items: { type: string }
+          minItems: 1
+          maxItems: 50
+        contactName: { type: string, maxLength: 255, nullable: true }
+        contactEmail: { type: string, format: email, nullable: true }
+        contactPhone: { type: string, nullable: true }
+        financialProviderCode: { type: string, nullable: true }
+        conditionCode: { type: string, nullable: true }
+        conditionTier: { type: string, nullable: true }
+        mileageCeiling: { type: integer, nullable: true }
+        topOfDeal: { type: boolean }
+        vinException: { type: boolean }
+        mfpnText: { type: string, nullable: true }
+        disclosureText: { type: string, nullable: true }
+        localeCode: { type: string, example: en-US }
+        deliveryStartDate: { type: string, format: date }
+        deliveryEndDate: { type: string, format: date }
+        effectiveStartDate: { type: string, format: date, nullable: true }
+        effectiveEndDate: { type: string, format: date, nullable: true }
+        financeTerms:
+          type: array
+          items: { type: integer }
+        creditTiers:
+          type: array
+          items: { type: string }
+
+    Setup:
+      allOf:
+        - type: object
+          properties:
+            programId: { type: integer }
+            programIdentifier: { type: string }
+            revisionId: { type: integer }
+            majorRevision: { type: integer }
+            minorRevision: { type: integer }
+            revisionLabel: { type: string }
+            revisionStatus: { $ref: "#/components/schemas/RevisionStatus" }
+        - $ref: "#/components/schemas/SetupInput"
+
+    ReferenceSetup:
+      type: object
+      properties:
+        programTypes:
+          type: array
+          items:
+            type: object
+            properties:
+              code: { type: string }
+              name: { type: string }
+              supportsCash: { type: boolean }
+              supportsRate: { type: boolean }
+        customerTypes:
+          type: array
+          items: { $ref: "#/components/schemas/CodeName" }
+        conditionCodes:
+          type: array
+          items: { $ref: "#/components/schemas/CodeName" }
+        financeTermOptions:
+          type: array
+          items:
+            type: object
+            properties:
+              termMonths: { type: integer }
+              label: { type: string }
+        creditTierOptions:
+          type: array
+          items:
+            type: object
+            properties:
+              code: { type: string }
+              name: { type: string }
+              sortOrder: { type: integer }
+        financialProviders:
+          type: array
+          items:
+            type: object
+            properties:
+              code: { type: string }
+              name: { type: string }
+              isActive: { type: boolean }
+              supportedTerms:
+                type: array
+                items: { type: integer }
+              supportsCash: { type: boolean }
+              supportsRate: { type: boolean }
+
+    CodeName:
+      type: object
+      properties:
+        code: { type: string }
+        name: { type: string }
+
+    Vehicle:
+      type: object
+      properties:
+        vehicleCatalogId: { type: integer }
+        vehicleId: { type: string, example: "GM:2019:SIL1500LD" }
+        year: { type: integer }
+        make: { type: string }
+        model: { type: string }
+        trimName: { type: string }
+        bodyStyle: { type: string }
+        segment: { type: string }
+        fuelType: { type: string }
+        drivetrain: { type: string }
+
+    VehicleLabel:
+      type: object
+      properties:
+        vehicleCatalogId: { type: integer }
+        label: { type: string }
+
+    SelectedVehicle:
+      type: object
+      properties:
+        revisionVehicleId: { type: integer }
+        vehicleCatalogId: { type: integer }
+        year: { type: integer }
+        make: { type: string }
+        model: { type: string }
+        trimName: { type: string }
+        segment: { type: string }
+
+    GeoNode:
+      type: object
+      properties:
+        code: { type: string }
+        name: { type: string }
+
+    GeoLevel:
+      type: string
+      enum: [REGION, STATE, DMA, COUNTY]
+
+    GeoSearchResult:
+      type: object
+      properties:
+        level: { $ref: "#/components/schemas/GeoLevel" }
+        code: { type: string }
+        name: { type: string }
+
+    GeoRuleInput:
+      type: object
+      required: [isIncluded, level, code]
+      properties:
+        isIncluded: { type: boolean }
+        level: { $ref: "#/components/schemas/GeoLevel" }
+        code: { type: string }
+        name: { type: string }
+
+    GeoRule:
+      allOf:
+        - type: object
+          properties:
+            geoRuleId: { type: integer }
+        - $ref: "#/components/schemas/GeoRuleInput"
+
+    Attribute:
+      type: object
+      properties:
+        attributeId: { type: integer }
+        key:
+          type: string
+          enum: [TERM_MONTHS, APR_RATE, CASH_AMOUNT]
+        numberValue: { type: number, nullable: true }
+        textValue: { type: string, nullable: true }
+
+    AttributeInput:
+      type: object
+      required: [key]
+      properties:
+        key:
+          type: string
+          enum: [TERM_MONTHS, APR_RATE, CASH_AMOUNT]
+        numberValue: { type: number, nullable: true }
+        textValue: { type: string, nullable: true }
+
+    Component:
+      type: object
+      properties:
+        componentId: { type: integer }
+        componentCode: { type: string, example: TERM_36 }
+        componentName: { type: string }
+        sequenceNo: { type: integer }
+        attributes:
+          type: array
+          items: { $ref: "#/components/schemas/Attribute" }
+        vehicleOverrides:
+          type: array
+          items: { type: object }
+
+    ComponentInput:
+      type: object
+      required: [componentCode, componentName, attributes]
+      properties:
+        componentCode: { type: string }
+        componentName: { type: string }
+        sequenceNo: { type: integer }
+        attributes:
+          type: array
+          minItems: 1
+          items: { $ref: "#/components/schemas/AttributeInput" }
+
+    ValuesResponse:
+      type: object
+      properties:
+        financeTerms:
+          type: array
+          items: { type: integer }
+        scopeVehicles:
+          type: array
+          items: { $ref: "#/components/schemas/SelectedVehicleLabel" }
+        components:
+          type: array
+          items: { $ref: "#/components/schemas/Component" }
+
+    SelectedVehicleLabel:
+      type: object
+      properties:
+        revisionVehicleId: { type: integer }
+        vehicleCatalogId: { type: integer }
+        label: { type: string }
+
+    RevisionSummary:
+      type: object
+      properties:
+        program:
+          type: object
+          properties:
+            programId: { type: integer }
+            programIdentifier: { type: string }
+            programName: { type: string }
+            programStatus: { $ref: "#/components/schemas/ProgramStatus" }
+        revision: { $ref: "#/components/schemas/RevisionRef" }
+        setup:
+          type: object
+          properties:
+            programTypeCode: { type: string }
+            customerTypeCode: { type: string }
+            deliveryStartDate: { type: string, format: date }
+            deliveryEndDate: { type: string, format: date }
+        vehicles:
+          type: array
+          items: { $ref: "#/components/schemas/VehicleLabel" }
+        geoRules:
+          type: array
+          items: { $ref: "#/components/schemas/GeoRuleInput" }
+        components:
+          type: array
+          items:
+            type: object
+            properties:
+              componentCode: { type: string }
+              componentName: { type: string }
+        mfpnText: { type: string }
+        disclosureText: { type: string }
+
+    ApprovalState:
+      type: object
+      properties:
+        revisionId: { type: integer }
+        majorRevision: { type: integer }
+        minorRevision: { type: integer }
+        revisionLabel: { type: string }
+        revisionStatus: { $ref: "#/components/schemas/RevisionStatus" }
+        isMinorRevision: { type: boolean }
+        isSubmitted: { type: boolean }
+        submittedAt: { type: string, format: date-time, nullable: true }
+        submittedBy: { type: string, nullable: true }
+        approved: { type: boolean }
+        approvedAt: { type: string, format: date-time, nullable: true }
+        approvedBy: { type: string, nullable: true }
+        approvalComment: { type: string, nullable: true }
+        rejectedAt: { type: string, format: date-time, nullable: true }
+        rejectedBy: { type: string, nullable: true }
+        rejectionReason: { type: string, nullable: true }
+        auditTimeline:
+          type: array
+          items: { $ref: "#/components/schemas/AuditEvent" }
+
+    RevisionHistoryItem:
+      type: object
+      properties:
+        revisionId: { type: integer }
+        majorRevision: { type: integer }
+        minorRevision: { type: integer }
+        revisionLabel: { type: string }
+        revisionStatus: { $ref: "#/components/schemas/RevisionStatus" }
+        isMinorRevision: { type: boolean }
+        isSubmitted: { type: boolean }
+        approved: { type: boolean }
+        postedAt: { type: string, format: date-time, nullable: true }
+        postedBy: { type: string, nullable: true }
+        createdAt: { type: string, format: date-time }
+        createdBy: { type: string }
+
+    RevisionDetail:
+      type: object
+      properties:
+        revisionId: { type: integer }
+        majorRevision: { type: integer }
+        minorRevision: { type: integer }
+        revisionLabel: { type: string }
+        revisionStatus: { $ref: "#/components/schemas/RevisionStatus" }
+        isMinorRevision: { type: boolean }
+        programName: { type: string }
+        programType: { type: string }
+        vehicleCount: { type: integer }
+        createdAt: { type: string, format: date-time }
+        createdBy: { type: string }
+        postedAt: { type: string, format: date-time, nullable: true }
+        postedBy: { type: string, nullable: true }
+
+    RevisionDelta:
+      type: object
+      properties:
+        fromRevisionLabel: { type: string, nullable: true }
+        toRevisionLabel: { type: string }
+        changes:
+          type: array
+          items:
+            type: object
+            properties:
+              entity:
+                type: string
+                enum: [SETUP, COMPONENT, VEHICLE, GEOGRAPHY]
+              field: { type: string }
+              action:
+                type: string
+                enum: [ADDED, REMOVED, CHANGED]
+              componentCode: { type: string }
+              componentName: { type: string }
+              label: { type: string }
+              previousValue: {}
+              newValue: {}
+              changedBy: { type: string }
+              changedAt: { type: string, format: date-time }
+
+    AuditOperation:
+      type: string
+      enum:
+        - CREATE
+        - UPDATE
+        - SUBMIT
+        - APPROVE
+        - REJECT
+        - REVISE
+        - MINOR_REVISE
+        - POST_TO_PRODUCTION
+        - EXPIRE
+
+    AuditEvent:
+      type: object
+      properties:
+        operation: { $ref: "#/components/schemas/AuditOperation" }
+        changedBy: { type: string }
+        changedAt: { type: string, format: date-time }
+        comment: { type: string, nullable: true }
