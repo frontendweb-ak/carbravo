@@ -7,9 +7,9 @@ import { defineConfig, loadEnv, type UserConfig } from "vite";
 export default defineConfig(({ mode }): UserConfig => {
   const env = loadEnv(mode, process.cwd(), "");
   return {
-    plugins: [react(), babel({ presets: [reactCompilerPreset()] })],
-    resolve: { alias: { "@": path.resolve(__dirname, "./src") } },
-    define: { "process.env": env },
-    server: { port: Number(env.PORT) },
-  };
+		plugins: [react(), babel({ presets: [reactCompilerPreset()] })],
+		resolve: { alias: { "@": path.resolve(import.meta.dirname, "./src") } },
+		server: { port: Number(env.VITE_PORT) },
+		build: { outDir: "dist" },
+	};
 });
