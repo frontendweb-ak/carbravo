@@ -2,10 +2,12 @@ import Header from "@/components/layout/Header";
 import {
 	Button,
 	FormCheckboxGroup,
+	FormChoiceChipGroup,
 	FormDateInput,
 	FormInput,
 	FormRadioGroup,
 	FormSelect,
+	FormSwitch,
 	FormTextarea,
 	FormTimeInput,
 	Row,
@@ -44,6 +46,9 @@ const schema = z.object({
 
 	vehicleTypes: z.array(z.string()).min(1, "Select at least one vehicle type"),
 	vehicle: z.string(),
+	active: z.boolean(),
+	programType: z.string().min(1),
+	creditTiers: z.array(z.string()).min(1, "Select at least one credit tier"),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -65,6 +70,9 @@ function App() {
 			description: "",
 			vehicleTypes: [],
 			vehicle: "bike",
+			active: false,
+			programType: "apr",
+			creditTiers: [],
 		},
 
 		mode: "all",
@@ -213,6 +221,58 @@ function App() {
 								{
 									value: "convertible",
 									label: "Convertible",
+								},
+							]}
+						/>
+						<FormSwitch
+							control={form.control}
+							name="active"
+							label="Active"
+							description="Enable this program for customers."
+						/>
+						<FormChoiceChipGroup
+							control={form.control}
+							name="programType"
+							label="Program type"
+							required
+							options={[
+								{
+									value: "customer_cash",
+									label: "Customer Cash",
+								},
+								{
+									value: "apr",
+									label: "APR",
+								},
+								{
+									value: "bonus_cash",
+									label: "Bonus Cash",
+								},
+							]}
+						/>
+						<FormChoiceChipGroup
+							control={form.control}
+							name="creditTiers"
+							label="Condition tier"
+							required
+							color="secondary"
+							selectionMode="multiple"
+							options={[
+								{
+									value: "carbravo_certified",
+									label: "CarBravo Certified",
+								},
+								{
+									value: "manufacturer_certified",
+									label: "Manufacturer Certified",
+								},
+								{
+									value: "used_inspected",
+									label: "Used — Inspected",
+								},
+								{
+									value: "used_as_is",
+									label: "Used — As-Is",
 								},
 							]}
 						/>

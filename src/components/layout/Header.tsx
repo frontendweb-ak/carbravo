@@ -1,18 +1,10 @@
-import { Car, Plus } from "lucide-react";
-
 import { Button } from "@/components/ui";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
+import { Car, Plus } from "lucide-react";
 
 export default function Header() {
 	return (
 		<header className="border-b bg-white">
-			<div className="mx-auto flex h-18 items-center justify-between px-8">
+			<div className="mx-auto flex py-2 items-center justify-between px-8">
 				{/* Left */}
 				<div className="flex items-center gap-10">
 					<div className="flex items-center gap-3">
@@ -58,7 +50,7 @@ export default function Header() {
 							Role
 						</span>
 
-						<Select defaultValue="admin">
+						{/* <Select defaultValue="admin">
 							<SelectTrigger className="w-32">
 								<SelectValue />
 							</SelectTrigger>
@@ -68,7 +60,7 @@ export default function Header() {
 								<SelectItem value="manager">Manager</SelectItem>
 								<SelectItem value="viewer">Viewer</SelectItem>
 							</SelectContent>
-						</Select>
+						</Select> */}
 					</div>
 
 					<div className="flex h-10 w-10 items-center justify-center rounded-full bg-sky-100 text-sm font-semibold text-sky-700">

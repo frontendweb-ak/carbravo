@@ -15,31 +15,10 @@ type DefaultOption = {
 };
 
 export interface ResolvedOption<T> {
-	/**
-	 * Original option object.
-	 *
-	 * Useful when a component needs valueType="object".
-	 */
 	original: T;
-
-	/**
-	 * Normalized option value.
-	 */
 	value: string;
-
-	/**
-	 * Display label.
-	 */
 	label: ReactNode;
-
-	/**
-	 * Optional description.
-	 */
 	description: ReactNode;
-
-	/**
-	 * Whether this option is disabled.
-	 */
 	disabled: boolean;
 }
 
@@ -84,3 +63,4 @@ function resolveOption<T>(
 }
 
 export { resolveOption };
+

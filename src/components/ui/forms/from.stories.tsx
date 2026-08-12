@@ -1,4 +1,5 @@
 import {
+	Button,
 	FormDateInput,
 	FormDateTimeInput,
 	FormInput,
@@ -6,7 +7,6 @@ import {
 	FormTimeInput,
 	Row,
 } from "@/components/ui";
-import { Button } from "@/components/ui/button";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useForm } from "react-hook-form";
@@ -16,10 +16,8 @@ import { FormCheckbox } from "./form-checkbox";
 const meta = {
 	title: "Components/Form",
 	tags: ["autodocs"],
-
 	parameters: {
 		layout: "centered",
-
 		docs: {
 			description: {
 				component:

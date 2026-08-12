@@ -2,7 +2,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import type { ComponentProps, ReactNode } from "react";
 
 import { Label } from "@/components/ui/primitives/label/label";
-import { Separator } from "@/components/ui/separator";
+import { Separator } from "@/components/ui/primitives/separator";
 import { cn } from "@/utils";
 
 /* -------------------------------------------------------------------------- */
@@ -339,3 +339,4 @@ export {
 	FieldSet,
 	FieldTitle,
 };
+

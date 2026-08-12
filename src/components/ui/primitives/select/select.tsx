@@ -1,93 +1,20 @@
-import { cn, type OptionGroupAccessors, resolveOption } from "@/utils";
 import {
 	Combobox as ComboboxPrimitive,
 	type ComboboxRootChangeEventDetails,
 } from "@base-ui/react/combobox";
-import {
-	Select as SelectPrimitive,
-	type SelectRootChangeEventDetails,
-} from "@base-ui/react/select";
+
+import { Select as SelectPrimitive } from "@base-ui/react/select";
 import { Check, ChevronDown, Loader2, X } from "lucide-react";
 import { type ComponentProps, type ReactNode, useMemo, useState } from "react";
 
-/* -------------------------------------------------------------------------- */
-/* Select                                                                      */
-/* -------------------------------------------------------------------------- */
-
-export type SelectProps = Omit<
-	ComponentProps<typeof SelectPrimitive.Root>,
-	"value" | "defaultValue" | "onValueChange"
-> & {
-	value?: string;
-	defaultValue?: string;
-	onValueChange?: (value: string) => void;
-	placeholder?: string;
-};
-
-function Select({ value, defaultValue, onValueChange, ...props }: SelectProps) {
-	return (
-		<SelectPrimitive.Root
-			{...props}
-			value={value}
-			defaultValue={defaultValue}
-			onValueChange={(nextValue, _details: SelectRootChangeEventDetails) => {
-				onValueChange?.(String(nextValue ?? ""));
-			}}
-		/>
-	);
-}
-
-/* -------------------------------------------------------------------------- */
-/* Select Trigger                                                              */
-/* -------------------------------------------------------------------------- */
-
-export type SelectTriggerProps = ComponentProps<typeof SelectPrimitive.Trigger>;
-
-function SelectTrigger({ className, children, ...props }: SelectTriggerProps) {
-	return (
-		<SelectPrimitive.Trigger
-			data-slot="select-trigger"
-			className={cn(
-				"flex h-9 w-full items-center justify-between gap-2",
-				"rounded-md border border-input",
-				"bg-background px-3",
-				"text-sm text-foreground",
-				"shadow-xs",
-				"outline-none",
-
-				"hover:border-ring/60",
-
-				"focus-visible:border-ring",
-				"focus-visible:ring-3",
-				"focus-visible:ring-ring/30",
-
-				"disabled:pointer-events-none",
-				"disabled:cursor-not-allowed",
-				"disabled:opacity-50",
-
-				"aria-invalid:border-destructive",
-				"aria-invalid:ring-3",
-				"aria-invalid:ring-destructive/20",
-
-				"dark:bg-input/30",
-
-				className,
-			)}
-			{...props}
-		>
-			<span className="min-w-0 flex-1 truncate text-left">{children}</span>
-
-			<ChevronDown
-				aria-hidden="true"
-				className="size-4 shrink-0 text-muted-foreground"
-			/>
-		</SelectPrimitive.Trigger>
-	);
-}
-
-/* -------------------------------------------------------------------------- */
-/* Select Value                                                                */
-/* -------------------------------------------------------------------------- */
+import {
+	cn,
+	type OptionGroupAccessors,
+	type ResolvedOption,
+	resolveOption,
+} from "@/utils";
+import { Select } from "./select-base";
+import { SelectTrigger, type SelectTriggerProps } from "./select-trigger";
 
 export type SelectValueProps = ComponentProps<typeof SelectPrimitive.Value>;
 
@@ -97,10 +24,6 @@ function SelectValue({
 }: SelectValueProps) {
 	return <SelectPrimitive.Value placeholder={placeholder} {...props} />;
 }
-
-/* -------------------------------------------------------------------------- */
-/* Select Content                                                              */
-/* -------------------------------------------------------------------------- */
 
 export type SelectContentProps = ComponentProps<typeof SelectPrimitive.Popup>;
 
@@ -129,10 +52,6 @@ function SelectContent({ className, children, ...props }: SelectContentProps) {
 	);
 }
 
-/* -------------------------------------------------------------------------- */
-/* Select List                                                                 */
-/* -------------------------------------------------------------------------- */
-
 export type SelectListProps = ComponentProps<typeof SelectPrimitive.List>;
 
 function SelectList({ className, ...props }: SelectListProps) {
@@ -144,10 +63,6 @@ function SelectList({ className, ...props }: SelectListProps) {
 		/>
 	);
 }
-
-/* -------------------------------------------------------------------------- */
-/* Select Item                                                                 */
-/* -------------------------------------------------------------------------- */
 
 export type SelectItemProps = ComponentProps<typeof SelectPrimitive.Item>;
 
@@ -162,7 +77,6 @@ function SelectItem({ className, children, ...props }: SelectItemProps) {
 				"text-sm outline-none",
 
 				"hover:bg-accent hover:text-accent-foreground",
-
 				"focus:bg-accent focus:text-accent-foreground",
 
 				"data-highlighted:bg-accent",
@@ -184,10 +98,6 @@ function SelectItem({ className, children, ...props }: SelectItemProps) {
 		</SelectPrimitive.Item>
 	);
 }
-
-/* -------------------------------------------------------------------------- */
-/* Combobox Input                                                              */
-/* -------------------------------------------------------------------------- */
 
 export type SelectSearchProps = ComponentProps<typeof ComboboxPrimitive.Input>;
 
@@ -212,10 +122,6 @@ function SelectSearch({ className, ...props }: SelectSearchProps) {
 	);
 }
 
-/* -------------------------------------------------------------------------- */
-/* Empty                                                                       */
-/* -------------------------------------------------------------------------- */
-
 export interface SelectEmptyProps {
 	children?: ReactNode;
 }
@@ -224,16 +130,16 @@ function SelectEmpty({ children = "No options found." }: SelectEmptyProps) {
 	return (
 		<div
 			data-slot="select-empty"
-			className="px-3 py-6 text-center text-sm text-muted-foreground"
+			className={cn(
+				"px-3 py-6",
+				"text-center text-sm",
+				"text-muted-foreground",
+			)}
 		>
 			{children}
 		</div>
 	);
 }
-
-/* -------------------------------------------------------------------------- */
-/* Loading                                                                     */
-/* -------------------------------------------------------------------------- */
 
 export interface SelectLoadingProps {
 	children?: ReactNode;
@@ -243,7 +149,11 @@ function SelectLoading({ children = "Loading..." }: SelectLoadingProps) {
 	return (
 		<div
 			data-slot="select-loading"
-			className="flex items-center justify-center gap-2 px-3 py-6 text-sm text-muted-foreground"
+			className={cn(
+				"flex items-center justify-center gap-2",
+				"px-3 py-6",
+				"text-sm text-muted-foreground",
+			)}
 		>
 			<Loader2 aria-hidden="true" className="size-4 animate-spin" />
 
@@ -252,9 +162,6 @@ function SelectLoading({ children = "Loading..." }: SelectLoadingProps) {
 	);
 }
 
-/**
- * Select data component
- */
 export type SelectValueType = "id" | "object";
 
 export type SelectOutput<
@@ -267,27 +174,62 @@ export interface SelectDataProps<
 	TValueType extends SelectValueType = "id",
 > extends OptionGroupAccessors<T> {
 	options: T[];
+
 	valueType?: TValueType;
+
 	value?: TValueType extends "object" ? T | null : string;
+
 	onValueChange?: (value: SelectOutput<T, TValueType>) => void;
+
 	searchable?: boolean;
+
 	searchValue?: string;
+
 	onSearchChange?: (value: string) => void;
+
 	loading?: boolean;
+
 	emptyMessage?: ReactNode;
+
 	loadingMessage?: ReactNode;
+
 	disabled?: boolean;
+
 	placeholder?: string;
+
+	/**
+	 * Props for the normal Select trigger.
+	 *
+	 * These are intentionally NOT passed to the
+	 * Combobox input because Trigger props are
+	 * HTMLButtonElement props.
+	 */
 	triggerProps?: SelectTriggerProps;
+
+	/**
+	 * Props specifically for the searchable input.
+	 */
+	searchInputProps?: Omit<
+		ComponentProps<typeof ComboboxPrimitive.Input>,
+		"value" | "onChange"
+	>;
+
 	className?: string;
 }
 
-function SelectData<T>({
+/* -------------------------------------------------------------------------- */
+/* Select Data                                                                  */
+/* -------------------------------------------------------------------------- */
+
+function SelectData<T, TValueType extends SelectValueType = "id">({
 	options,
+
+	valueType = "id" as TValueType,
+
 	value,
+
 	onValueChange,
 
-	valueType = "id",
 	getValue,
 	getLabel,
 	getDescription,
@@ -304,17 +246,28 @@ function SelectData<T>({
 	loadingMessage = "Loading...",
 
 	disabled = false,
+
 	placeholder = "Select an option",
 
 	triggerProps,
+	searchInputProps,
+
 	className,
-}: SelectDataProps<T>) {
+}: SelectDataProps<T, TValueType>) {
 	const [internalSearch, setInternalSearch] = useState("");
 
-	const isServerSearch = Boolean(onSearchChange);
+	/*
+	 * Controlled search:
+	 *
+	 * If onSearchChange exists:
+	 *     parent controls search.
+	 *
+	 * Otherwise:
+	 *     SelectData controls search locally.
+	 */
 	const search = onSearchChange ? searchValue : internalSearch;
 
-	const resolvedOptions = useMemo(
+	const resolvedOptions = useMemo<ResolvedOption<T>[]>(
 		() =>
 			options.map((option) =>
 				resolveOption(option, {
@@ -327,16 +280,40 @@ function SelectData<T>({
 		[options, getValue, getLabel, getDescription, getDisabled],
 	);
 
+	/* ---------------------------------------------------------------------- */
+	/* Local filtering                                                         */
+	/* ---------------------------------------------------------------------- */
+
 	const visibleOptions = useMemo(() => {
-		if (onSearchChange) return resolvedOptions;
-		if (!searchable || !search.trim()) return resolvedOptions;
+		/*
+		 * Server search:
+		 *
+		 * Parent is responsible for changing options.
+		 */
+		if (onSearchChange) {
+			return resolvedOptions;
+		}
+
+		/*
+		 * No search or search disabled.
+		 */
+		if (!searchable || !search.trim()) {
+			return resolvedOptions;
+		}
+
 		const query = search.trim().toLowerCase();
+
 		return resolvedOptions.filter((option) =>
 			String(option.label ?? "")
 				.toLowerCase()
 				.includes(query),
 		);
 	}, [resolvedOptions, searchable, search, onSearchChange]);
+
+	/* ---------------------------------------------------------------------- */
+	/* Search change                                                            */
+	/* ---------------------------------------------------------------------- */
+
 	const handleSearchChange = (nextValue: string) => {
 		if (onSearchChange) {
 			onSearchChange(nextValue);
@@ -344,13 +321,95 @@ function SelectData<T>({
 			setInternalSearch(nextValue);
 		}
 	};
+
+	/* ---------------------------------------------------------------------- */
+	/* ID mode                                                                  */
+	/* ---------------------------------------------------------------------- */
+
+	const emitIdValue = (nextValue: string) => {
+		onValueChange?.(nextValue as SelectOutput<T, TValueType>);
+	};
+
+	/* ---------------------------------------------------------------------- */
+	/* Object mode                                                              */
+	/* ---------------------------------------------------------------------- */
+
+	const selectedObject = useMemo(() => {
+		if (valueType !== "object") {
+			return null;
+		}
+
+		if (value === null || value === undefined) {
+			return null;
+		}
+
+		const objectValue = value as T;
+
+		const objectId = getValue
+			? getValue(objectValue)
+			: resolveOption(objectValue, {}).value;
+
+		return (
+			resolvedOptions.find((option) => option.value === objectId)?.original ??
+			objectValue
+		);
+	}, [valueType, value, getValue, resolvedOptions]);
+
+	/* ---------------------------------------------------------------------- */
+	/* Common selection                                                         */
+	/* ---------------------------------------------------------------------- */
+
+	const selectedId =
+		valueType === "object"
+			? selectedObject
+				? resolveOption(selectedObject, {
+						getValue,
+						getLabel,
+						getDescription,
+						getDisabled,
+					}).value
+				: ""
+			: String(value ?? "");
+
+	const handleResolvedSelection = (option: ResolvedOption<T> | null) => {
+		if (!option) {
+			if (valueType === "object") {
+				onValueChange?.(null as SelectOutput<T, TValueType>);
+			} else {
+				emitIdValue("");
+			}
+
+			return;
+		}
+
+		if (valueType === "object") {
+			onValueChange?.(option.original as SelectOutput<T, TValueType>);
+		} else {
+			emitIdValue(option.value);
+		}
+	};
+
+	/* ====================================================================== */
+	/* SIMPLE SELECT                                                           */
+	/* ====================================================================== */
+
 	if (!searchable) {
 		return (
-			<Select value={value} onValueChange={onValueChange} disabled={disabled}>
+			<Select
+				value={selectedId}
+				onValueChange={(nextValue) => {
+					const selected = resolvedOptions.find(
+						(option) => option.value === nextValue,
+					);
+
+					handleResolvedSelection(selected ?? null);
+				}}
+				disabled={disabled}
+			>
 				<SelectTrigger
 					{...triggerProps}
 					disabled={disabled}
-					className={className}
+					className={cn(className, triggerProps?.className)}
 				>
 					<SelectValue placeholder={placeholder} />
 				</SelectTrigger>
@@ -386,36 +445,46 @@ function SelectData<T>({
 		);
 	}
 
-	/*
-	 * Searchable select = Combobox.
-	 */
+	/* ====================================================================== */
+	/* SEARCHABLE SELECT / COMBOBOX                                           */
+	/* ====================================================================== */
+
+	const selectedComboboxValue =
+		resolvedOptions.find((option) => option.value === selectedId) ?? null;
+
 	return (
 		<ComboboxPrimitive.Root
-			items={visibleOptions}
-			value={resolvedOptions.find((option) => option.value === value) ?? null}
+			items={resolvedOptions}
+			value={selectedComboboxValue}
 			onValueChange={(nextValue, _details: ComboboxRootChangeEventDetails) => {
 				if (!nextValue) {
-					onValueChange?.("");
+					handleResolvedSelection(null);
 					return;
 				}
 
-				const resolved = resolveOption(nextValue as T, {});
-
-				onValueChange?.(resolved.value);
+				/*
+				 * Because `items` contains ResolvedOption<T>,
+				 * Base UI gives us the same object here.
+				 */
+				handleResolvedSelection(nextValue as ResolvedOption<T>);
 			}}
 			disabled={disabled}
 			autoHighlight
 		>
 			<ComboboxPrimitive.InputGroup className="relative w-full">
 				<ComboboxPrimitive.Input
-					id={triggerProps?.id}
-					aria-invalid={triggerProps?.["aria-invalid"]}
+					{...searchInputProps}
 					disabled={disabled}
 					placeholder={placeholder}
+					value={search}
+					onChange={(event) => {
+						handleSearchChange(event.target.value);
+					}}
 					className={cn(
 						"h-9 w-full",
 						"rounded-md border border-input",
-						"bg-background px-3 pr-9",
+						"bg-background",
+						"px-3 pr-16",
 						"text-sm text-foreground",
 						"shadow-xs",
 						"outline-none",
@@ -432,6 +501,7 @@ function SelectData<T>({
 						"disabled:opacity-50",
 
 						className,
+						searchInputProps?.className,
 					)}
 				/>
 
@@ -469,7 +539,8 @@ function SelectData<T>({
 							"max-h-80",
 							"overflow-hidden",
 							"rounded-md border",
-							"bg-popover text-popover-foreground",
+							"bg-popover",
+							"text-popover-foreground",
 							"shadow-md",
 							"outline-none",
 						)}
@@ -477,12 +548,10 @@ function SelectData<T>({
 						{loading ? (
 							<SelectLoading>{loadingMessage}</SelectLoading>
 						) : visibleOptions.length === 0 ? (
-							<ComboboxPrimitive.Empty>
-								<SelectEmpty>{emptyMessage}</SelectEmpty>
-							</ComboboxPrimitive.Empty>
+							<SelectEmpty>{emptyMessage}</SelectEmpty>
 						) : (
 							<ComboboxPrimitive.List className="max-h-72 overflow-y-auto p-1">
-								{(option) => (
+								{visibleOptions.map((option) => (
 									<ComboboxPrimitive.Item
 										key={option.value}
 										value={option}
@@ -517,7 +586,7 @@ function SelectData<T>({
 											<Check aria-hidden="true" className="size-4 shrink-0" />
 										</ComboboxPrimitive.ItemIndicator>
 									</ComboboxPrimitive.Item>
-								)}
+								))}
 							</ComboboxPrimitive.List>
 						)}
 					</ComboboxPrimitive.Popup>
@@ -527,12 +596,7 @@ function SelectData<T>({
 	);
 }
 
-/* -------------------------------------------------------------------------- */
-/* Exports                                                                     */
-/* -------------------------------------------------------------------------- */
-
 export {
-	Select,
 	SelectContent,
 	SelectData,
 	SelectEmpty,
