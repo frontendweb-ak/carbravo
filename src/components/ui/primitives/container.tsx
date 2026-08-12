@@ -14,7 +14,7 @@ const containerSizes: Record<ContainerSize, string> = {
 	md: "max-w-4xl",
 	lg: "max-w-5xl",
 	xl: "max-w-6xl",
-	"2xl": "max-w-7xl",
+	"2xl": "max-w-[1360px]",
 	full: "max-w-none",
 };
 
@@ -41,3 +41,4 @@ function Container({
 }
 
 export { Container };
+
