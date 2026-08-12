@@ -1,8 +1,8 @@
 import { Button as ButtonPrimitive } from "@base-ui/react/button";
 import { cva, type VariantProps } from "class-variance-authority";
-import * as React from "react";
 
-import { cn } from "@/utils";
+
+import { cn } from "@/utils/index";
 
 const buttonVariants = cva(
 	[
@@ -209,3 +209,4 @@ function Button({
 
 export { Button, buttonVariants };
 export type { ButtonProps };
+
