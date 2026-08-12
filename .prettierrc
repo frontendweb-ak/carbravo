@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json.schemastore.org/prettierrc",
+  "endOfLine": "lf",
+  "semi": true,
+  "tabWidth": 2,
+  "singleQuote": false,
+  "printWidth": 80,
+  "trailingComma": "es5",
+  "plugins": ["@trivago/prettier-plugin-sort-imports"],
+  "importOrder": [
+    "^react(.*)",
+    "<THIRD_PARTY_MODULES>",
+    "^@/components/(.*)",
+    "<BUILTIN_MODULES>",
+    "interface",
+    "(?=content|api)",
+    "context/",
+    "mock/",
+    "config",
+    "utils/",
+    "hooks/",
+    ".svg",
+    "^../(.*)$",
+    "(?=./styles.module.scss)"
+  ],
+  "importOrderSeparation": false,
+  "importOrderSortSpecifiers": false
+}
