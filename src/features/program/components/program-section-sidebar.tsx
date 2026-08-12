@@ -35,15 +35,11 @@ function ProgramSectionSidebar({
 	return (
 		<aside
 			className={cn(
-				"w-full",
+				"min-w-0 w-full",
 				"rounded-2xl border border-border",
 				"bg-card",
 				"p-3",
 				"shadow-sm",
-
-				"lg:w-64",
-				"xl:w-66",
-
 				className,
 			)}
 		>
@@ -194,3 +190,4 @@ function ProgramSectionSidebar({
 }
 
 export { ProgramSectionSidebar };
+

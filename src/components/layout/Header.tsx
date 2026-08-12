@@ -1,122 +1,97 @@
+import { Plus } from "lucide-react";
+import { NavLink, useNavigate } from "react-router-dom";
+
 import { Button, Container } from "@/components/ui";
-import { ChevronDown, Plus } from "lucide-react";
 
 import { Logo } from "./logo";
 
-export default function Header() {
+function Header() {
+	const navigate = useNavigate();
+
 	return (
-		<header className="border-b bg-red">
-			<Container className="flex min-h-16 items-center justify-between px-8">
-				{/* =========================================================
-				 * Left / Navigation
-				 * ========================================================= */}
-				<div className="flex h-full items-center gap-6">
-					{/* Logo */}
-					<a href="/" aria-label="CarBravo home" className="shrink-0">
-						<Logo size={32} />
-					</a>
+		<header className="sticky top-0 z-50 border-b border-border bg-card">
+			<Container className="flex h-15 items-center justify-between px-8">
+				{/* Left */}
+				<div className="flex h-full items-center">
+					<NavLink
+						to="/dashboard"
+						className="flex items-center"
+						aria-label="CarBravo"
+					>
+						<Logo size={32} className="h-8 w-auto" />
+					</NavLink>
 
 					{/* Navigation */}
-					<nav
-						aria-label="Main navigation"
-						className="ml-4 flex h-full items-center gap-8"
-					>
-						<a
-							href="/dashboard"
-							className="
-								flex h-full items-center
-								text-sm font-semibold
-								text-foreground/80
-								transition-colors
-								hover:text-foreground
-							"
+					<nav className="ml-8 flex items-center gap-2">
+						<NavLink
+							to="/dashboard"
+							className={({ isActive }) =>
+								[
+									"rounded-lg px-4 py-2",
+									"text-sm font-semibold",
+									"transition-colors",
+									isActive
+										? "bg-muted text-foreground"
+										: "text-foreground hover:bg-muted",
+								].join(" ")
+							}
 						>
 							Dashboard
-						</a>
+						</NavLink>
 
-						<a
-							href="/programs"
-							className="
-								flex h-full items-center
-								text-sm font-semibold
-								text-foreground
-								transition-colors
-								hover:text-primary
-							"
-							aria-current="page"
+						<NavLink
+							to="/programs"
+							className={({ isActive }) =>
+								[
+									"rounded-lg px-4 py-2",
+									"text-sm font-semibold",
+									"transition-colors",
+									isActive
+										? "bg-muted text-foreground"
+										: "text-foreground hover:bg-muted",
+								].join(" ")
+							}
 						>
 							Programs
-						</a>
+						</NavLink>
 					</nav>
 				</div>
 
-				{/* =========================================================
-				 * Right
-				 * ========================================================= */}
-				<div className="flex items-center gap-5">
-					{/* New Program */}
-					<Button className="gap-2 rounded-xl px-5">
-						<Plus className="size-4" />
+				{/* Right */}
+				<div className="flex items-center gap-4">
+					<Button
+						type="button"
+						className="gap-2 rounded-xl px-5"
+						onClick={() => navigate("/programs/new")}
+					>
+						<Plus className="h-4 w-4" />
 						New Program
 					</Button>
 
-					{/* Divider */}
 					<div className="h-8 w-px bg-border" />
 
-					{/* Role */}
 					<div className="flex items-center gap-2">
-						<span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+						<span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
 							Role
 						</span>
 
 						<button
 							type="button"
-							className="
-								flex h-9 min-w-24 items-center
-								justify-between gap-3
-								rounded-lg
-								border border-input
-								bg-background
-								px-3
-								text-sm font-semibold
-								text-foreground
-								outline-none
-								transition-colors
-								hover:bg-accent
-								focus-visible:border-ring
-								focus-visible:ring-3
-								focus-visible:ring-ring/30
-							"
-							aria-label="Current role"
+							className="flex h-9 min-w-22 items-center justify-between rounded-lg border border-input bg-background px-3 text-sm font-semibold"
 						>
 							<span>Admin</span>
 
-							<ChevronDown className="size-4 text-muted-foreground" />
+							<span className="text-muted-foreground">▾</span>
 						</button>
 					</div>
 
-					{/* Avatar */}
-					<button
-						type="button"
-						className="
-							flex size-10 shrink-0
-							items-center justify-center
-							rounded-full
-							bg-sky-100
-							text-sm font-semibold
-							text-sky-700
-							outline-none
-							transition-colors
-							hover:bg-sky-200
-							focus-visible:ring-3
-							focus-visible:ring-ring/30
-						"
-						aria-label="Open account menu"
-					>
+					<div className="flex h-10 w-10 items-center justify-center rounded-full bg-sky-100 text-sm font-semibold text-sky-700">
 						AC
-					</button>
+					</div>
 				</div>
 			</Container>
 		</header>
 	);
 }
+
+export default Header;
