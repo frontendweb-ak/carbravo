@@ -71,20 +71,21 @@ const chipVariants = cva(
 					"data-[selected=true]:bg-destructive/10",
 					"data-[selected=true]:text-destructive",
 				],
+
 				secondary: [
 					"data-[selected=true]:border-secondary",
 					"data-[selected=true]:bg-secondary/10",
 					"data-[selected=true]:text-secondary",
 				],
-				purple: [
-					"data-[selected=true]:border-purple-500",
-					"data-[selected=true]:bg-purple-50",
-					"data-[selected=true]:text-purple-700",
+				// purple: [
+				// 	"data-[selected=true]:border-purple-500",
+				// 	"data-[selected=true]:bg-purple-50",
+				// 	"data-[selected=true]:text-purple-700",
 
-					"dark:data-[selected=true]:border-purple-500",
-					"dark:data-[selected=true]:bg-purple-950/40",
-					"dark:data-[selected=true]:text-purple-400",
-				],
+				// 	"dark:data-[selected=true]:border-purple-500",
+				// 	"dark:data-[selected=true]:bg-purple-950/40",
+				// 	"dark:data-[selected=true]:text-purple-400",
+				// ],
 
 				neutral: [
 					"data-[selected=true]:border-muted-foreground/50",
@@ -185,3 +186,4 @@ function Chip({
 }
 
 export { Chip, chipVariants };
+

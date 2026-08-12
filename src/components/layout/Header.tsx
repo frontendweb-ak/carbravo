@@ -1,73 +1,122 @@
-import { Button } from "@/components/ui";
-import { Car, Plus } from "lucide-react";
+import { Button, Container } from "@/components/ui";
+import { ChevronDown, Plus } from "lucide-react";
+
+import { Logo } from "./logo";
 
 export default function Header() {
 	return (
-		<header className="border-b bg-white">
-			<div className="mx-auto flex py-2 items-center justify-between px-8">
-				{/* Left */}
-				<div className="flex items-center gap-10">
-					<div className="flex items-center gap-3">
-						<div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
-							<Car className="h-5 w-5 text-primary" />
-						</div>
+		<header className="border-b bg-red">
+			<Container className="flex min-h-16 items-center justify-between px-8">
+				{/* =========================================================
+				 * Left / Navigation
+				 * ========================================================= */}
+				<div className="flex h-full items-center gap-6">
+					{/* Logo */}
+					<a href="/" aria-label="CarBravo home" className="shrink-0">
+						<Logo size={32} />
+					</a>
 
-						<div className="flex items-center gap-4">
-							<span className="text-2xl font-bold text-slate-900">
-								CarBravo
-							</span>
-
-							<div className="h-5 w-px bg-border" />
-
-							<span className="text-xs font-semibold tracking-[0.2em] text-muted-foreground uppercase">
-								Incentives
-							</span>
-						</div>
-					</div>
-
-					<nav className="flex items-center gap-2">
-						<Button variant="secondary" className="font-medium">
+					{/* Navigation */}
+					<nav
+						aria-label="Main navigation"
+						className="ml-4 flex h-full items-center gap-8"
+					>
+						<a
+							href="/dashboard"
+							className="
+								flex h-full items-center
+								text-sm font-semibold
+								text-foreground/80
+								transition-colors
+								hover:text-foreground
+							"
+						>
 							Dashboard
-						</Button>
+						</a>
 
-						<Button variant="ghost" className="font-medium">
+						<a
+							href="/programs"
+							className="
+								flex h-full items-center
+								text-sm font-semibold
+								text-foreground
+								transition-colors
+								hover:text-primary
+							"
+							aria-current="page"
+						>
 							Programs
-						</Button>
+						</a>
 					</nav>
 				</div>
 
-				{/* Right */}
-				<div className="flex items-center gap-6">
+				{/* =========================================================
+				 * Right
+				 * ========================================================= */}
+				<div className="flex items-center gap-5">
+					{/* New Program */}
 					<Button className="gap-2 rounded-xl px-5">
-						<Plus className="h-4 w-4" />
+						<Plus className="size-4" />
 						New Program
 					</Button>
 
+					{/* Divider */}
 					<div className="h-8 w-px bg-border" />
 
+					{/* Role */}
 					<div className="flex items-center gap-2">
-						<span className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
+						<span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
 							Role
 						</span>
 
-						{/* <Select defaultValue="admin">
-							<SelectTrigger className="w-32">
-								<SelectValue />
-							</SelectTrigger>
+						<button
+							type="button"
+							className="
+								flex h-9 min-w-24 items-center
+								justify-between gap-3
+								rounded-lg
+								border border-input
+								bg-background
+								px-3
+								text-sm font-semibold
+								text-foreground
+								outline-none
+								transition-colors
+								hover:bg-accent
+								focus-visible:border-ring
+								focus-visible:ring-3
+								focus-visible:ring-ring/30
+							"
+							aria-label="Current role"
+						>
+							<span>Admin</span>
 
-							<SelectContent>
-								<SelectItem value="admin">Admin</SelectItem>
-								<SelectItem value="manager">Manager</SelectItem>
-								<SelectItem value="viewer">Viewer</SelectItem>
-							</SelectContent>
-						</Select> */}
+							<ChevronDown className="size-4 text-muted-foreground" />
+						</button>
 					</div>
 
-					<div className="flex h-10 w-10 items-center justify-center rounded-full bg-sky-100 text-sm font-semibold text-sky-700">
+					{/* Avatar */}
+					<button
+						type="button"
+						className="
+							flex size-10 shrink-0
+							items-center justify-center
+							rounded-full
+							bg-sky-100
+							text-sm font-semibold
+							text-sky-700
+							outline-none
+							transition-colors
+							hover:bg-sky-200
+							focus-visible:ring-3
+							focus-visible:ring-ring/30
+						"
+						aria-label="Open account menu"
+					>
 						AC
-					</div>
+					</button>
 				</div>
-			</div>
+			</Container>
 		</header>
 	);
 }

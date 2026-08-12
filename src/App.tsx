@@ -1,6 +1,7 @@
-import Header from "@/components/layout/Header";
 import {
 	Button,
+	Container,
+	FilterTabs,
 	FormCheckboxGroup,
 	FormChoiceChipGroup,
 	FormDateInput,
@@ -18,7 +19,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 import "./App.css";
+
+import { useState } from "react";
+import Header from "./components/layout/header";
 import { FormDateTimeInput } from "./components/ui/forms/form-datetime-input";
+import { ProgramSectionSidebar } from "./features/program";
+import { PROGRAM_SIDE_MENU } from "./features/program/constants";
+import { VehicleFilterBuilder } from "./features/vehicle";
 
 const schema = z.object({
 	name: z
@@ -26,24 +33,15 @@ const schema = z.object({
 			error: "Name is required",
 		})
 		.min(2, "Name must be at least 2 characters"),
-
 	email: z.string().email("Enter a valid email address"),
-
 	password: z.string().min(8, "Password must be at least 8 characters"),
-
 	phone: z.string().min(10, "Enter a valid phone number"),
-
 	website: z.string().url("Enter a valid URL").optional().or(z.literal("")),
-
 	amount: z.coerce.number().min(0, "Amount cannot be negative"),
-
 	startDate: z.string().min(1, "Start date is required"),
-
 	startTime: z.string().min(1, "Start time is required"),
-
 	startDateTime: z.string().min(1, "Date and time are required"),
 	description: z.string().optional(),
-
 	vehicleTypes: z.array(z.string()).min(1, "Select at least one vehicle type"),
 	vehicle: z.string(),
 	active: z.boolean(),
@@ -83,22 +81,205 @@ function App() {
 	};
 
 	const value = useWatch({ control: form.control, name: "vehicle" });
-	console.log("V", value);
+	console.log("Vs", value);
+	type ProgramStatus =
+		| "all"
+		| "draft"
+		| "review"
+		| "approved"
+		| "active"
+		| "expired";
 
+	const [filter, setFilter] = useState<ProgramStatus>("all");
+	// const filteredPrograms = [].filter((program) => {
+	// 	if (status === "all") {
+	// 		return true;
+	// 	}
+
+	// 	return program.status === status;
+	// });
+
+	const [modelYears, setModelYears] = useState<string[]>([]);
+	const [makes, setMakes] = useState<string[]>([]);
+	const [models, setModels] = useState<string[]>([]);
+	const [fuelTypes, setFuelTypes] = useState<string[]>([]);
+	const [segments, setSegments] = useState<string[]>([]);
+	const [activeSection, setActiveSection] = useState("");
 	return (
 		<AppProviders>
 			<FormProvider {...form}>
 				<Header />
 
-				<main className="mx-auto w-full max-w-3xl space-y-8 p-8">
+				<Container className="space-y-8 p-8">
+					<ProgramSectionSidebar
+						sections={PROGRAM_SIDE_MENU}
+						activeSection={activeSection}
+						onSectionChange={setActiveSection}
+						completion={0}
+					/>
 					<header>
 						<h1 className="text-2xl font-semibold">{env.appName}</h1>
-
 						<p className="text-sm text-muted-foreground">
 							Environment: {env.environment}
 						</p>
 					</header>
+					<FilterTabs
+						value={filter}
+						onValueChange={setFilter}
+						items={[
+							{
+								value: "all",
+								label: "All",
+								count: 7,
+							},
+							{
+								value: "draft",
+								label: "Draft",
+								count: 2,
+							},
+							{
+								value: "review",
+								label: "Review",
+								count: 1,
+							},
+							{
+								value: "approved",
+								label: "Approved",
+								count: 1,
+							},
+							{
+								value: "active",
+								label: "Active",
+								count: 2,
+							},
+							{
+								value: "expired",
+								label: "Expired",
+								count: 1,
+							},
+						]}
+					/>
+					<VehicleFilterBuilder
+						columns={[
+							{
+								id: "model-year",
+								title: "Model year",
 
+								options: [
+									{ id: "2027", name: "2027" },
+									{ id: "2026", name: "2026" },
+									{ id: "2025", name: "2025" },
+									{ id: "2024", name: "2024" },
+									{ id: "2023", name: "2023" },
+								],
+
+								value: modelYears,
+								onValueChange: setModelYears,
+
+								getValue: (item) => item.id,
+								getLabel: (item) => item.name,
+
+								anyLabel: "* Any Model year",
+
+								searchPlaceholder: "Search model year...",
+							},
+
+							{
+								id: "make",
+								title: "Make",
+
+								options: [
+									{ id: "chevrolet", name: "Chevrolet" },
+									{ id: "buick", name: "Buick" },
+									{ id: "gmc", name: "GMC" },
+									{ id: "cadillac", name: "Cadillac" },
+									{ id: "ford", name: "Ford" },
+								],
+
+								value: makes,
+								onValueChange: setMakes,
+
+								getValue: (item) => item.id,
+								getLabel: (item) => item.name,
+
+								anyLabel: "* Any Make",
+
+								searchPlaceholder: "Search make...",
+							},
+
+							{
+								id: "model",
+								title: "Model",
+
+								options: [
+									{ id: "acadia", name: "Acadia" },
+									{ id: "accord", name: "Accord" },
+									{ id: "altima", name: "Altima" },
+									{ id: "ariya", name: "Ariya" },
+									{ id: "arteon", name: "Arteon" },
+								],
+
+								value: models,
+								onValueChange: setModels,
+
+								getValue: (item) => item.id,
+								getLabel: (item) => item.name,
+
+								anyLabel: "* Any Model",
+
+								searchPlaceholder: "Search model...",
+							},
+
+							{
+								id: "fuel-type",
+								title: "Fuel type",
+
+								options: [
+									{ id: "gas", name: "Gas" },
+									{ id: "diesel", name: "Diesel" },
+									{ id: "hybrid", name: "Hybrid" },
+									{ id: "phev", name: "PHEV" },
+									{ id: "ev", name: "EV" },
+								],
+
+								value: fuelTypes,
+								onValueChange: setFuelTypes,
+
+								getValue: (item) => item.id,
+								getLabel: (item) => item.name,
+
+								anyLabel: "* Any Fuel type",
+
+								searchPlaceholder: "Search fuel type...",
+							},
+
+							{
+								id: "segment",
+								title: "Segment",
+
+								options: [
+									{ id: "sedan", name: "Sedan" },
+									{ id: "coupe", name: "Coupe" },
+									{ id: "convertible", name: "Convertible" },
+									{ id: "truck", name: "Truck" },
+									{ id: "suv", name: "SUV" },
+								],
+
+								value: segments,
+								onValueChange: setSegments,
+
+								getValue: (item) => item.id,
+								getLabel: (item) => item.name,
+
+								anyLabel: "* Any Segment",
+
+								searchPlaceholder: "Search segment...",
+							},
+						]}
+						onAddRow={() => {
+							console.log("Add vehicle row");
+						}}
+					/>
 					<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
 						<Row gap={12}>
 							<FormInput
@@ -338,7 +519,7 @@ function App() {
 							</Button>
 						</div>
 					</form>
-				</main>
+				</Container>
 			</FormProvider>
 		</AppProviders>
 	);
