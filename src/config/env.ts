@@ -5,18 +5,13 @@ const envSchema = z.object({
 	VITE_APP_ENV: z.enum(["development", "test", "staging", "production"]),
 	VITE_APP_VERSION: z.string().min(1),
 	VITE_API_URL: z.url(),
-	VITE_ENABLE_API_MOCKS: z
-		.enum(["true", "false"])
-		.transform((value) => value === "true"),
+	VITE_ENABLE_API_MOCKS: z.enum(["true", "false"]).transform((value) => value === "true"),
 });
 
 const parsedEnv = envSchema.safeParse(import.meta.env);
 
 if (!parsedEnv.success) {
-	console.error(
-		"Invalid application environment configuration:",
-		parsedEnv.error,
-	);
+	console.error("Invalid application environment configuration:", parsedEnv.error);
 
 	throw new Error(
 		"Invalid application environment configuration. Check your VITE_* environment variables.",

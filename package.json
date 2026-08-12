@@ -25,10 +25,17 @@
 		"ci": "pnpm verify"
 	},
 	"dependencies": {
+		"@base-ui/react": "^1.7.0",
 		"@hookform/resolvers": "^5.7.1",
+		"@tailwindcss/vite": "^4.3.3",
+		"@tanstack/react-query": "^5.101.4",
+		"class-variance-authority": "^0.7.1",
+		"clsx": "^2.1.1",
 		"react": "^19.2.8",
 		"react-dom": "^19.2.8",
 		"react-hook-form": "^7.85.0",
+		"tailwind-merge": "^3.6.0",
+		"tailwindcss": "^4.3.3",
 		"zod": "^4.4.3"
 	},
 	"devDependencies": {
@@ -36,6 +43,7 @@
 		"@biomejs/biome": "^2.5.7",
 		"@playwright/test": "^1.62.1",
 		"@rolldown/plugin-babel": "^0.2.3",
+		"@tanstack/react-query-devtools": "^5.101.4",
 		"@testing-library/jest-dom": "^7.0.1",
 		"@testing-library/react": "^16.3.2",
 		"@testing-library/user-event": "^14.6.3",
@@ -48,6 +56,7 @@
 		"jsdom": "^30.0.1",
 		"typescript": "~6.0.2",
 		"vite": "^8.2.0",
+		"vite-tsconfig-paths": "^6.1.1",
 		"vitest": "^4.1.10"
 	}
 }
