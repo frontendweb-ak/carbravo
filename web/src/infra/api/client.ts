@@ -11,18 +11,18 @@ type RetryableRequest = InternalAxiosRequestConfig & {
 };
 
 const http = axios.create({
-	baseURL: import.meta.env.VITE_API_URL ?? "http://localhost:4010/api/v1",
-
+	baseURL: import.meta.env.VITE_API_URL ?? "http://localhost:3001/api",
 	timeout: 15_000,
-
 	headers: {
 		"Content-Type": "application/json",
+		"ngrok-skip-browser-warning": "true",
 	},
 });
 
 http.interceptors.request.use(
 	(config) => {
-		const accessToken = authSession.getAccessToken();
+		const accessToken =
+			authSession.getAccessToken() || import.meta.env.VITE_API_TOKEN;
 
 		if (accessToken) {
 			config.headers.Authorization = `Bearer ${accessToken}`;
@@ -79,3 +79,4 @@ http.interceptors.response.use(
 );
 
 export { http };
+

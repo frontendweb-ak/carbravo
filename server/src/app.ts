@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 
 import { ApiError } from "./lib/errors.js";
+import { authMiddleware } from "./middleware/auth.js";
 import { approval } from "./routes/approval.js";
 import { dashboard } from "./routes/dashboard.js";
 import { delta } from "./routes/delta.js";
@@ -16,21 +17,26 @@ import { values } from "./routes/values.js";
 import { vehicles } from "./routes/vehicles.js";
 
 export const app = new Hono();
-
+const allowedOrigin = process.env.WEB_ORIGIN ?? "http://localhost:5173";
 app.use(
-	"*",
-	cors({
-		origin: "http://localhost:5173",
-		allowHeaders: [
-			"Content-Type",
-			"Authorization",
-			"X-User-Role",
-			"X-User-Name",
-		],
-		allowMethods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-	}),
+  "*",
+  cors({
+    origin: allowedOrigin,
+    allowHeaders: [
+      "Content-Type",
+      "Authorization",
+      "X-User-Role",
+      "X-User-Name",
+      "ngrok-skip-browser-warning",
+    ],
+    allowMethods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  }),
 );
+app.get("/health", (c) => {
+  return c.json({ status: "UP" });
+});
 
+app.use("/api/*", authMiddleware);
 app.route("/api", dashboard);
 app.route("/api", programs);
 app.route("/api", setup);
@@ -44,9 +50,6 @@ app.route("/api", revisionHistory);
 app.route("/api", delta);
 app.route("/api", approval);
 
-app.get("/health", (c) => {
-	return c.json({ status: "UP" });
-});
 
 app.onError((error, c) => {
 	if (error instanceof ApiError) {
