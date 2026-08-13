@@ -60,7 +60,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
 					"flex w-full min-w-0",
 					"appearance-none",
 					"border border-input",
-					"bg-background",
+					"bg-white",
 					"text-foreground",
 					"leading-none",
 					"shadow-xs",

@@ -108,7 +108,7 @@ function SelectSearch({ className, ...props }: SelectSearchProps) {
 			className={cn(
 				"h-9 w-full",
 				"border-b border-input",
-				"bg-background",
+				"bg-white",
 				"px-3",
 				"text-sm",
 				"outline-none",
@@ -483,7 +483,7 @@ function SelectData<T, TValueType extends SelectValueType = "id">({
 					className={cn(
 						"h-9 w-full",
 						"rounded-md border border-input",
-						"bg-background",
+						"bg-white",
 						"px-3 pr-16",
 						"text-sm text-foreground",
 						"shadow-xs",
@@ -607,3 +607,4 @@ export {
 	SelectTrigger,
 	SelectValue,
 };
+

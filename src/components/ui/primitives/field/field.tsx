@@ -218,7 +218,7 @@ function FieldDescription({ className, ...props }: FieldDescriptionProps) {
 		<p
 			data-slot="field-description"
 			className={cn(
-				"text-left text-sm leading-normal",
+				"text-left text-xs leading-normal",
 				"font-normal text-muted-foreground",
 				"[&>a]:underline",
 				"[&>a]:underline-offset-4",

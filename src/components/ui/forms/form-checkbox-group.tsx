@@ -68,7 +68,6 @@ function FormCheckboxGroup<T extends FieldValues, O>({
 						/>
 
 						{description && <FieldDescription>{description}</FieldDescription>}
-
 						{fieldState.error && (
 							<FieldError>{fieldState.error.message}</FieldError>
 						)}
@@ -80,3 +79,4 @@ function FormCheckboxGroup<T extends FieldValues, O>({
 }
 
 export { FormCheckboxGroup };
+

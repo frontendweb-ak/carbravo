@@ -17,7 +17,7 @@ export function SelectTrigger({
 			className={cn(
 				"flex h-9 w-full items-center justify-between gap-2",
 				"rounded-md border border-input",
-				"bg-background px-3",
+				"bg-white px-3",
 				"text-sm text-foreground",
 				"shadow-xs",
 				"outline-none",

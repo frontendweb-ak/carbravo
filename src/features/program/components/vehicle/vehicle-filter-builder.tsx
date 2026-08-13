@@ -1,7 +1,6 @@
-import type { ComponentProps, ReactNode } from "react";
-
+import { Button } from "@/components/ui";
 import { cn } from "@/utils";
-
+import type { ComponentProps, ReactNode } from "react";
 import {
 	FilterSelectCard,
 	type FilterSelectCardProps,
@@ -18,14 +17,18 @@ export interface VehicleFilterBuilderProps extends Omit<
 	columns: VehicleFilterColumn[];
 	onAddRow?: () => void;
 	addRowLabel?: ReactNode;
+	onCancelEdit?: () => void;
 	disabled?: boolean;
+	editing?: boolean;
 }
 
 function VehicleFilterBuilder({
 	columns,
 	onAddRow,
+	onCancelEdit,
 	addRowLabel = "Add row",
 	disabled = false,
+	editing = false,
 	className,
 	...props
 }: VehicleFilterBuilderProps) {
@@ -41,7 +44,6 @@ function VehicleFilterBuilder({
 			{/* Header */}
 			<div className="mb-3">
 				<h2 className="text-base font-bold text-foreground">Add vehicles</h2>
-
 				<p className="text-sm text-muted-foreground">
 					Author one row with model year, make, model, fuel and segment. Use *
 					for wildcard values and search to find options quickly.
@@ -69,30 +71,24 @@ function VehicleFilterBuilder({
 			</div>
 
 			{/* Footer */}
-			<div className="mt-3 flex justify-end">
-				<button
+			<div className="mt-3 gap-4 flex justify-end">
+				{editing && onCancelEdit && (
+					<Button
+						type="button"
+						variant="outline"
+						onClick={onCancelEdit}
+						disabled={disabled}
+					>
+						Cancel edit
+					</Button>
+				)}
+				<Button
 					type="button"
-					disabled={disabled || !onAddRow}
 					onClick={onAddRow}
-					className={cn(
-						"h-9 rounded-lg px-4",
-						"bg-primary",
-						"text-sm font-semibold",
-						"text-primary-foreground",
-						"transition-colors",
-
-						"hover:bg-primary/90",
-
-						"focus-visible:outline-none",
-						"focus-visible:ring-3",
-						"focus-visible:ring-ring/30",
-
-						"disabled:pointer-events-none",
-						"disabled:opacity-50",
-					)}
+					disabled={disabled || !onAddRow}
 				>
-					{addRowLabel}
-				</button>
+					{editing ? "Update row" : "Add row"}
+				</Button>
 			</div>
 		</div>
 	);

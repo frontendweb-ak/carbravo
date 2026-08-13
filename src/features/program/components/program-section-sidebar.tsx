@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 
 import { cn } from "@/utils";
 
-export interface ProgramSection {
+export interface SidebarProgramSection {
 	id: string;
 	number: number;
 	label: ReactNode;
@@ -11,7 +11,7 @@ export interface ProgramSection {
 }
 
 export interface ProgramSectionSidebarProps {
-	sections: ProgramSection[];
+	sections: SidebarProgramSection[];
 	activeSection?: string;
 	onSectionChange?: (sectionId: string) => void;
 	completion?: number;

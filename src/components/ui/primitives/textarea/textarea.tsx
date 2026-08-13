@@ -39,7 +39,8 @@ function Textarea({
 
 				/* Appearance */
 				"border border-input",
-				"bg-background",
+
+				"bg-transparent",
 				"text-foreground",
 				"shadow-xs",
 				"outline-none",
@@ -87,3 +88,4 @@ function Textarea({
 }
 
 export { Textarea };
+

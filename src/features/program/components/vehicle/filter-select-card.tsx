@@ -1,8 +1,7 @@
+import { Checkbox } from "@/components/ui";
+import { cn, type OptionGroupAccessors, resolveOption } from "@/utils";
 import type { ReactNode } from "react";
 import { useMemo, useState } from "react";
-
-import { cn, type OptionGroupAccessors, resolveOption } from "@/utils";
-import { Checkbox } from "../../../components/ui";
 
 export interface FilterSelectCardProps<T> extends OptionGroupAccessors<T> {
 	title: ReactNode;
@@ -217,7 +216,7 @@ function FilterSelectCard<T>({
 						className={cn(
 							"h-8 w-full",
 							"rounded-lg border border-input",
-							"bg-background px-2.5",
+							"bg-transparent px-2.5",
 							"text-sm text-foreground",
 							"outline-none",
 
@@ -356,4 +355,3 @@ function FilterCheckboxRow({
 }
 
 export { FilterSelectCard };
-

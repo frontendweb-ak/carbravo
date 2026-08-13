@@ -18,7 +18,7 @@ function InputGroup({ className, ...props }: InputGroupProps) {
 				"relative flex w-full min-w-0 items-center",
 
 				"rounded-lg border border-input",
-				"bg-background",
+				"bg-transparent",
 				"transition-[border-color,box-shadow,background-color]",
 				"outline-none",
 

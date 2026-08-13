@@ -1,6 +1,8 @@
 // src/utils/status.ts
 
-import type { ProgramStatus } from "@/features/program/model/program.types";
+import type { ProgramStatus } from "@/features/program/model/programs.types";
+
+
 
 export const GENERAL_STATUSES = [
 	"success",
