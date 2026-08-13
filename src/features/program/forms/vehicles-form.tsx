@@ -1,4 +1,4 @@
-import { toast } from "@/components/ui";
+import { Button, toast } from "@/components/ui";
 import {
 	SelectedVehiclesSection,
 	VehicleFilterBuilder,
@@ -285,14 +285,8 @@ export function VehiclesForm() {
 					onEdit={onEditRow}
 					onDelete={onDeleteRow}
 				/>
-
 				<div className="flex justify-end">
-					<button
-						type="submit"
-						className="rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground"
-					>
-						Save Vehicles
-					</button>
+					<Button type="submit">Save Vehicles</Button>
 				</div>
 			</form>
 		</FormProvider>

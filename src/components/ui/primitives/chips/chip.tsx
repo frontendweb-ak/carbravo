@@ -171,15 +171,7 @@ function Chip({
 			data-selected={selected || undefined}
 			aria-pressed={selected}
 			disabled={disabled}
-			className={cn(
-				chipVariants({
-					color,
-					variant,
-					radius,
-					size,
-				}),
-				className,
-			)}
+			className={cn(chipVariants({ color, variant, radius, size }), className)}
 			{...props}
 		/>
 	);

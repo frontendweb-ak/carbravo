@@ -1,6 +1,3 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { FormProvider, useForm } from "react-hook-form";
-
 import {
 	FormCheckbox,
 	FormChoiceChipGroup,
@@ -9,84 +6,21 @@ import {
 	FormSelect,
 	FormTimeInput,
 } from "@/components/ui";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useCallback, useEffect, useRef } from "react";
+import { FormProvider, useForm } from "react-hook-form";
 import { ProgramSection } from "../components";
-import { setupDefaultValues } from "../constants";
+import {
+	CONDITION_TIER_OPTIONS,
+	COUNTRY_OPTIONS,
+	CREDIT_TIER_OPTIONS,
+	PROGRAM_TYPE_OPTIONS,
+	PURCHASE_TYPE_OPTIONS,
+	setupDefaultValues,
+} from "../constants";
+import { useProgramEditor } from "../editor/program-editor-context";
+import { useUpdateProgramSetup } from "../hooks";
 import { type SetupFormValues, setupFormSchema } from "../schema";
-
-const PROGRAM_TYPE_OPTIONS = [
-	{
-		value: "CUSTOMER_CASH",
-		label: "Customer Cash",
-	},
-	{
-		value: "APR",
-		label: "APR",
-	},
-	{
-		value: "BONUS_CASH",
-		label: "Bonus Cash",
-	},
-];
-
-const PURCHASE_TYPE_OPTIONS = [
-	{
-		value: "CASH",
-		label: "Cash",
-	},
-	{
-		value: "FINANCE",
-		label: "Finance",
-	},
-];
-
-const CONDITION_TIER_OPTIONS = [
-	{
-		value: "CARBRAVO_CERTIFIED",
-		label: "CarBravo Certified",
-	},
-	{
-		value: "MANUFACTURER_CERTIFIED",
-		label: "Manufacturer Certified",
-	},
-	{
-		value: "USED_INSPECTED",
-		label: "Used — Inspected",
-	},
-	{
-		value: "USED_AS_IS",
-		label: "Used — As-Is",
-	},
-];
-
-const CREDIT_TIER_OPTIONS = [
-	{
-		value: "A_PLUS",
-		label: "A+ — Excellent Credit",
-	},
-	{
-		value: "A1",
-		label: "A1 — Very Good Credit",
-	},
-	{
-		value: "A2",
-		label: "A2 — Good Credit",
-	},
-	{
-		value: "B",
-		label: "B — Fair Credit",
-	},
-];
-
-const COUNTRY_OPTIONS = [
-	{
-		value: "US",
-		label: "United States",
-	},
-	{
-		value: "CA",
-		label: "Canada",
-	},
-];
 
 interface FlagCardProps {
 	children: React.ReactNode;
@@ -99,23 +33,147 @@ function FlagCard({ children }: FlagCardProps) {
 }
 
 export function SetupForm() {
+	const {
+		mode,
+		programId,
+		revisionId,
+		registerSaveHandler,
+		updateSectionStatus,
+		isReadOnly,
+		// isSaving,
+	} = useProgramEditor();
+
+	const updateSetup = useUpdateProgramSetup();
+
 	const form = useForm({
 		resolver: zodResolver(setupFormSchema),
 		defaultValues: setupDefaultValues,
 		mode: "onBlur",
 	});
 
-	const onSubmit = (values: SetupFormValues) => {
-		console.log("SETUP SUBMIT", values);
-	};
+	const savingRef = useRef(false);
+	/**
+	 * ---------------------------------------------------------------
+	 * Persist Setup
+	 * ---------------------------------------------------------------
+	 *
+	 * IMPORTANT:
+	 * Replace the body of this function with the actual
+	 * React Query mutation/API call.
+	 *
+	 * The section is marked completed ONLY after the API succeeds.
+	 */
+	const persistSetup = useCallback(
+		async (values: SetupFormValues) => {
+			if (savingRef.current) {
+				return;
+			}
+
+			if (!programId || !revisionId) {
+				return;
+			}
+
+			savingRef.current = true;
+
+			try {
+				await updateSetup.mutateAsync({
+					programId,
+					revisionId,
+					payload: values,
+				});
+
+				updateSectionStatus("setup", "completed");
+			} catch (error) {
+				updateSectionStatus("setup", "warning");
+				throw error;
+			} finally {
+				savingRef.current = false;
+			}
+		},
+		[programId, revisionId, updateSetup, updateSectionStatus],
+	);
+
+	/**
+	 * ---------------------------------------------------------------
+	 * Save current section
+	 * ---------------------------------------------------------------
+	 *
+	 * This is what the global "Save draft" button will eventually call.
+	 */
+	const saveSetup = useCallback(async () => {
+		if (isReadOnly) return;
+
+		const valid = await form.trigger();
+		if (!valid) {
+			updateSectionStatus("setup", "warning");
+			return;
+		}
+
+		const values = form.getValues();
+		await persistSetup(values as SetupFormValues);
+	}, [form, isReadOnly, persistSetup, updateSectionStatus]);
+
+	/**
+	 * ---------------------------------------------------------------
+	 * Register Setup save handler
+	 * ---------------------------------------------------------------
+	 *
+	 * ProgramLayout/Header can now call:
+	 *
+	 * saveCurrentSection()
+	 *
+	 * and this function will execute.
+	 */
+	useEffect(() => {
+		registerSaveHandler(saveSetup);
+
+		return () => {
+			registerSaveHandler(null);
+		};
+	}, [registerSaveHandler, saveSetup]);
+
+	/**
+	 * ---------------------------------------------------------------
+	 * Detect incomplete/dirty Setup
+	 * ---------------------------------------------------------------
+	 *
+	 * Once the user starts editing, the sidebar should show warning
+	 * until the section is successfully saved.
+	 */
+	useEffect(() => {
+		if (!form.formState.isDirty) {
+			return;
+		}
+
+		updateSectionStatus("setup", "warning");
+	}, [form.formState.isDirty, updateSectionStatus]);
+
+	/**
+	 * ---------------------------------------------------------------
+	 * Auto-save
+	 * ---------------------------------------------------------------
+	 *
+	 * Don't save on every keystroke.
+	 *
+	 * Wait until the user stops typing.
+	 */
+	useEffect(() => {
+		if (!form.formState.isDirty || isReadOnly) {
+			return;
+		}
+
+		const timer = window.setTimeout(() => {
+			void saveSetup();
+		}, 1000);
+
+		return () => {
+			window.clearTimeout(timer);
+		};
+	}, [form.formState.isDirty, isReadOnly, saveSetup]);
 
 	return (
 		<FormProvider {...form}>
-			<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
-				{/* =========================================================
-				    1. PROGRAM DETAILS
-				========================================================= */}
-
+			<form className="space-y-5">
 				<ProgramSection
 					title="Program details"
 					description="Core metadata identifying this incentive program."
@@ -332,15 +390,9 @@ export function SetupForm() {
 				{/* =========================================================
 				    FORM ACTION
 				========================================================= */}
-
-				<div className="flex justify-end">
-					<button
-						type="submit"
-						className="rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground"
-					>
-						Save Setup
-					</button>
-				</div>
+				{/* <div className="flex justify-end">
+					<Button type="submit">Save Setup</Button>
+				</div> */}
 			</form>
 		</FormProvider>
 	);

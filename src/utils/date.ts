@@ -86,3 +86,21 @@ export function formatProgramDate(value: string | null) {
 
 	return formatDate(value, "MMM d, yyyy");
 }
+
+export function isoToDisplay(value: string) {
+	if (!value) return "";
+
+	const [year, month, day] = value.split("-");
+	return `${day}-${month}-${year}`;
+}
+
+export function displayToIso(value: string) {
+	if (!value) return "";
+
+	const [day, month, year] = value.split("-");
+	return `${year}-${month}-${day}`;
+}
+export function parseDate(value: string) {
+	const [day, month, year] = value.split("-").map(Number);
+	return new Date(year, month - 1, day);
+}

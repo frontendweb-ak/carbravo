@@ -1,10 +1,16 @@
 // src/features/program/model/programs.mapper.ts
 
 import type {
+	ConditionTierDto,
+	CreditTierDto,
 	PaginationDto,
 	ProgramListItemDto,
+	ProgramSetupDto,
 	ProgramStatusCountsDto,
+	ProgramTypeDto,
+	PurchaseTypeDto,
 } from "../api/programs.api";
+import type { SetupFormValues } from "../schema";
 
 import type {
 	Program,
@@ -114,5 +120,52 @@ export function mapProgramsList(dto: {
 		items: (dto.content ?? []).map(mapProgram),
 		pagination: mapProgramsPagination(dto.pagination),
 		statusCounts: mapProgramsStatusCounts(dto.statusCounts),
+	};
+}
+
+/* -------------------------------------------------------------------------- */
+/* Setup mapper                                                               */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Form -> API DTO
+ *
+ * Keep this conversion here rather than leaking React Hook Form values
+ * into the API layer.
+ */
+export function mapSetupFormToDto(values: SetupFormValues): ProgramSetupDto {
+	return {
+		programName: values.programName,
+		programNumber: values.programNumber,
+		incentiveCodes: values.incentiveCodes,
+		country: values.country,
+
+		deliveryStart: values.deliveryStart,
+		deliveryEnd: values.deliveryEnd,
+
+		firstVisibleDate: values.firstVisibleDate,
+		firstVisibleTime: values.firstVisibleTime || undefined,
+
+		programType: values.programType as ProgramTypeDto,
+		purchaseType: values.purchaseType as PurchaseTypeDto,
+
+		mileageMaximum:
+			values.mileageMaximum === undefined ||
+			values.mileageMaximum === null ||
+			values.mileageMaximum === 0
+				? undefined
+				: Number(values.mileageMaximum),
+
+		conditionTier: values.conditionTier as ConditionTierDto,
+
+		creditTiers: values.creditTiers as CreditTierDto[],
+
+		contact: values.contact,
+
+		flags: {
+			vinException: values.flags.vinException,
+			topOfDeal: values.flags.topOfDeal,
+			noAddOns: values.flags.noAddOns,
+		},
 	};
 }

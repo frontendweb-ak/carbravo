@@ -1,13 +1,17 @@
+import { Check } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { cn } from "@/utils";
+
+export type ProgramSectionStatus = "pending" | "warning" | "completed";
 
 export interface SidebarProgramSection {
 	id: string;
 	number: number;
 	label: ReactNode;
+	requiredForSubmission?: boolean;
 	completed?: boolean;
-	status?: "pending" | "active" | "completed" | "warning";
+	status?: ProgramSectionStatus;
 }
 
 export interface ProgramSectionSidebarProps {
@@ -27,7 +31,6 @@ function ProgramSectionSidebar({
 	completion = 0,
 	title = "Sections · Edit in any order",
 	disabled = false,
-
 	className,
 }: ProgramSectionSidebarProps) {
 	const normalizedCompletion = Math.min(100, Math.max(0, completion));
@@ -35,7 +38,7 @@ function ProgramSectionSidebar({
 	return (
 		<aside
 			className={cn(
-				"min-w-0 w-full ",
+				"w-full min-w-0",
 				"rounded-2xl border border-border",
 				"bg-card",
 				"p-3",
@@ -64,15 +67,15 @@ function ProgramSectionSidebar({
 					const isActive = activeSection === section.id;
 
 					const isCompleted =
-						section.completed || section.status === "completed";
+						section.completed === true || section.status === "completed";
 
-					const isDisabled = disabled;
+					const isWarning = section.status === "warning";
 
 					return (
 						<button
 							key={section.id}
 							type="button"
-							disabled={isDisabled}
+							disabled={disabled}
 							onClick={() => onSectionChange?.(section.id)}
 							aria-current={isActive ? "step" : undefined}
 							className={cn(
@@ -83,11 +86,9 @@ function ProgramSectionSidebar({
 								"rounded-lg",
 								"px-2",
 								"py-1.5",
-
 								"text-left",
 								"text-sm",
 								"font-semibold",
-
 								"transition-colors",
 
 								// Default
@@ -106,44 +107,62 @@ function ProgramSectionSidebar({
 
 								// Disabled
 								"disabled:pointer-events-none",
+								"disabled:cursor-not-allowed",
 								"disabled:opacity-50",
 							)}
 						>
-							{/* Number */}
+							{/* ------------------------------------------------ */}
+							{/* Section indicator                              */}
+							{/* ------------------------------------------------ */}
+
 							<span
 								className={cn(
 									"flex size-6 shrink-0",
 									"items-center justify-center",
 									"rounded-md",
-									"bg-muted",
 									"text-[11px]",
 									"font-bold",
-									"text-muted-foreground",
 
+									// Pending
+									!isCompleted &&
+										!isWarning && ["bg-muted", "text-muted-foreground"],
+
+									// Warning
+									isWarning &&
+										!isCompleted && ["bg-warning/10", "text-warning"],
+
+									// Completed
+									isCompleted && !isActive && ["bg-success/10", "text-success"],
+
+									// Active
 									isActive && ["bg-primary", "text-primary-foreground"],
-
-									isCompleted && !isActive && ["bg-primary/10", "text-primary"],
 								)}
 							>
-								{section.number}
+								{isCompleted && !isActive ? (
+									<Check aria-hidden="true" className="size-3.5 stroke-3" />
+								) : (
+									section.number
+								)}
 							</span>
 
 							{/* Label */}
 							<span className="min-w-0 flex-1 truncate">{section.label}</span>
 
-							{/* Status */}
+							{/* Status dot */}
 							<span
 								aria-hidden="true"
 								className={cn(
 									"size-2 shrink-0",
 									"rounded-full",
+
+									// Default / pending
 									"bg-border",
 
-									isActive && "bg-primary",
+									// Warning
+									isWarning && !isCompleted && "bg-warning",
 
-									isCompleted && !isActive && "bg-success",
-
-									section.status === "warning" && "bg-warning",
+									// Completed
+									isCompleted && "bg-success",
 								)}
 							/>
 						</button>
@@ -190,4 +209,3 @@ function ProgramSectionSidebar({
 }
 
 export { ProgramSectionSidebar };
-

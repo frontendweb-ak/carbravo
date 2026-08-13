@@ -7,10 +7,15 @@ import { http } from "@/infra/api";
 /* -------------------------------------------------------------------------- */
 
 export type ProgramStatusDto = "DRAFT" | "ACTIVE" | "EXPIRED";
-
 export type ProgramTypeDto = "CUSTOMER_CASH" | "APR" | "BONUS_CASH";
-
 export type RevisionStatusDto = "DRAFT" | "ACTIVE" | "EXPIRED";
+export type PurchaseTypeDto = "CASH" | "FINANCE";
+export type ConditionTierDto =
+	| "CARBRAVO_CERTIFIED"
+	| "MANUFACTURER_CERTIFIED"
+	| "USED_INSPECTED"
+	| "USED_AS_IS";
+export type CreditTierDto = "A_PLUS" | "A1" | "A2" | "B";
 
 /* -------------------------------------------------------------------------- */
 /* API parameters                                                             */
@@ -100,6 +105,51 @@ export interface CreateProgramResponseDto {
 	revisionLabel?: string;
 }
 
+export interface ProgramSetupDto {
+	programName: string;
+	programNumber: string;
+	incentiveCodes: string;
+	country: string;
+
+	deliveryStart: string;
+	deliveryEnd: string;
+
+	firstVisibleDate: string;
+	firstVisibleTime?: string;
+
+	programType: ProgramTypeDto;
+	purchaseType: PurchaseTypeDto;
+
+	mileageMaximum?: number;
+
+	conditionTier: ConditionTierDto;
+	creditTiers: CreditTierDto[];
+
+	contact: string;
+
+	flags: {
+		vinException: boolean;
+		topOfDeal: boolean;
+		noAddOns: boolean;
+	};
+}
+
+export interface SaveProgramSetupResponseDto {
+	programId?: number;
+	revisionId?: number;
+
+	programIdentifier?: string;
+	programName?: string;
+
+	programStatus?: ProgramStatusDto;
+
+	revisionStatus?: RevisionStatusDto;
+
+	majorRevision?: number;
+	minorRevision?: number;
+	revisionLabel?: string;
+}
+
 /* -------------------------------------------------------------------------- */
 /* API                                                                        */
 /* -------------------------------------------------------------------------- */
@@ -109,13 +159,11 @@ export const programsApi = {
 		const response = await http.get<ListProgramsResponseDto>("/programs", {
 			params,
 		});
-
 		return response.data;
 	},
 
 	async getDetail(programId: number) {
 		const response = await http.get(`/programs/${programId}`);
-
 		return response.data;
 	},
 
@@ -126,12 +174,35 @@ export const programsApi = {
 			"/programs",
 			payload,
 		);
-
 		return response.data;
 	},
 
 	async deleteProgram(programId: number) {
 		const response = await http.delete(`/programs/${programId}`);
+		return response.data;
+	},
+
+	// setup
+	async saveSetup(
+		payload: ProgramSetupDto,
+	): Promise<SaveProgramSetupResponseDto> {
+		const response = await http.post<SaveProgramSetupResponseDto>(
+			"/programs/setup",
+			payload,
+		);
+
+		return response.data;
+	},
+
+	async updateSetup(
+		programId: number,
+		revisionId: number,
+		payload: ProgramSetupDto,
+	): Promise<SaveProgramSetupResponseDto> {
+		const response = await http.patch<SaveProgramSetupResponseDto>(
+			`/programs/${programId}/revisions/${revisionId}/setup`,
+			payload,
+		);
 
 		return response.data;
 	},

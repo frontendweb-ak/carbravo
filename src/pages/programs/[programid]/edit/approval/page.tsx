@@ -1,3 +1,4 @@
+// src/pages/programs/[programId]/edit/approval/page.tsx
 export default function ApprovalPage() {
 	return (
 		<div>

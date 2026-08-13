@@ -34,25 +34,30 @@ function FormDateInput<T extends FieldValues>({
 			control={control}
 			name={name}
 			render={({ field, fieldState }) => (
-				<FormField
-					label={label}
-					required={required}
-					description={description}
-					error={fieldState.error?.message}
-					disabled={props.disabled}
-					rightElement={rightElement}
-				>
-					<DateInput
-						{...props}
-						{...field}
-						value={field.value ?? ""}
-						error={!!fieldState.error}
-						aria-invalid={fieldState.error ? true : undefined}
-					/>
-				</FormField>
+				console.log(name, field.value),
+				(
+					<FormField
+						label={label}
+						required={required}
+						description={description}
+						error={fieldState.error?.message}
+						disabled={props.disabled}
+						rightElement={rightElement}
+					>
+						<DateInput
+							{...props}
+							{...field}
+							className="bg-white"
+							value={field.value ?? ""}
+							error={!!fieldState.error}
+							aria-invalid={fieldState.error ? true : undefined}
+						/>
+					</FormField>
+				)
 			)}
 		/>
 	);
 }
 
 export { FormDateInput };
+

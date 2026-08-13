@@ -40,7 +40,7 @@ function Textarea({
 				/* Appearance */
 				"border border-input",
 
-				"bg-transparent",
+				"bg-white",
 				"text-foreground",
 				"shadow-xs",
 				"outline-none",

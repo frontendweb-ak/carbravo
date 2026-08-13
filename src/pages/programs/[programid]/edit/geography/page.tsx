@@ -1,7 +1,13 @@
+import { useProgramEditor } from "@/features/program/editor/program-editor-context";
+import { GeographyForm } from "@/features/program/forms/geography-form";
+
 export default function GeographyPage() {
-	return (
-		<div>
-			<h1>GeographyPage program</h1>
-		</div>
-	);
+	const { mode, programId } = useProgramEditor();
+
+	console.log("PROGRAM EDITOR", {
+		mode,
+		programId,
+	});
+
+	return <GeographyForm />;
 }

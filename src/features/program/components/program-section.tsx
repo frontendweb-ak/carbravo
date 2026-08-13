@@ -17,7 +17,7 @@ function ProgramSection({
 }: ProgramSectionProps) {
 	return (
 		<section
-			className={["rounded-2xl border border-border bg-card p-8", className]
+			className={["rounded-2xl border border-border bg-card p-6", className]
 				.filter(Boolean)
 				.join(" ")}
 		>
@@ -41,3 +41,4 @@ function ProgramSection({
 }
 
 export { ProgramSection };
+

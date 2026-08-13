@@ -228,7 +228,7 @@ const InputGroupInput = forwardRef<HTMLInputElement, InputGroupInputProps>(
 
 					"rounded-none",
 					"border-0",
-					"bg-transparent",
+					"bg-white",
 					"shadow-none",
 					"ring-0",
 
