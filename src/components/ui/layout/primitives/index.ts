@@ -1,7 +1,10 @@
-export { Box } from "./Box";
-export type { BoxProps } from "./Box";
-export { Center } from "./Center";
-export { Col } from "./Col";
-export { Flex } from "./Flex";
-export type { FlexProps } from "./Flex";
-export { Row } from "./Row";
+export { Box } from "./box";
+export type { BoxProps } from "./box";
+
+export { Center } from "./center";
+
+export { Col } from "./col";
+export { Flex } from "./flex";
+export type { FlexAlign, FlexJustify, FlexProps } from "./flex";
+
+export { Row } from "./row";

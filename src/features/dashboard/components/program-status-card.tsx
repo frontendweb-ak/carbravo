@@ -1,52 +1,41 @@
-import { Card, CardContent } from "@/components/ui";
-
+import { Card, CardContent, StatusBadge } from "@/components/ui";
 import { cn } from "@/utils";
 
-export type ProgramStatus =
-	| "draft"
-	| "review"
-	| "approved"
-	| "active"
-	| "expired";
+import type { DashboardProgramStatus } from "../model/dashboard.types";
 
-interface ProgramStatusCardProps {
+export interface ProgramStatusCardProps {
 	label: string;
 	value: number;
-	status: ProgramStatus;
+	status: DashboardProgramStatus;
+	loading?: boolean;
 	className?: string;
 }
-
-const statusStyles: Record<ProgramStatus, string> = {
-	draft: "bg-status-draft",
-	review: "bg-status-review",
-	approved: "bg-status-approved",
-	active: "bg-status-active",
-	expired: "bg-status-expired",
-};
 
 function ProgramStatusCard({
 	label,
 	value,
 	status,
+	loading = false,
 	className,
 }: ProgramStatusCardProps) {
 	return (
-		<Card className={cn("min-h-25.5 justify-center", className)}>
-			<CardContent>
-				<div className="flex items-center gap-2">
-					<span
-						className={cn("size-2 rounded-full", statusStyles[status])}
-						aria-hidden="true"
-					/>
-
-					<span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+		<Card className={cn("min-h-[108px]", className)}>
+			<CardContent className="flex flex-col justify-between gap-3 p-4">
+				<div className="flex items-center justify-between gap-2">
+					<span className="text-sm font-semibold text-muted-foreground">
 						{label}
 					</span>
+
+					<StatusBadge status={status} />
 				</div>
 
-				<div className="mt-3 text-3xl font-bold leading-none text-foreground">
-					{value}
-				</div>
+				{loading ? (
+					<div className="h-8 w-12 animate-pulse rounded-md bg-muted" />
+				) : (
+					<span className="text-2xl font-bold tracking-tight text-foreground">
+						{value}
+					</span>
+				)}
 			</CardContent>
 		</Card>
 	);

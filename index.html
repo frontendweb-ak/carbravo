@@ -1,13 +1,175 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CarBravo</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+	<head>
+		<meta charset="UTF-8" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta
+			name="viewport"
+			content="width=device-width, initial-scale=1.0"
+		/>
+
+		<title>CarBravo</title>
+
+		<style>
+			/* ---------------------------------------------------------- */
+			/* CarBravo Boot Loader                                      */
+			/* ---------------------------------------------------------- */
+
+			#boot-loader {
+				position: fixed;
+				inset: 0;
+				z-index: 99999;
+
+				display: flex;
+				align-items: center;
+				justify-content: center;
+
+				background: #f5f7f8;
+
+				transition:
+					opacity 180ms ease,
+					visibility 180ms ease;
+			}
+
+			#boot-loader.is-hidden {
+				opacity: 0;
+				visibility: hidden;
+				pointer-events: none;
+			}
+
+			.boot-loader-content {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+			}
+
+			.boot-loader-brand {
+				display: flex;
+				align-items: center;
+				gap: 24px;
+			}
+
+			.boot-loader-logo {
+				display: block;
+				width: auto;
+				height: 138px;
+				object-fit: contain;
+			}
+
+			.boot-loader-divider {
+				width: 1px;
+				height: 82px;
+				background: #dfe4e6;
+			}
+
+			.boot-loader-name {
+				color: #063f4f;
+				font-family:
+					system-ui,
+					-apple-system,
+					BlinkMacSystemFont,
+					"Segoe UI",
+					sans-serif;
+
+				font-size: 88px;
+				font-weight: 700;
+				letter-spacing: -0.055em;
+				line-height: 1;
+			}
+
+			.boot-loader-product {
+				margin-top: 38px;
+
+				color: #174a58;
+
+				font-family:
+					system-ui,
+					-apple-system,
+					BlinkMacSystemFont,
+					"Segoe UI",
+					sans-serif;
+
+				font-size: 14px;
+				font-weight: 700;
+				letter-spacing: 0.32em;
+				line-height: 1;
+			}
+
+			.boot-loader-version {
+				margin-top: 12px;
+				padding: 6px 14px;
+
+				border-radius: 999px;
+
+				background: #eef8df;
+
+				color: #5a9f2e;
+
+				font-family:
+					system-ui,
+					-apple-system,
+					BlinkMacSystemFont,
+					"Segoe UI",
+					sans-serif;
+
+				font-size: 11px;
+				font-weight: 700;
+				letter-spacing: 0.01em;
+			}
+
+			@media (max-width: 700px) {
+				.boot-loader-logo {
+					height: 80px;
+				}
+
+				.boot-loader-divider {
+					height: 50px;
+				}
+
+				.boot-loader-name {
+					font-size: 48px;
+				}
+
+				.boot-loader-brand {
+					gap: 16px;
+				}
+			}
+
+			@media (prefers-reduced-motion: reduce) {
+				#boot-loader {
+					transition: none;
+				}
+			}
+		</style>
+	</head>
+
+	<body>
+		<!-- Initial boot loader.
+		     This renders before React is available. -->
+		<div id="boot-loader" role="status" aria-label="Loading CarBravo">
+			<div class="boot-loader-content">
+				<div class="boot-loader-brand">
+					<img
+						src="/logo.svg"
+						alt="CarBravo"
+						class="boot-loader-logo"
+					/>
+
+				
+				</div>
+
+				<div class="boot-loader-product">
+					INCENTIVES
+				</div>
+
+				<div class="boot-loader-version">
+					prototype-0.3 · 6658bdda-dirty
+				</div>
+			</div>
+		</div>
+
+		<div id="root"></div>
+
+		<script type="module" src="/src/main.tsx"></script>
+	</body>
 </html>

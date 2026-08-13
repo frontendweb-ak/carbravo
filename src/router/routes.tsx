@@ -10,68 +10,38 @@ export const router = createBrowserRouter([
 	{
 		path: "/",
 		element: <RootLayout />,
-
 		children: [
-			{
-				index: true,
-				element: <Navigate to="/dashboard" replace />,
-			},
-
-			{
-				path: "dashboard",
-				element: <DashboardPage />,
-			},
-
+			{ index: true, element: <Navigate to="/dashboard" replace /> },
+			{ path: "dashboard", element: <DashboardPage /> },
 			{
 				path: "programs",
 				children: [
-					{
-						index: true,
-						element: <ProgramsPage />,
-					},
-
-					/*
-					 * ------------------------------------------------------
-					 * NEW PROGRAM
-					 * ------------------------------------------------------
-					 *
-					 * /programs/new/setup
-					 * /programs/new/vehicles
-					 * /programs/new/geography
-					 * ...
-					 */
+					{ index: true, element: <ProgramsPage /> },
+					// -----------------------------------------
+					// CREATE PROGRAM
+					// /programs/new/*
+					// -----------------------------------------
 					{
 						path: "new",
 						element: <ProgramLayout mode="new" />,
 						children: PROGRAM_EDITOR_ROUTES,
 					},
 
-					/*
-					 * ------------------------------------------------------
-					 * EXISTING PROGRAM
-					 * ------------------------------------------------------
-					 *
-					 * /programs/:programId
-					 */
-					{
-						path: ":programId",
-						element: <ProgramPage />,
-					},
-
-					/*
-					 * ------------------------------------------------------
-					 * EDIT EXISTING PROGRAM
-					 * ------------------------------------------------------
-					 *
-					 * /programs/:programId/edit/setup
-					 * /programs/:programId/edit/vehicles
-					 * ...
-					 */
+					// -----------------------------------------
+					// EDIT EXISTING PROGRAM
+					// /programs/:programId/edit/*
+					// -----------------------------------------
 					{
 						path: ":programId/edit",
 						element: <ProgramLayout mode="edit" />,
 						children: PROGRAM_EDITOR_ROUTES,
 					},
+
+					// -----------------------------------------
+					// PROGRAM DETAIL
+					// /programs/:programId
+					// -----------------------------------------
+					{ path: ":programId", element: <ProgramPage /> },
 				],
 			},
 		],

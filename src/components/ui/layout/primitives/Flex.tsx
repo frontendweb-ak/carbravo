@@ -1,6 +1,6 @@
 import { cn } from "@/utils";
 import { forwardRef } from "react";
-import { Box, type BoxProps } from "./Box";
+import { Box, type BoxProps } from "./box";
 
 export type FlexJustify =
 	| "start"

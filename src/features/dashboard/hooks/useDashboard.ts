@@ -1,36 +1,40 @@
 import { queryKeys } from "@/infra/query/keys";
 import type { AppQueryOptions } from "@/infra/query/options";
 import { useQuery } from "@tanstack/react-query";
-import {
-	DashboardApi,
-	type ActivityItem,
-	type DashboardSummary,
-	type ExpiringProgram,
-} from "../api/dashboard.api";
 
-export const useDashboardSummary = (
+import { dashboardApi } from "../api/dashboard.api";
+import type {
+	ActivityItem,
+	DashboardSummary,
+	ExpiringProgram,
+} from "../model/dashboard.types";
+
+export function useDashboardSummary(
 	options?: AppQueryOptions<DashboardSummary>,
-) =>
-	useQuery({
+) {
+	return useQuery({
 		queryKey: queryKeys.dashboard.summary(),
-		queryFn: () => DashboardApi.getSummary(),
+		queryFn: dashboardApi.getSummary,
 		...options,
 	});
+}
 
-export const useDashboardActivity = (
+export function useDashboardActivity(
 	options?: AppQueryOptions<{ items: ActivityItem[] }>,
-) =>
-	useQuery({
+) {
+	return useQuery({
 		queryKey: queryKeys.dashboard.activity(),
-		queryFn: () => DashboardApi.getActivity(),
+		queryFn: dashboardApi.getActivity,
 		...options,
 	});
+}
 
-export const useExpiringPrograms = (
+export function useExpiringPrograms(
 	options?: AppQueryOptions<{ items: ExpiringProgram[] }>,
-) =>
-	useQuery({
+) {
+	return useQuery({
 		queryKey: queryKeys.dashboard.expiring(),
-		queryFn: () => DashboardApi.getExpiringPrograms(),
+		queryFn: dashboardApi.getExpiringPrograms,
 		...options,
 	});
+}

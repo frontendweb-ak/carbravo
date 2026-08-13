@@ -104,7 +104,7 @@ paths:
         - name: programType
           in: query
           required: false
-          schema: { type: string, example: FINANCE }
+          schema: { type: string, enum: [CUSTOMER_CASH, APR, BONUS_CASH], example: APR }
         - name: search
           in: query
           required: false
@@ -850,12 +850,12 @@ paths:
     post:
       tags: [Revision Lifecycle]
       operationId: reviseProgram
-      summary: Begin a new major revision of an active program
+      summary: Begin a new major revision from an active or expired program
       description: >
-        Roles - AUTHOR, ADMIN. Guards - program status must be ACTIVE; no
+        Roles - AUTHOR, ADMIN. Guards - program status must be ACTIVE or EXPIRED; no
         existing draft unless overwrite=true. Creates a DRAFT copied from the
-        active revision (target majorRevision+1.0); requires full approval
-        before posting.
+        base revision (target majorRevision+1.0); requires full approval
+        before posting. For EXPIRED programs, revives the program to ACTIVE status upon posting.
       parameters:
         - $ref: "#/components/parameters/OverwriteParam"
       requestBody:
@@ -879,12 +879,12 @@ paths:
     post:
       tags: [Revision Lifecycle]
       operationId: minorReviseProgram
-      summary: Begin a minor (text-only) revision of an active program
+      summary: Begin a minor (text-only) revision from an active or expired program
       description: >
-        Roles - AUTHOR, ADMIN. Guards - program status must be ACTIVE; no
-        existing draft unless overwrite=true; active minorRevision < 99.
+        Roles - AUTHOR, ADMIN. Guards - program status must be ACTIVE or EXPIRED; no
+        existing draft unless overwrite=true; base revision minorRevision < 99.
         Creates a text-only DRAFT (target Major.minor+1) that does not require
-        approval before posting.
+        approval before posting. For EXPIRED programs, revives the program to ACTIVE status upon posting.
       parameters:
         - $ref: "#/components/parameters/OverwriteParam"
       requestBody:
@@ -1091,6 +1091,7 @@ components:
                 - ALREADY_APPROVED
                 - NOT_SUBMITTED
                 - PROGRAM_NOT_ACTIVE
+                - PROGRAM_NOT_REVISABLE
                 - MINOR_LIMIT_EXCEEDED
                 - NO_INCLUDE_RULE
             message: { type: string }
@@ -1219,12 +1220,19 @@ components:
       required:
         - programName
         - programTypeCode
+        - purchaseType
         - customerTypeCodes
+        - conditionCode
         - deliveryStartDate
         - deliveryEndDate
       properties:
         programName: { type: string, maxLength: 255 }
-        programTypeCode: { type: string }
+        programTypeCode:
+          type: string
+          enum: [CUSTOMER_CASH, APR, BONUS_CASH]
+        purchaseType:
+          type: string
+          enum: [CASH, FINANCE]
         customerTypeCodes:
           type: array
           items: { type: string }
@@ -1234,8 +1242,9 @@ components:
         contactEmail: { type: string, format: email, nullable: true }
         contactPhone: { type: string, nullable: true }
         financialProviderCode: { type: string, nullable: true }
-        conditionCode: { type: string, nullable: true }
-        conditionTier: { type: string, nullable: true }
+        conditionCode:
+          type: string
+          enum: [CARBRAVO, MANUFACTURER_CERTIFIED, USED_INSPECTED, USED_AS_IS]
         mileageCeiling: { type: integer, nullable: true }
         topOfDeal: { type: boolean }
         vinException: { type: boolean }
@@ -1251,7 +1260,9 @@ components:
           items: { type: integer }
         creditTiers:
           type: array
-          items: { type: string }
+          items:
+            type: string
+            enum: [A_PLUS, A1, A2, B]
 
     Setup:
       allOf:
@@ -1278,6 +1289,9 @@ components:
               name: { type: string }
               supportsCash: { type: boolean }
               supportsRate: { type: boolean }
+        purchaseTypes:
+          type: array
+          items: { $ref: "#/components/schemas/CodeName" }
         customerTypes:
           type: array
           items: { $ref: "#/components/schemas/CodeName" }

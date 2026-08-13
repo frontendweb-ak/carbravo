@@ -1,5 +1,9 @@
 import { Input as InputPrimitive } from "@base-ui/react/input";
-import { type ComponentPropsWithoutRef, forwardRef } from "react";
+import {
+	type ComponentPropsWithoutRef,
+	forwardRef,
+	type ReactNode,
+} from "react";
 
 import { cn, type InputParseMode } from "@/utils";
 
@@ -19,6 +23,8 @@ export type InputProps = Omit<
 	error?: boolean;
 	success?: boolean;
 	parseMode?: InputParseMode;
+	leftIcon?: ReactNode;
+	rightIcon?: ReactNode;
 };
 
 const Input = forwardRef<HTMLInputElement, InputProps>(
@@ -31,15 +37,16 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
 			disabled,
 			readOnly,
 			"aria-invalid": ariaInvalid,
+			leftIcon,
+			rightIcon,
 			...props
 		},
 		ref,
 	) => {
 		const hasError = error || ariaInvalid === true || ariaInvalid === "true";
-
 		const hasSuccess = success && !hasError;
 
-		return (
+		const input = (
 			<InputPrimitive
 				ref={ref}
 				data-slot="input"
@@ -92,10 +99,41 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
 
 					inputVariants[size],
 
+					leftIcon && "pl-9",
+					rightIcon && "pr-9",
+
 					className,
 				)}
 				{...props}
 			/>
+		);
+
+		if (!leftIcon && !rightIcon) {
+			return input;
+		}
+
+		return (
+			<div className="relative w-full">
+				{leftIcon && (
+					<span
+						aria-hidden="true"
+						className="pointer-events-none absolute top-1/2 left-3 z-10 flex size-4 -translate-y-1/2 items-center justify-center text-muted-foreground"
+					>
+						{leftIcon}
+					</span>
+				)}
+
+				{input}
+
+				{rightIcon && (
+					<span
+						aria-hidden="true"
+						className="pointer-events-none absolute top-1/2 right-3 z-10 flex size-4 -translate-y-1/2 items-center justify-center text-muted-foreground"
+					>
+						{rightIcon}
+					</span>
+				)}
+			</div>
 		);
 	},
 );

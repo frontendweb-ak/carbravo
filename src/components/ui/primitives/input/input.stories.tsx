@@ -154,19 +154,16 @@ export const URL: Story = {
 
 export const SearchInput: Story = {
 	render: () => (
-		<div className="relative w-96">
-			<Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-
+		<div className="w-96">
 			<Input
 				type="search"
-				className="pl-9"
+				leftIcon={<Search />}
 				placeholder="Search programs..."
 				aria-label="Search programs"
 			/>
 		</div>
 	),
 };
-
 /* -------------------------------------------------------------------------- */
 /* Date                                                                        */
 /* -------------------------------------------------------------------------- */

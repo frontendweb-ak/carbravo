@@ -7,59 +7,30 @@ import {
 	ProgramStatusSummary,
 	QuickActions,
 	RecentActivity,
-} from "@/features/dashboard";
-import {
 	useDashboardActivity,
 	useDashboardSummary,
 	useExpiringPrograms,
-} from "@/features/dashboard/hoosk/useDashboard";
+} from "@/features/dashboard";
+import { getStatusCounts } from "@/features/dashboard/utils";
+import { formatLongDate } from "@/utils";
 
 function DashboardPage() {
 	const navigate = useNavigate();
 
-	// Call all dashboard hooks
-	const {
-		data: summaryData,
-		isLoading: isSummaryLoading,
-		isError: isSummaryError,
-	} = useDashboardSummary();
+	const summaryQuery = useDashboardSummary();
+	const activityQuery = useDashboardActivity();
+	const expiringQuery = useExpiringPrograms();
 
-	const {
-		data: activityData,
-		isLoading: isActivityLoading,
-		isError: isActivityError,
-	} = useDashboardActivity();
+	const statusCounts = getStatusCounts(summaryQuery.data?.counts ?? []);
 
-	const {
-		data: expiringData,
-		isLoading: isExpiringLoading,
-		isError: isExpiringError,
-	} = useExpiringPrograms();
-
-	// Derive status counts from summary API response
-	const statusCounts = summaryData?.counts.reduce(
-		(acc, item) => {
-			acc[item.status.toLowerCase()] = item.total;
-			acc.review += item.pendingApproval;
-			return acc;
-		},
-		{ draft: 0, review: 0, approved: 0, active: 0, expired: 0 },
-	) ?? { draft: 0, review: 0, approved: 0, active: 0, expired: 0 };
-
-	const formattedDate = new Intl.DateTimeFormat("en-US", {
-		weekday: "long",
-		year: "numeric",
-		month: "long",
-		day: "numeric",
-	}).format(new Date());
+	const formattedDate = formatLongDate(new Date());
 
 	console.log(
-		"---",
-		isSummaryError,
-		isSummaryLoading,
-		summaryData,
-		activityData,
-		expiringData,
+		"data",
+		summaryQuery.data,
+		activityQuery.data,
+		expiringQuery.data,
+		JSON.stringify(summaryQuery.data, null, 2),
 	);
 	return (
 		<main className="min-h-[calc(100vh-60px)] bg-background">
@@ -74,31 +45,34 @@ function DashboardPage() {
 					}
 				/>
 
+				{/* Program status */}
 				<div className="mt-6">
 					<ProgramStatusSummary
-						draft={2}
-						review={1}
-						approved={1}
-						active={2}
-						expired={1}
+						{...statusCounts}
+						loading={summaryQuery.isLoading}
 					/>
 				</div>
 
+				{/* Dashboard content */}
 				<div className="mt-6 grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(320px,1fr)]">
-					{/* Expiring programs */}
 					<div>
-						<ExpiringPrograms />
+						<ExpiringPrograms programs={expiringQuery.data?.items ?? []} />
 					</div>
 
 					{/* Right column */}
 					<div className="space-y-5">
-						<RecentActivity />
+						<RecentActivity items={activityQuery.data?.items ?? []} />
+
 						<QuickActions
-							reviewCount={1}
-							onNewProgram={() => navigate("/programs/new")}
-							onBrowsePrograms={() => navigate("/programs")}
+							reviewCount={statusCounts.review}
+							onNewProgram={() => {
+								navigate("/programs/new");
+							}}
+							onBrowsePrograms={() => {
+								navigate("/programs");
+							}}
 							onReviewQueue={() => {
-								console.log("Review queue");
+								// TODO: navigate to review queue
 							}}
 						/>
 					</div>

@@ -10,7 +10,7 @@ function Header() {
 
 	return (
 		<header className="sticky top-0 z-50 border-b border-border bg-card">
-			<Container className="flex h-15 items-center justify-between px-8">
+			<Container className="flex h-16 items-center justify-between px-8">
 				{/* Left */}
 				<div className="flex h-full items-center">
 					<NavLink
@@ -18,7 +18,7 @@ function Header() {
 						className="flex items-center"
 						aria-label="CarBravo"
 					>
-						<Logo size={32} className="h-8 w-auto" />
+						<Logo size={28} className="h-8 w-auto" />
 					</NavLink>
 
 					{/* Navigation */}

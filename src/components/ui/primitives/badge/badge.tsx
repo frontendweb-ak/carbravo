@@ -26,60 +26,73 @@ const badgeVariants = cva(
 		"transition-colors",
 		"select-none",
 
+		// ----------------------------------------------------------
 		// Focus
+		// ----------------------------------------------------------
+
 		"focus-visible:border-ring",
 		"focus-visible:ring-3",
 		"focus-visible:ring-ring/50",
 		"focus-visible:outline-none",
 
+		// ----------------------------------------------------------
 		// Invalid
+		// ----------------------------------------------------------
+
 		"aria-invalid:border-destructive",
 		"aria-invalid:ring-3",
 		"aria-invalid:ring-destructive/20",
 		"dark:aria-invalid:ring-destructive/40",
 
+		// ----------------------------------------------------------
 		// Icons
+		// ----------------------------------------------------------
+
 		"[&>svg]:pointer-events-none",
 		"[&>svg]:shrink-0",
 		"[&>svg:not([class*='size-'])]:size-3",
 
+		// ----------------------------------------------------------
 		// Icon spacing
+		// ----------------------------------------------------------
+
 		"has-data-[icon=inline-start]:pl-1.5",
 		"has-data-[icon=inline-end]:pr-1.5",
 
+		// ----------------------------------------------------------
 		// Links rendered through Badge
+		// ----------------------------------------------------------
+
 		"[a]:hover:no-underline",
 	],
 	{
 		variants: {
 			variant: {
+				// ----------------------------------------------------
+				// Generic
+				// ----------------------------------------------------
+
 				default: [
 					"bg-primary",
 					"text-primary-foreground",
 					"[a]:hover:bg-primary/90",
-				].join(" "),
+				],
 
-				brand: [
-					"bg-brand-teal",
-					"text-white",
-					"[a]:hover:bg-brand-teal/90",
-				].join(" "),
+				brand: ["bg-brand-teal", "text-white", "[a]:hover:bg-brand-teal/90"],
 
 				success: [
 					"bg-success",
 					"text-success-foreground",
 					"[a]:hover:bg-success/90",
-				].join(" "),
+				],
 
 				warning: [
 					"bg-warning",
 					"text-warning-foreground",
 					"[a]:hover:bg-warning/90",
-				].join(" "),
+				],
 
-				info: ["bg-info", "text-info-foreground", "[a]:hover:bg-info/90"].join(
-					" ",
-				),
+				info: ["bg-info", "text-info-foreground", "[a]:hover:bg-info/90"],
 
 				destructive: [
 					"bg-destructive/10",
@@ -87,32 +100,42 @@ const badgeVariants = cva(
 					"[a]:hover:bg-destructive/20",
 					"dark:bg-destructive/20",
 					"dark:[a]:hover:bg-destructive/30",
-				].join(" "),
+				],
 
 				outline: [
 					"border-border",
 					"bg-background",
 					"text-foreground",
 					"[a]:hover:bg-muted",
-				].join(" "),
+				],
 
 				ghost: [
 					"text-foreground",
 					"hover:bg-muted",
 					"hover:text-foreground",
 					"dark:hover:bg-muted/50",
-				].join(" "),
+				],
 
-				link: ["text-primary", "underline-offset-4", "hover:underline"].join(
-					" ",
-				),
+				link: ["text-primary", "underline-offset-4", "hover:underline"],
+
+				// ----------------------------------------------------
+				// CarBravo program statuses
+				// ----------------------------------------------------
+
+				statusDraft: ["bg-status-draft/10", "text-status-draft"],
+
+				statusReview: ["bg-status-review/10", "text-status-review"],
+
+				statusApproved: ["bg-status-approved/10", "text-status-approved"],
+
+				statusActive: ["bg-status-active/10", "text-status-active"],
+
+				statusExpired: ["bg-status-expired/10", "text-status-expired"],
 			},
 
 			size: {
 				sm: "h-5 px-1.5 text-[0.6875rem]",
-
 				default: "h-6 px-2 text-xs",
-
 				lg: "h-7 px-2.5 text-sm",
 			},
 		},
@@ -124,7 +147,13 @@ const badgeVariants = cva(
 	},
 );
 
-type BadgeProps = useRender.ComponentProps<"span"> &
+export type BadgeVariant = NonNullable<
+	VariantProps<typeof badgeVariants>["variant"]
+>;
+
+export type BadgeSize = NonNullable<VariantProps<typeof badgeVariants>["size"]>;
+
+export type BadgeProps = useRender.ComponentProps<"span"> &
 	VariantProps<typeof badgeVariants>;
 
 function Badge({
@@ -136,22 +165,13 @@ function Badge({
 }: BadgeProps) {
 	return useRender({
 		defaultTagName: "span",
-
 		props: mergeProps<"span">(
 			{
-				className: cn(
-					badgeVariants({
-						variant,
-						size,
-					}),
-					className,
-				),
+				className: cn(badgeVariants({ variant, size }), className),
 			},
 			props,
 		),
-
 		render,
-
 		state: {
 			slot: "badge",
 			variant,
@@ -161,4 +181,3 @@ function Badge({
 }
 
 export { Badge, badgeVariants };
-export type { BadgeProps };

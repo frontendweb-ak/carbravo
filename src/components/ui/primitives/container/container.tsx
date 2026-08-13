@@ -32,7 +32,7 @@ function Container({
 				"w-full",
 				containerSizes[size],
 				centered && "mx-auto",
-				"px-4 sm:px-6 lg:px-8",
+				"sm:px-6 lg:px-8",
 				className,
 			)}
 			{...props}
@@ -41,4 +41,3 @@ function Container({
 }
 
 export { Container };
-

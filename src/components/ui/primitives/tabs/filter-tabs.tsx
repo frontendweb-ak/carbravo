@@ -14,11 +14,8 @@ export interface FilterTabsProps<T extends string = string> extends Omit<
 	"onChange"
 > {
 	items: FilterTab<T>[];
-
 	value: T;
-
 	onValueChange: (value: T) => void;
-
 	className?: string;
 }
 
@@ -105,3 +102,4 @@ function FilterTabs<T extends string>({
 }
 
 export { FilterTabs };
+

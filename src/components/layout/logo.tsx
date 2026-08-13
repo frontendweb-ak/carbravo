@@ -9,7 +9,6 @@ export interface LogoProps extends Omit<
 	 * Width is automatically calculated from the SVG aspect ratio.
 	 */
 	size?: number | string;
-
 	alt?: string;
 }
 
@@ -45,3 +44,4 @@ function Logo({
 }
 
 export { Logo };
+

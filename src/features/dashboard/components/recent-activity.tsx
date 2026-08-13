@@ -1,68 +1,18 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui";
-import { cn } from "@/utils";
+import { cn, formatRelativeTime } from "@/utils";
+import type { ActivityItem } from "../model/dashboard.types";
+import { RecentActivitySkeleton } from "./recent-activity-skeleton";
 
-export interface RecentActivityItem {
-	id: string;
-	actor: string;
-	action: string;
-	target: string;
-	time: string;
-	color?: "draft" | "review" | "approved" | "active";
-}
-
-interface RecentActivityProps {
-	items?: RecentActivityItem[];
+export interface RecentActivityProps {
+	items?: ActivityItem[];
 	className?: string;
+	loading?: boolean;
 }
-
-const activityColor: Record<
-	NonNullable<RecentActivityItem["color"]>,
-	string
-> = {
-	draft: "bg-status-draft",
-	review: "bg-status-review",
-	approved: "bg-status-approved",
-	active: "bg-status-active",
-};
-
-const defaultItems: RecentActivityItem[] = [
-	{
-		id: "1",
-		actor: "jsmith",
-		action: "submitted",
-		target: "Q3 Customer Cash — Sedans",
-		time: "12 minutes ago",
-		color: "review",
-	},
-	{
-		id: "2",
-		actor: "mreviewer",
-		action: "approved",
-		target: "EV Bonus Cash",
-		time: "1 hour ago",
-		color: "approved",
-	},
-	{
-		id: "3",
-		actor: "admin",
-		action: "published",
-		target: "Summer Finance Event",
-		time: "3 hours ago",
-		color: "active",
-	},
-	{
-		id: "4",
-		actor: "jsmith",
-		action: "created draft",
-		target: "Non-GM Certified Cash",
-		time: "Yesterday",
-		color: "draft",
-	},
-];
 
 function RecentActivity({
-	items = defaultItems,
+	items = [],
 	className,
+	loading = false,
 }: RecentActivityProps) {
 	return (
 		<Card className={cn("min-h-0", className)}>
@@ -71,36 +21,61 @@ function RecentActivity({
 			</CardHeader>
 
 			<CardContent className="px-5 pb-5">
-				<div className="space-y-3.5">
-					{items.map((item) => (
-						<div key={item.id} className="flex gap-3">
-							<span
-								aria-hidden="true"
-								className={cn(
-									"mt-1.5 size-2 shrink-0 rounded-full",
-									item.color
-										? activityColor[item.color]
-										: "bg-muted-foreground",
-								)}
-							/>
-
-							<div className="min-w-0">
-								<p className="text-sm leading-5 text-foreground">
-									<span className="font-bold">{item.actor}</span>{" "}
-									<span>{item.action}</span>{" "}
-									<span className="font-medium">“{item.target}”</span>
-								</p>
-
-								<p className="mt-0.5 text-xs text-muted-foreground">
-									{item.time}
-								</p>
-							</div>
-						</div>
-					))}
-				</div>
+				{loading ? (
+					<RecentActivitySkeleton />
+				) : items.length === 0 ? (
+					<div className="py-8 text-center text-sm text-muted-foreground">
+						No recent activity.
+					</div>
+				) : (
+					<div className="space-y-4">
+						{items.map((item) => (
+							<ActivityRow key={item.id} item={item} />
+						))}
+					</div>
+				)}
 			</CardContent>
 		</Card>
 	);
 }
+
+function ActivityRow({ item }: { item: ActivityItem }) {
+	return (
+		<div className="flex gap-3">
+			<ActivityDot color={item.color} />
+			<div className="min-w-0 flex-1">
+				<p className="text-sm leading-5 text-foreground">
+					<span className="font-bold">{item.actor}</span>{" "}
+					<span>{item.operation}</span>{" "}
+					<span className="font-medium">“{item.programName}”</span>
+				</p>
+				<p className="mt-0.5 text-xs text-muted-foreground">
+					{formatRelativeTime(item.changedAt)}
+				</p>
+			</div>
+		</div>
+	);
+}
+
+function ActivityDot({ color }: { color?: ActivityItem["color"] }) {
+	const className =
+		color === "review"
+			? "bg-status-review"
+			: color === "approved"
+				? "bg-status-approved"
+				: color === "active"
+					? "bg-status-active"
+					: color === "draft"
+						? "bg-status-draft"
+						: "bg-muted-foreground";
+
+	return (
+		<span
+			aria-hidden="true"
+			className={cn("mt-1.5 size-2 shrink-0 rounded-full", className)}
+		/>
+	);
+}
+
 
 export { RecentActivity };

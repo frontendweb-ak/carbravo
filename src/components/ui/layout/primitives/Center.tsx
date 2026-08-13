@@ -1,6 +1,6 @@
 import { cn } from "@/utils";
 import { forwardRef } from "react";
-import { Flex, type FlexProps } from "./Flex";
+import { Flex, type FlexProps } from "./flex";
 
 export const Center = forwardRef<HTMLDivElement, FlexProps>(
   ({ className, ...props }, ref) => {

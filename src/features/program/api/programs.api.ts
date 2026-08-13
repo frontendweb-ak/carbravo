@@ -1,8 +1,24 @@
-import { api } from "@/infra/axios/client";
+// src/features/program/api/programs.api.ts
+
+import { http } from "@/infra/api";
+
+/* -------------------------------------------------------------------------- */
+/* API enums                                                                  */
+/* -------------------------------------------------------------------------- */
+
+export type ProgramStatusDto = "DRAFT" | "ACTIVE" | "EXPIRED";
+
+export type ProgramTypeDto = "CUSTOMER_CASH" | "APR" | "BONUS_CASH";
+
+export type RevisionStatusDto = "DRAFT" | "ACTIVE" | "EXPIRED";
+
+/* -------------------------------------------------------------------------- */
+/* API parameters                                                             */
+/* -------------------------------------------------------------------------- */
 
 export interface ListProgramsParams {
-	status?: "DRAFT" | "ACTIVE" | "EXPIRED";
-	programType?: string;
+	status?: ProgramStatusDto;
+	programType?: ProgramTypeDto;
 	search?: string;
 	dateFrom?: string;
 	dateTo?: string;
@@ -11,28 +27,112 @@ export interface ListProgramsParams {
 	size?: number;
 }
 
-export interface CreateProgramPayload {
+/* -------------------------------------------------------------------------- */
+/* API DTOs                                                                   */
+/* -------------------------------------------------------------------------- */
+
+export interface RevisionRefDto {
+	revisionId?: number;
+	majorRevision?: number;
+	minorRevision?: number;
+	revisionLabel?: string;
+	revisionStatus?: RevisionStatusDto;
+
+	isMinorRevision?: boolean;
+	isSubmitted?: boolean;
+	approved?: boolean;
+}
+
+export interface ProgramListItemDto {
+	programId?: number;
+	programIdentifier?: string;
+	programName?: string;
+
+	programStatus?: ProgramStatusDto;
+	programType?: ProgramTypeDto;
+
+	currentRevision?: RevisionRefDto;
+
+	hasDraft?: boolean;
+
+	deliveryStartDate?: string;
+	deliveryEndDate?: string;
+
+	updatedAt?: string;
+}
+
+export interface PaginationDto {
+	page?: number;
+	size?: number;
+	totalElements?: number;
+	totalPages?: number;
+}
+export interface ProgramStatusCountsDto {
+	all?: number;
+	draft?: number;
+	active?: number;
+	expired?: number;
+}
+export interface ListProgramsResponseDto {
+	content?: ProgramListItemDto[];
+	pagination?: PaginationDto;
+	statusCounts?: ProgramStatusCountsDto;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Create                                                                     */
+/* -------------------------------------------------------------------------- */
+
+export interface CreateProgramRequestDto {
 	programName: string;
 }
 
-export class ProgramsApi {
-	static async getList(params?: ListProgramsParams) {
-		const response = await api.get("/programs", { params });
-		return response.data;
-	}
+export interface CreateProgramResponseDto {
+	programId?: number;
+	programIdentifier?: string;
+	programStatus?: ProgramStatusDto;
 
-	static async getDetail(programId: number) {
-		const response = await api.get(`/programs/${programId}`);
-		return response.data;
-	}
+	revisionId?: number;
+	revisionStatus?: RevisionStatusDto;
 
-	static async createProgram(payload: CreateProgramPayload) {
-		const response = await api.post("/programs", payload);
-		return response.data;
-	}
-
-	static async deleteProgram(programId: number) {
-		const response = await api.delete(`/programs/${programId}`);
-		return response.data;
-	}
+	majorRevision?: number;
+	minorRevision?: number;
+	revisionLabel?: string;
 }
+
+/* -------------------------------------------------------------------------- */
+/* API                                                                        */
+/* -------------------------------------------------------------------------- */
+
+export const programsApi = {
+	async getList(params?: ListProgramsParams): Promise<ListProgramsResponseDto> {
+		const response = await http.get<ListProgramsResponseDto>("/programs", {
+			params,
+		});
+
+		return response.data;
+	},
+
+	async getDetail(programId: number) {
+		const response = await http.get(`/programs/${programId}`);
+
+		return response.data;
+	},
+
+	async createProgram(
+		payload: CreateProgramRequestDto,
+	): Promise<CreateProgramResponseDto> {
+		const response = await http.post<CreateProgramResponseDto>(
+			"/programs",
+			payload,
+		);
+
+		return response.data;
+	},
+
+	async deleteProgram(programId: number) {
+		const response = await http.delete(`/programs/${programId}`);
+
+		return response.data;
+	},
+};

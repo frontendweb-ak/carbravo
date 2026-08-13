@@ -13,48 +13,13 @@ import SummaryPage from "@/pages/programs/[programid]/edit/summary/page";
 import VehiclesPage from "@/pages/programs/[programid]/edit/vehicles/page";
 
 export const PROGRAM_EDITOR_ROUTES = [
-	{
-		index: true,
-		element: <Navigate to="setup" replace />,
-	},
-
-	{
-		path: "setup",
-		element: <SetupPage />,
-	},
-
-	{
-		path: "vehicles",
-		element: <VehiclesPage />,
-	},
-
-	{
-		path: "geography",
-		element: <GeographyPage />,
-	},
-
-	{
-		path: "eligibility",
-		element: <EligibilityPage />,
-	},
-
-	{
-		path: "incentive-values",
-		element: <IncentiveValuesPage />,
-	},
-
-	{
-		path: "marketing",
-		element: <MarketingPage />,
-	},
-
-	{
-		path: "summary",
-		element: <SummaryPage />,
-	},
-
-	{
-		path: "approval",
-		element: <ApprovalPage />,
-	},
+	{ index: true, element: <Navigate to="setup" replace /> },
+	{ path: "setup", element: <SetupPage /> },
+	{ path: "vehicles", element: <VehiclesPage /> },
+	{ path: "geography", element: <GeographyPage /> },
+	{ path: "eligibility", element: <EligibilityPage /> },
+	{ path: "incentive-values", element: <IncentiveValuesPage /> },
+	{ path: "marketing", element: <MarketingPage /> },
+	{ path: "summary", element: <SummaryPage /> },
+	{ path: "approval", element: <ApprovalPage /> },
 ];

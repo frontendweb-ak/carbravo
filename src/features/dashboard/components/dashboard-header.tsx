@@ -17,12 +17,10 @@ function DashboardHeader({
 				<div className="text-xs font-bold uppercase tracking-wide text-primary">
 					Welcome back, {userName}
 				</div>
-
 				<h1 className="mt-1 text-3xl font-bold tracking-tight text-foreground">
 					{title}
 				</h1>
 			</div>
-
 			{rightContent && (
 				<div className="shrink-0 text-sm text-muted-foreground">
 					{rightContent}
@@ -33,3 +31,4 @@ function DashboardHeader({
 }
 
 export { DashboardHeader };
+
