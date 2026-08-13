@@ -1,0 +1,37 @@
+### ==========================================
+### CarBravo Incentives API - Values
+### ==========================================
+
+@baseUrl = http://localhost:3001/api
+@contentType = application/json
+@token = mock-token
+
+### Get Values
+
+GET {{baseUrl}}/programs/6/revisions/107/values
+Authorization: Bearer {{token}}
+
+
+### Update Values
+
+PUT {{baseUrl}}/programs/6/revisions/107/values
+Authorization: Bearer {{token}}
+Content-Type: {{contentType}}
+
+{
+  "components": [
+    {
+      "componentCode": "APR",
+      "componentType": "RATE",
+      "amount": 2.9,
+      "unit": "PERCENT",
+      "termMonths": 36
+    },
+    {
+      "componentCode": "BONUS",
+      "componentType": "CASH",
+      "amount": 1500,
+      "unit": "USD"
+    }
+  ]
+}

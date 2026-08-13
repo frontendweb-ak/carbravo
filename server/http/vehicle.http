@@ -1,0 +1,82 @@
+### ==========================================
+### CarBravo Incentives API - Vehicles
+### ==========================================
+
+@baseUrl = http://localhost:3001/api
+@contentType = application/json
+@token = mock-token
+
+
+### ==========================================
+### Vehicle Years
+### ==========================================
+
+GET {{baseUrl}}/vehicles/years
+Authorization: Bearer {{token}}
+
+
+### ==========================================
+### Vehicle Makes
+### ==========================================
+
+GET {{baseUrl}}/vehicles/makes?year=2026
+Authorization: Bearer {{token}}
+
+
+### ==========================================
+### Vehicle Models
+### ==========================================
+
+GET {{baseUrl}}/vehicles/models?year=2026&make=Chevrolet
+Authorization: Bearer {{token}}
+
+
+### ==========================================
+### Search Vehicles
+### ==========================================
+
+GET {{baseUrl}}/vehicles/search?year=2026&make=Chevrolet
+Authorization: Bearer {{token}}
+
+
+### ==========================================
+### Search Vehicles - Text
+### ==========================================
+
+GET {{baseUrl}}/vehicles/search?search=Silverado
+Authorization: Bearer {{token}}
+
+
+### ==========================================
+### Get Selected Vehicles
+### ==========================================
+
+GET {{baseUrl}}/programs/6/revisions/107/vehicles
+Authorization: Bearer {{token}}
+
+
+### ==========================================
+### Get Selected Vehicles - Active Revision
+### ==========================================
+
+GET {{baseUrl}}/programs/1/revisions/101/vehicles
+Authorization: Bearer {{token}}
+
+
+### ==========================================
+### Update Selected Vehicles
+### ==========================================
+
+PUT {{baseUrl}}/programs/6/revisions/107/vehicles
+Authorization: Bearer {{token}}
+X-User-Role: AUTHOR
+X-User-Name: demo.author
+Content-Type: {{contentType}}
+
+{
+  "vehicleCatalogIds": [
+    1001,
+    1002,
+    2001
+  ]
+}

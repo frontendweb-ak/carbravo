@@ -1,0 +1,107 @@
+### ==========================================
+### Program Revision History
+### ==========================================
+
+GET http://localhost:3001/api/programs/6/revisions
+Authorization: Bearer mock-token
+
+
+### ==========================================
+### Revision Detail
+### ==========================================
+
+GET http://localhost:3001/api/programs/6/revisions/107/detail
+Authorization: Bearer mock-token
+
+
+### ==========================================
+### Create Major Revision
+### ==========================================
+
+POST http://localhost:3001/api/programs/6/revisions
+Authorization: Bearer mock-token
+X-User-Role: AUTHOR
+X-User-Name: demo.author
+Content-Type: application/json
+
+{
+  "overwrite": false
+}
+
+
+### ==========================================
+### Create Minor Revision
+### ==========================================
+
+POST http://localhost:3001/api/programs/6/revisions/106/minor-revise
+Authorization: Bearer mock-token
+X-User-Role: AUTHOR
+X-User-Name: demo.author
+Content-Type: application/json
+
+{
+  "overwrite": false
+}
+
+
+### ==========================================
+### Submit Revision
+### ==========================================
+
+POST http://localhost:3001/api/programs/6/revisions/107/submit
+Authorization: Bearer mock-token
+X-User-Role: AUTHOR
+X-User-Name: demo.author
+Content-Type: application/json
+
+
+### ==========================================
+### Approve Revision
+### ==========================================
+
+POST http://localhost:3001/api/programs/6/revisions/107/approve
+Authorization: Bearer mock-token
+X-User-Role: APPROVER
+X-User-Name: demo.approver
+Content-Type: application/json
+
+{
+  "approvalComment": "Reviewed and approved."
+}
+
+
+### ==========================================
+### Reject Revision
+### ==========================================
+
+POST http://localhost:3001/api/programs/6/revisions/107/reject
+Authorization: Bearer mock-token
+X-User-Role: APPROVER
+X-User-Name: demo.approver
+Content-Type: application/json
+
+{
+  "rejectionReason": "Delivery dates need to be corrected."
+}
+
+
+### ==========================================
+### Post Revision To Production
+### ==========================================
+
+POST http://localhost:3001/api/programs/6/revisions/107/post
+Authorization: Bearer mock-token
+X-User-Role: ADMIN
+X-User-Name: demo.admin
+Content-Type: application/json
+
+
+### ==========================================
+### Expire Revision
+### ==========================================
+
+POST http://localhost:3001/api/programs/6/revisions/107/expire
+Authorization: Bearer mock-token
+X-User-Role: ADMIN
+X-User-Name: demo.admin
+Content-Type: application/json

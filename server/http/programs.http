@@ -1,0 +1,117 @@
+### ==========================================
+### CarBravo Incentives API - Programs
+### ==========================================
+
+@baseUrl = http://localhost:3001/api
+@contentType = application/json
+@token = mock-token
+
+### ==========================================
+### Program List
+### ==========================================
+
+GET {{baseUrl}}/programs
+Authorization: Bearer {{token}}
+
+
+### ==========================================
+### Program List - DRAFT
+### ==========================================
+
+GET {{baseUrl}}/programs?status=DRAFT
+Authorization: Bearer {{token}}
+
+
+### ==========================================
+### Program List - ACTIVE
+### ==========================================
+
+GET {{baseUrl}}/programs?status=ACTIVE
+Authorization: Bearer {{token}}
+
+
+### ==========================================
+### Program List - EXPIRED
+### ==========================================
+
+GET {{baseUrl}}/programs?status=EXPIRED
+Authorization: Bearer {{token}}
+
+
+### ==========================================
+### Program List - Search
+### ==========================================
+
+GET {{baseUrl}}/programs?search=Cash
+Authorization: Bearer {{token}}
+
+
+### ==========================================
+### Program List - Program Type
+### ==========================================
+
+GET {{baseUrl}}/programs?programType=APR
+Authorization: Bearer {{token}}
+
+
+### ==========================================
+### Program List - Pending Approval
+### ==========================================
+
+GET {{baseUrl}}/programs?pendingApproval=true
+Authorization: Bearer {{token}}
+
+
+### ==========================================
+### Program List - Pagination
+### ==========================================
+
+GET {{baseUrl}}/programs?page=0&size=10
+Authorization: Bearer {{token}}
+
+
+### ==========================================
+### Program List - Date Filter
+### ==========================================
+
+GET {{baseUrl}}/programs?dateFrom=2026-08-01&dateTo=2026-12-31
+Authorization: Bearer {{token}}
+
+
+### ==========================================
+### Create Program
+### ==========================================
+
+POST {{baseUrl}}/programs
+Authorization: Bearer {{token}}
+Content-Type: {{contentType}}
+
+{
+  "programName": "Test Customer Cash"
+}
+
+
+### ==========================================
+### Get Program Detail
+### ==========================================
+
+GET {{baseUrl}}/programs/1
+Authorization: Bearer {{token}}
+
+
+### ==========================================
+### Get Program Detail - Live Draft
+### ==========================================
+
+GET {{baseUrl}}/programs/6
+Authorization: Bearer {{token}}
+
+
+### ==========================================
+### Delete Program
+### ==========================================
+
+DELETE {{baseUrl}}/programs/5
+Authorization: Bearer {{token}}
+X-User-Role: ADMIN
+X-User-Name: demo.admin

@@ -1,412 +1,332 @@
 {
-	"programs": [
-		{
-			"id": 1,
-			"identifier": "SUMMER-FINANCE",
-			"name": "Summer Finance Event",
-			"status": "ACTIVE",
-			"programType": "INC",
-			"activeRevisionId": 101,
-			"draftRevisionId": null,
-			"deliveryStartDate": "2026-07-01",
-			"deliveryEndDate": "2026-08-20",
-			"createdAt": "2026-06-01T10:00:00Z",
-			"updatedAt": "2026-08-13T05:30:00Z",
-			"deletedAt": null
-		},
-		{
-			"id": 2,
-			"identifier": "EV-BONUS",
-			"name": "EV Bonus Cash",
-			"status": "ACTIVE",
-			"programType": "INC",
-			"activeRevisionId": 102,
-			"draftRevisionId": null,
-			"deliveryStartDate": "2026-07-15",
-			"deliveryEndDate": "2026-08-25",
-			"createdAt": "2026-06-10T10:00:00Z",
-			"updatedAt": "2026-08-13T07:30:00Z",
-			"deletedAt": null
-		},
-		{
-			"id": 3,
-			"identifier": "CAD-LOYALTY",
-			"name": "Cadillac Loyalty APR",
-			"status": "EXPIRED",
-			"programType": "INC",
-			"activeRevisionId": 103,
-			"draftRevisionId": null,
-			"deliveryStartDate": "2026-07-01",
-			"deliveryEndDate": "2026-07-31",
-			"createdAt": "2026-05-01T10:00:00Z",
-			"updatedAt": "2026-07-31T10:00:00Z",
-			"deletedAt": null
-		},
-		{
-			"id": 4,
-			"identifier": "NON-GM-CASH",
-			"name": "Non-GM Certified Cash",
-			"status": "DRAFT",
-			"programType": "INC",
-			"activeRevisionId": null,
-			"draftRevisionId": 104,
-			"deliveryStartDate": null,
-			"deliveryEndDate": null,
-			"createdAt": "2026-08-12T10:00:00Z",
-			"updatedAt": "2026-08-12T10:00:00Z",
-			"deletedAt": null
-		},
-		{
-			"id": 5,
-			"identifier": "Q3-CASH",
-			"name": "Q3 Customer Cash",
-			"status": "DRAFT",
-			"programType": "INC",
-			"activeRevisionId": null,
-			"draftRevisionId": 105,
-			"deliveryStartDate": null,
-			"deliveryEndDate": null,
-			"createdAt": "2026-08-12T11:00:00Z",
-			"updatedAt": "2026-08-13T08:20:00Z",
-			"deletedAt": null
-		}
-	],
-
-	"revisions": [
-		{
-			"id": 101,
-			"programId": 1,
-			"majorRevision": 2,
-			"minorRevision": 0,
-			"status": "ACTIVE",
-			"isMinorRevision": false,
-			"createdAt": "2026-06-01T10:00:00Z",
-			"createdBy": "admin",
-			"postedAt": "2026-07-01T10:00:00Z",
-			"postedBy": "admin",
-			"approval": {
-				"revisionId": 101,
-				"isSubmitted": true,
-				"submittedAt": "2026-06-20T10:00:00Z",
-				"submittedBy": "jsmith",
-				"approved": true,
-				"approvedAt": "2026-06-25T10:00:00Z",
-				"approvedBy": "mreviewer",
-				"approvalComment": "Approved",
-				"rejectedAt": null,
-				"rejectedBy": null,
-				"rejectionReason": null
-			},
-			"setup": {
-				"programName": "Summer Finance Event",
-				"programTypeCode": "INC",
-				"customerTypeCodes": ["RETAIL"],
-				"deliveryStartDate": "2026-07-01",
-				"deliveryEndDate": "2026-08-20",
-				"contactName": "Jordan Smith",
-				"contactEmail": "jsmith@example.com",
-				"contactPhone": "555-1000",
-				"financialProviderCode": "GMF",
-				"conditionCode": "STANDARD",
-				"conditionTier": "TIER_1",
-				"mileageCeiling": 100000,
-				"topOfDeal": false,
-				"vinException": false,
-				"mfpnText": "Summer Finance Event",
-				"disclosureText": "Offer subject to program terms.",
-				"localeCode": "en-US",
-				"effectiveStartDate": "2026-07-01",
-				"effectiveEndDate": "2026-08-20",
-				"financeTerms": [24, 36, 48, 60],
-				"creditTiers": ["A", "B"]
-			},
-			"vehicles": [1001],
-			"geography": [
-				{
-					"geoRuleId": 1,
-					"isIncluded": true,
-					"level": "STATE",
-					"code": "CA",
-					"name": "California"
-				},
-				{
-					"geoRuleId": 2,
-					"isIncluded": true,
-					"level": "STATE",
-					"code": "TX",
-					"name": "Texas"
-				}
-			],
-			"values": {
-				"financeTerms": [24, 36, 48, 60],
-				"components": [
-					{
-						"componentCode": "TERM_36",
-						"componentName": "36 Month Finance",
-						"sequenceNo": 1,
-						"attributes": [
-							{
-								"key": "APR_RATE",
-								"numberValue": 3.9,
-								"textValue": null
-							},
-							{
-								"key": "CASH_AMOUNT",
-								"numberValue": 1000,
-								"textValue": null
-							}
-						]
-					}
-				]
-			},
-			"summary": {
-				"mfpnText": "Summer Finance Event",
-				"disclosureText": "Offer subject to program terms."
-			}
-		},
-
-		{
-			"id": 102,
-			"programId": 2,
-			"majorRevision": 1,
-			"minorRevision": 0,
-			"status": "ACTIVE",
-			"isMinorRevision": false,
-			"createdAt": "2026-06-10T10:00:00Z",
-			"createdBy": "admin",
-			"postedAt": "2026-07-15T10:00:00Z",
-			"postedBy": "admin",
-			"approval": {
-				"revisionId": 102,
-				"isSubmitted": true,
-				"submittedAt": "2026-07-01T10:00:00Z",
-				"submittedBy": "jsmith",
-				"approved": true,
-				"approvedAt": "2026-07-05T10:00:00Z",
-				"approvedBy": "mreviewer",
-				"approvalComment": "Approved",
-				"rejectedAt": null,
-				"rejectedBy": null,
-				"rejectionReason": null
-			},
-			"setup": {
-				"programName": "EV Bonus Cash",
-				"programTypeCode": "INC",
-				"customerTypeCodes": ["RETAIL"],
-				"deliveryStartDate": "2026-07-15",
-				"deliveryEndDate": "2026-08-25",
-				"localeCode": "en-US",
-				"financeTerms": [36, 48],
-				"creditTiers": ["A", "B"]
-			},
-			"vehicles": [1002],
-			"geography": [
-				{
-					"geoRuleId": 3,
-					"isIncluded": true,
-					"level": "STATE",
-					"code": "CA",
-					"name": "California"
-				},
-				{
-					"geoRuleId": 4,
-					"isIncluded": true,
-					"level": "STATE",
-					"code": "NY",
-					"name": "New York"
-				}
-			],
-			"values": {
-				"financeTerms": [36, 48],
-				"components": []
-			},
-			"summary": {
-				"mfpnText": "EV Bonus Cash",
-				"disclosureText": "Offer subject to program terms."
-			}
-		},
-
-		{
-			"id": 103,
-			"programId": 3,
-			"majorRevision": 1,
-			"minorRevision": 0,
-			"status": "EXPIRED",
-			"isMinorRevision": false,
-			"createdAt": "2026-05-01T10:00:00Z",
-			"createdBy": "admin",
-			"postedAt": "2026-06-01T10:00:00Z",
-			"postedBy": "admin",
-			"approval": {
-				"revisionId": 103,
-				"isSubmitted": true,
-				"submittedAt": "2026-05-20T10:00:00Z",
-				"submittedBy": "jsmith",
-				"approved": true,
-				"approvedAt": "2026-05-25T10:00:00Z",
-				"approvedBy": "mreviewer",
-				"approvalComment": "Approved",
-				"rejectedAt": null,
-				"rejectedBy": null,
-				"rejectionReason": null
-			},
-			"setup": {
-				"programName": "Cadillac Loyalty APR",
-				"programTypeCode": "INC",
-				"customerTypeCodes": ["RETAIL"],
-				"deliveryStartDate": "2026-07-01",
-				"deliveryEndDate": "2026-07-31",
-				"localeCode": "en-US",
-				"financeTerms": [24, 36, 48],
-				"creditTiers": ["A"]
-			},
-			"vehicles": [1003],
-			"geography": [],
-			"values": {},
-			"summary": {}
-		},
-
-		{
-			"id": 104,
-			"programId": 4,
-			"majorRevision": 1,
-			"minorRevision": 0,
-			"status": "DRAFT",
-			"isMinorRevision": false,
-			"createdAt": "2026-08-12T10:00:00Z",
-			"createdBy": "jsmith",
-			"postedAt": null,
-			"postedBy": null,
-			"approval": {
-				"revisionId": 104,
-				"isSubmitted": false,
-				"submittedAt": null,
-				"submittedBy": null,
-				"approved": false,
-				"approvedAt": null,
-				"approvedBy": null,
-				"approvalComment": null,
-				"rejectedAt": null,
-				"rejectedBy": null,
-				"rejectionReason": null
-			},
-			"setup": {},
-			"vehicles": [],
-			"geography": [],
-			"values": {},
-			"summary": {}
-		},
-
-		{
-			"id": 105,
-			"programId": 5,
-			"majorRevision": 1,
-			"minorRevision": 0,
-			"status": "DRAFT",
-			"isMinorRevision": false,
-			"createdAt": "2026-08-12T11:00:00Z",
-			"createdBy": "jsmith",
-			"postedAt": null,
-			"postedBy": null,
-			"approval": {
-				"revisionId": 105,
-				"isSubmitted": false,
-				"submittedAt": null,
-				"submittedBy": null,
-				"approved": false,
-				"approvedAt": null,
-				"approvedBy": null,
-				"rejectionReason": null,
-				"rejectedAt": null,
-				"rejectedBy": null,
-				"approvalComment": null
-			},
-			"setup": {},
-			"vehicles": [],
-			"geography": [],
-			"values": {},
-			"summary": {}
-		}
-	],
-
-	"vehicles": [
-		{
-			"vehicleCatalogId": 1001,
-			"year": 2026,
-			"make": "GMC",
-			"model": "Sierra",
-			"division": "GM Trucks & SUVs",
-			"segment": "TRUCK",
-			"fuelType": "GAS",
-			"oemCode": "GM",
-			"label": "GMC Sierra"
-		},
-		{
-			"vehicleCatalogId": 1002,
-			"year": 2026,
-			"make": "Chevrolet",
-			"model": "Equinox EV",
-			"division": "Electric · all divisions",
-			"segment": "SUV",
-			"fuelType": "ELECTRIC",
-			"oemCode": "GM",
-			"label": "Chevrolet Equinox EV"
-		},
-		{
-			"vehicleCatalogId": 1003,
-			"year": 2026,
-			"make": "Cadillac",
-			"model": "CT5",
-			"division": "Cadillac",
-			"segment": "SEDAN",
-			"fuelType": "GAS",
-			"oemCode": "GM",
-			"label": "Cadillac CT5"
-		}
-	],
-
-	"activity": [
-		{
-			"id": 1,
-			"entityType": "INCENTIVE_REVISION",
-			"entityId": 104,
-			"operation": "SUBMIT",
-			"changedBy": "jsmith",
-			"changedAt": "2026-08-13T08:20:00Z",
-			"programName": "Q3 Customer Cash",
-			"programIdentifier": "Q3-CASH"
-		},
-		{
-			"id": 2,
-			"entityType": "INCENTIVE_REVISION",
-			"entityId": 102,
-			"operation": "APPROVE",
-			"changedBy": "mreviewer",
-			"changedAt": "2026-08-13T07:30:00Z",
-			"programName": "EV Bonus Cash",
-			"programIdentifier": "EV-BONUS"
-		},
-		{
-			"id": 3,
-			"entityType": "INCENTIVE_PROGRAM",
-			"entityId": 1,
-			"operation": "PUBLISH",
-			"changedBy": "admin",
-			"changedAt": "2026-08-13T05:30:00Z",
-			"programName": "Summer Finance Event",
-			"programIdentifier": "SUMMER-FINANCE"
-		},
-		{
-			"id": 4,
-			"entityType": "INCENTIVE_PROGRAM",
-			"entityId": 4,
-			"operation": "CREATE",
-			"changedBy": "jsmith",
-			"changedAt": "2026-08-12T10:00:00Z",
-			"programName": "Non-GM Certified Cash",
-			"programIdentifier": "NON-GM-CASH"
-		}
-	],
-
-	"geoRules": {}
+  "programs": [
+    {
+      "id": 1,
+      "identifier": "PROG-2026-0001",
+      "name": "Summer Finance Event",
+      "status": "ACTIVE",
+      "programType": "APR",
+      "activeRevisionId": 1,
+      "draftRevisionId": null,
+      "deliveryStartDate": "2026-08-01",
+      "deliveryEndDate": "2026-09-30",
+      "createdAt": "2026-07-14T12:41:13.171Z",
+      "updatedAt": "2026-08-12T12:41:13.171Z",
+      "deletedAt": null
+    }
+  ],
+  "revisions": [
+    {
+      "id": 1,
+      "programId": 1,
+      "majorRevision": 1,
+      "minorRevision": 0,
+      "status": "ACTIVE",
+      "isMinorRevision": false,
+      "createdAt": "2026-07-14T12:41:13.171Z",
+      "createdBy": "demo.admin",
+      "postedAt": "2026-07-15T12:41:13.171Z",
+      "postedBy": "demo.admin",
+      "approval": {
+        "revisionId": 1,
+        "isSubmitted": true,
+        "submittedAt": "2026-07-15T12:41:13.171Z",
+        "submittedBy": "demo.author",
+        "approved": true,
+        "approvedAt": "2026-07-15T12:41:13.171Z",
+        "approvedBy": "demo.approver",
+        "approvalComment": null,
+        "rejectedAt": null,
+        "rejectedBy": null,
+        "rejectionReason": null
+      },
+      "setup": {
+        "programTypeCode": "APR",
+        "purchaseType": "FINANCE",
+        "customerTypeCodes": [
+          "RETAIL"
+        ],
+        "contactName": "CarBravo Incentives",
+        "contactEmail": "incentives@example.com",
+        "contactPhone": "800-555-0100",
+        "financialProviderCode": "GMF",
+        "conditionCode": "NEW",
+        "mileageCeiling": null,
+        "topOfDeal": false,
+        "vinException": false,
+        "mfpnText": "Standard incentive terms apply.",
+        "disclosureText": "See dealer program disclosure.",
+        "localeCode": "en-US",
+        "deliveryStartDate": "2026-08-01",
+        "deliveryEndDate": "2026-09-30",
+        "effectiveStartDate": "2026-08-01",
+        "effectiveEndDate": "2026-09-30",
+        "financeTerms": [
+          {
+            "termMonths": 36
+          },
+          {
+            "termMonths": 48
+          },
+          {
+            "termMonths": 60
+          }
+        ],
+        "creditTiers": [
+          {
+            "code": "TIER_1"
+          }
+        ]
+      },
+      "vehicles": [
+        1,
+        2
+      ],
+      "geography": [
+        {
+          "geoRuleId": 1,
+          "isIncluded": true,
+          "level": "STATE",
+          "code": "NY",
+          "name": "New York"
+        }
+      ],
+      "values": {
+        "components": [
+          {
+            "componentCode": "APR",
+            "rate": 3.9
+          }
+        ]
+      },
+      "summary": {},
+      "copiedFromRevisionId": null
+    },
+    {
+      "id": 2,
+      "programId": 1,
+      "majorRevision": 2,
+      "minorRevision": 0,
+      "status": "ACTIVE",
+      "isMinorRevision": false,
+      "createdAt": "2026-08-03T12:41:13.172Z",
+      "createdBy": "demo.author",
+      "postedAt": "2026-08-04T12:41:13.172Z",
+      "postedBy": "demo.approver",
+      "approval": {
+        "revisionId": 2,
+        "isSubmitted": true,
+        "submittedAt": "2026-08-04T12:41:13.172Z",
+        "submittedBy": "demo.author",
+        "approved": true,
+        "approvedAt": "2026-08-04T12:41:13.172Z",
+        "approvedBy": "demo.approver",
+        "approvalComment": null,
+        "rejectedAt": null,
+        "rejectedBy": null,
+        "rejectionReason": null
+      },
+      "setup": {
+        "programTypeCode": "APR",
+        "purchaseType": "FINANCE",
+        "customerTypeCodes": [
+          "RETAIL"
+        ],
+        "contactName": "CarBravo Incentives",
+        "contactEmail": "incentives@example.com",
+        "contactPhone": "800-555-0100",
+        "financialProviderCode": "GMF",
+        "conditionCode": "NEW",
+        "mileageCeiling": null,
+        "topOfDeal": false,
+        "vinException": false,
+        "mfpnText": "Standard incentive terms apply.",
+        "disclosureText": "See dealer program disclosure.",
+        "localeCode": "en-US",
+        "deliveryStartDate": "2026-08-01",
+        "deliveryEndDate": "2026-09-30",
+        "effectiveStartDate": "2026-08-01",
+        "effectiveEndDate": "2026-09-30",
+        "financeTerms": [
+          {
+            "termMonths": 36
+          },
+          {
+            "termMonths": 48
+          },
+          {
+            "termMonths": 60
+          }
+        ],
+        "creditTiers": [
+          {
+            "code": "TIER_1"
+          }
+        ]
+      },
+      "vehicles": [
+        1,
+        2,
+        3
+      ],
+      "geography": [
+        {
+          "geoRuleId": 1,
+          "isIncluded": true,
+          "level": "STATE",
+          "code": "NY",
+          "name": "New York"
+        },
+        {
+          "geoRuleId": 2,
+          "isIncluded": true,
+          "level": "STATE",
+          "code": "NJ",
+          "name": "New Jersey"
+        }
+      ],
+      "values": {
+        "components": [
+          {
+            "componentCode": "APR",
+            "rate": 2.9
+          }
+        ]
+      },
+      "summary": {},
+      "copiedFromRevisionId": 1
+    }
+  ],
+  "vehicles": [
+    {
+      "vehicleCatalogId": 1,
+      "vehicleId": "CHEV-SIL-2026",
+      "year": 2026,
+      "make": "Chevrolet",
+      "model": "Silverado",
+      "trimName": "LT",
+      "bodyStyle": "Truck",
+      "segment": "FULL_SIZE_TRUCK",
+      "fuelType": "GAS",
+      "drivetrain": "4WD",
+      "oemCode": "SIL"
+    },
+    {
+      "vehicleCatalogId": 2,
+      "vehicleId": "CHEV-EQV-2026",
+      "year": 2026,
+      "make": "Chevrolet",
+      "model": "Equinox EV",
+      "trimName": "LT",
+      "bodyStyle": "SUV",
+      "segment": "COMPACT_SUV",
+      "fuelType": "EV",
+      "drivetrain": "AWD",
+      "oemCode": "EQV"
+    },
+    {
+      "vehicleCatalogId": 3,
+      "vehicleId": "CAD-CT5-2026",
+      "year": 2026,
+      "make": "Cadillac",
+      "model": "CT5",
+      "trimName": "Luxury",
+      "bodyStyle": "Sedan",
+      "segment": "LUXURY_SEDAN",
+      "fuelType": "GAS",
+      "drivetrain": "RWD",
+      "oemCode": "CT5"
+    }
+  ],
+  "activity": [],
+  "geography": {
+    "regions": [
+      {
+        "code": "NORTHEAST",
+        "name": "Northeast"
+      },
+      {
+        "code": "SOUTHEAST",
+        "name": "Southeast"
+      },
+      {
+        "code": "MIDWEST",
+        "name": "Midwest"
+      },
+      {
+        "code": "WEST",
+        "name": "West"
+      }
+    ],
+    "states": [
+      {
+        "code": "NY",
+        "name": "New York",
+        "region": "NORTHEAST"
+      },
+      {
+        "code": "NJ",
+        "name": "New Jersey",
+        "region": "NORTHEAST"
+      },
+      {
+        "code": "PA",
+        "name": "Pennsylvania",
+        "region": "NORTHEAST"
+      },
+      {
+        "code": "CA",
+        "name": "California",
+        "region": "WEST"
+      },
+      {
+        "code": "TX",
+        "name": "Texas",
+        "region": "WEST"
+      }
+    ],
+    "dmas": [
+      {
+        "code": "NYC",
+        "name": "New York",
+        "state": "NY"
+      },
+      {
+        "code": "BUF",
+        "name": "Buffalo",
+        "state": "NY"
+      },
+      {
+        "code": "PHL",
+        "name": "Philadelphia",
+        "state": "PA"
+      },
+      {
+        "code": "LAX",
+        "name": "Los Angeles",
+        "state": "CA"
+      }
+    ],
+    "counties": [
+      {
+        "code": "NYC001",
+        "name": "New York County",
+        "state": "NY",
+        "dma": "NYC"
+      },
+      {
+        "code": "NYC003",
+        "name": "Kings County",
+        "state": "NY",
+        "dma": "NYC"
+      },
+      {
+        "code": "PHL001",
+        "name": "Philadelphia County",
+        "state": "PA",
+        "dma": "PHL"
+      }
+    ]
+  },
+  "geoRules": {}
 }

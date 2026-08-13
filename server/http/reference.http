@@ -1,0 +1,6 @@
+### ==========================================
+### Reference Setup
+### ==========================================
+
+GET http://localhost:3001/api/reference/setup
+Authorization: Bearer mock-token

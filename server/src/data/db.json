@@ -1,0 +1,1416 @@
+{
+  "programs": [
+    {
+      "id": 1,
+      "identifier": "PROG-2026-0001",
+      "name": "Summer Finance Event",
+      "status": "ACTIVE",
+      "programType": "APR",
+      "activeRevisionId": 101,
+      "draftRevisionId": null,
+      "deliveryStartDate": "2026-07-01",
+      "deliveryEndDate": "2026-08-20",
+      "createdAt": "2026-06-01T10:00:00.000Z",
+      "updatedAt": "2026-08-13T05:30:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": 2,
+      "identifier": "PROG-2026-0002",
+      "name": "EV Bonus Cash",
+      "status": "ACTIVE",
+      "programType": "BONUS_CASH",
+      "activeRevisionId": 102,
+      "draftRevisionId": null,
+      "deliveryStartDate": "2026-07-15",
+      "deliveryEndDate": "2026-08-25",
+      "createdAt": "2026-06-10T10:00:00.000Z",
+      "updatedAt": "2026-08-13T07:30:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": 3,
+      "identifier": "PROG-2026-0003",
+      "name": "Cadillac Loyalty APR",
+      "status": "EXPIRED",
+      "programType": "APR",
+      "activeRevisionId": 103,
+      "draftRevisionId": null,
+      "deliveryStartDate": "2026-06-01",
+      "deliveryEndDate": "2026-08-28",
+      "createdAt": "2026-05-01T10:00:00.000Z",
+      "updatedAt": "2026-08-01T09:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": 4,
+      "identifier": "PROG-2026-0004",
+      "name": "Non-GM Certified Cash",
+      "status": "DRAFT",
+      "programType": "CUSTOMER_CASH",
+      "activeRevisionId": null,
+      "draftRevisionId": 104,
+      "deliveryStartDate": "2026-09-01",
+      "deliveryEndDate": "2026-09-30",
+      "createdAt": "2026-08-12T10:00:00.000Z",
+      "updatedAt": "2026-08-13T08:20:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": 5,
+      "identifier": "PROG-2026-0005",
+      "name": "Q3 Customer Cash",
+      "status": "DRAFT",
+      "programType": "CUSTOMER_CASH",
+      "activeRevisionId": null,
+      "draftRevisionId": 105,
+      "deliveryStartDate": "2026-09-01",
+      "deliveryEndDate": "2026-11-30",
+      "createdAt": "2026-08-12T09:00:00.000Z",
+      "updatedAt": "2026-08-12T09:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": 6,
+      "identifier": "PROG-2026-0006",
+      "name": "Northeast APR Special",
+      "status": "ACTIVE",
+      "programType": "APR",
+      "activeRevisionId": 106,
+      "draftRevisionId": 107,
+      "deliveryStartDate": "2026-08-01",
+      "deliveryEndDate": "2026-12-31",
+      "createdAt": "2026-05-28T09:00:00.000Z",
+      "updatedAt": "2026-08-13T13:01:48.063Z",
+      "deletedAt": null
+    }
+  ],
+  "revisions": [
+    {
+      "id": 101,
+      "programId": 1,
+      "majorRevision": 2,
+      "minorRevision": 0,
+      "status": "ACTIVE",
+      "isMinorRevision": false,
+      "createdAt": "2026-06-01T10:00:00.000Z",
+      "createdBy": "admin",
+      "postedAt": "2026-07-01T10:00:00.000Z",
+      "postedBy": "admin",
+      "approval": {
+        "revisionId": 101,
+        "isSubmitted": true,
+        "submittedAt": "2026-06-20T10:00:00.000Z",
+        "submittedBy": "jsmith",
+        "approved": true,
+        "approvedAt": "2026-06-25T10:00:00.000Z",
+        "approvedBy": "mreviewer",
+        "approvalComment": "Approved",
+        "rejectedAt": null,
+        "rejectedBy": null,
+        "rejectionReason": null
+      },
+      "setup": {
+        "programName": "Summer Finance Event",
+        "programTypeCode": "APR",
+        "purchaseType": "FINANCE",
+        "customerTypeCodes": [
+          "STANDARD",
+          "LOYALTY"
+        ],
+        "contactName": "Jordan Smith",
+        "contactEmail": "jsmith@example.com",
+        "contactPhone": "555-1000",
+        "financialProviderCode": "GM_FINANCIAL",
+        "conditionCode": "CARBRAVO",
+        "mileageCeiling": 75000,
+        "topOfDeal": true,
+        "vinException": false,
+        "mfpnText": "Not all buyers will qualify. See dealer for details.",
+        "disclosureText": "Offer valid on approved credit through GM Financial.",
+        "localeCode": "en-US",
+        "deliveryStartDate": "2026-07-01",
+        "deliveryEndDate": "2026-08-20",
+        "effectiveStartDate": "2026-07-01",
+        "effectiveEndDate": "2026-08-20",
+        "financeTerms": [
+          36,
+          48,
+          60
+        ],
+        "creditTiers": [
+          "A_PLUS",
+          "A1"
+        ]
+      },
+      "vehicles": [
+        {
+          "revisionVehicleId": 1,
+          "vehicleCatalogId": 1001
+        }
+      ],
+      "geography": [
+        {
+          "geoRuleId": 1,
+          "isIncluded": true,
+          "level": "STATE",
+          "code": "CA",
+          "name": "California"
+        },
+        {
+          "geoRuleId": 2,
+          "isIncluded": true,
+          "level": "STATE",
+          "code": "TX",
+          "name": "Texas"
+        },
+        {
+          "geoRuleId": 3,
+          "isIncluded": true,
+          "level": "STATE",
+          "code": "FL",
+          "name": "Florida"
+        }
+      ],
+      "values": {
+        "financeTerms": [
+          36,
+          48,
+          60
+        ],
+        "components": [
+          {
+            "componentId": 1,
+            "componentCode": "TERM_36",
+            "componentName": "36 Month APR",
+            "sequenceNo": 1,
+            "attributes": [
+              {
+                "attributeId": 1,
+                "key": "TERM_MONTHS",
+                "numberValue": 36,
+                "textValue": null
+              },
+              {
+                "attributeId": 2,
+                "key": "APR_RATE",
+                "numberValue": 2.9,
+                "textValue": null
+              }
+            ],
+            "vehicleOverrides": []
+          }
+        ]
+      },
+      "summary": {
+        "mfpnText": "Not all buyers will qualify. See dealer for details.",
+        "disclosureText": "Offer valid on approved credit through GM Financial."
+      },
+      "copiedFromRevisionId": null
+    },
+    {
+      "id": 102,
+      "programId": 2,
+      "majorRevision": 1,
+      "minorRevision": 0,
+      "status": "ACTIVE",
+      "isMinorRevision": false,
+      "createdAt": "2026-06-10T10:00:00.000Z",
+      "createdBy": "admin",
+      "postedAt": "2026-07-15T10:00:00.000Z",
+      "postedBy": "admin",
+      "approval": {
+        "revisionId": 102,
+        "isSubmitted": true,
+        "submittedAt": "2026-07-01T10:00:00.000Z",
+        "submittedBy": "jsmith",
+        "approved": true,
+        "approvedAt": "2026-07-05T10:00:00.000Z",
+        "approvedBy": "mreviewer",
+        "approvalComment": "Approved",
+        "rejectedAt": null,
+        "rejectedBy": null,
+        "rejectionReason": null
+      },
+      "setup": {
+        "programName": "EV Bonus Cash",
+        "programTypeCode": "BONUS_CASH",
+        "purchaseType": "CASH",
+        "customerTypeCodes": [
+          "STANDARD"
+        ],
+        "contactName": "Jamie Smith",
+        "contactEmail": "jamie.smith@carbravo.example",
+        "contactPhone": "555-0101",
+        "financialProviderCode": null,
+        "conditionCode": "CARBRAVO",
+        "mileageCeiling": 60000,
+        "topOfDeal": false,
+        "vinException": false,
+        "mfpnText": "Bonus cash applied at time of sale.",
+        "disclosureText": "Not compatible with other offers.",
+        "localeCode": "en-US",
+        "deliveryStartDate": "2026-07-15",
+        "deliveryEndDate": "2026-08-25",
+        "effectiveStartDate": "2026-07-15",
+        "effectiveEndDate": "2026-08-25",
+        "financeTerms": [],
+        "creditTiers": []
+      },
+      "vehicles": [
+        {
+          "revisionVehicleId": 2,
+          "vehicleCatalogId": 1004
+        }
+      ],
+      "geography": [
+        {
+          "geoRuleId": 4,
+          "isIncluded": true,
+          "level": "STATE",
+          "code": "CA",
+          "name": "California"
+        },
+        {
+          "geoRuleId": 5,
+          "isIncluded": true,
+          "level": "STATE",
+          "code": "NY",
+          "name": "New York"
+        },
+        {
+          "geoRuleId": 6,
+          "isIncluded": true,
+          "level": "STATE",
+          "code": "WA",
+          "name": "Washington"
+        }
+      ],
+      "values": {
+        "financeTerms": [],
+        "components": [
+          {
+            "componentId": 2,
+            "componentCode": "EV_BONUS",
+            "componentName": "EV Bonus Cash",
+            "sequenceNo": 1,
+            "attributes": [
+              {
+                "attributeId": 3,
+                "key": "CASH_AMOUNT",
+                "numberValue": 1500,
+                "textValue": null
+              }
+            ],
+            "vehicleOverrides": []
+          }
+        ]
+      },
+      "summary": {
+        "mfpnText": "Bonus cash applied at time of sale.",
+        "disclosureText": "Not compatible with other offers."
+      },
+      "copiedFromRevisionId": null
+    },
+    {
+      "id": 103,
+      "programId": 3,
+      "majorRevision": 1,
+      "minorRevision": 0,
+      "status": "EXPIRED",
+      "isMinorRevision": false,
+      "createdAt": "2026-07-15T09:00:00.000Z",
+      "createdBy": "jsmith",
+      "postedAt": "2026-07-22T09:00:00.000Z",
+      "postedBy": "admin",
+      "approval": {
+        "revisionId": 103,
+        "isSubmitted": true,
+        "submittedAt": "2026-07-20T09:00:00.000Z",
+        "submittedBy": "jsmith",
+        "approved": true,
+        "approvedAt": "2026-07-21T09:00:00.000Z",
+        "approvedBy": "mreviewer",
+        "approvalComment": null,
+        "rejectedAt": null,
+        "rejectedBy": null,
+        "rejectionReason": null
+      },
+      "setup": {
+        "programName": "Cadillac Loyalty APR",
+        "programTypeCode": "APR",
+        "purchaseType": "FINANCE",
+        "customerTypeCodes": [
+          "LOYALTY"
+        ],
+        "contactName": null,
+        "contactEmail": null,
+        "contactPhone": null,
+        "financialProviderCode": "ALLY",
+        "conditionCode": "MANUFACTURER_CERTIFIED",
+        "mileageCeiling": 50000,
+        "topOfDeal": false,
+        "vinException": false,
+        "mfpnText": null,
+        "disclosureText": null,
+        "localeCode": "en-US",
+        "deliveryStartDate": "2026-06-01",
+        "deliveryEndDate": "2026-08-28",
+        "effectiveStartDate": "2026-06-01",
+        "effectiveEndDate": "2026-08-28",
+        "financeTerms": [
+          36,
+          48
+        ],
+        "creditTiers": [
+          "A_PLUS"
+        ]
+      },
+      "vehicles": [
+        {
+          "revisionVehicleId": 3,
+          "vehicleCatalogId": 3001
+        }
+      ],
+      "geography": [
+        {
+          "geoRuleId": 7,
+          "isIncluded": true,
+          "level": "STATE",
+          "code": "CA",
+          "name": "California"
+        },
+        {
+          "geoRuleId": 8,
+          "isIncluded": true,
+          "level": "STATE",
+          "code": "TX",
+          "name": "Texas"
+        }
+      ],
+      "values": {
+        "financeTerms": [
+          36,
+          48
+        ],
+        "components": [
+          {
+            "componentId": 3,
+            "componentCode": "TERM_36",
+            "componentName": "36 Month APR",
+            "sequenceNo": 1,
+            "attributes": [
+              {
+                "attributeId": 4,
+                "key": "TERM_MONTHS",
+                "numberValue": 36,
+                "textValue": null
+              },
+              {
+                "attributeId": 5,
+                "key": "APR_RATE",
+                "numberValue": 1.9,
+                "textValue": null
+              }
+            ],
+            "vehicleOverrides": []
+          }
+        ]
+      },
+      "summary": {},
+      "copiedFromRevisionId": null
+    },
+    {
+      "id": 104,
+      "programId": 4,
+      "majorRevision": 1,
+      "minorRevision": 0,
+      "status": "DRAFT",
+      "isMinorRevision": false,
+      "createdAt": "2026-08-12T10:00:00.000Z",
+      "createdBy": "jsmith",
+      "postedAt": null,
+      "postedBy": null,
+      "approval": {
+        "revisionId": 104,
+        "isSubmitted": true,
+        "submittedAt": "2026-08-13T08:20:00.000Z",
+        "submittedBy": "jsmith",
+        "approved": false,
+        "approvedAt": null,
+        "approvedBy": null,
+        "approvalComment": null,
+        "rejectedAt": null,
+        "rejectedBy": null,
+        "rejectionReason": null
+      },
+      "setup": {
+        "programName": "Non-GM Certified Cash",
+        "programTypeCode": "CUSTOMER_CASH",
+        "purchaseType": "CASH",
+        "customerTypeCodes": [
+          "STANDARD",
+          "CONQUEST"
+        ],
+        "contactName": null,
+        "contactEmail": null,
+        "contactPhone": null,
+        "financialProviderCode": null,
+        "conditionCode": "USED_INSPECTED",
+        "mileageCeiling": 80000,
+        "topOfDeal": false,
+        "vinException": false,
+        "mfpnText": null,
+        "disclosureText": null,
+        "localeCode": "en-US",
+        "deliveryStartDate": "2026-09-01",
+        "deliveryEndDate": "2026-09-30",
+        "effectiveStartDate": null,
+        "effectiveEndDate": null,
+        "financeTerms": [],
+        "creditTiers": []
+      },
+      "vehicles": [
+        {
+          "revisionVehicleId": 4,
+          "vehicleCatalogId": 5001
+        }
+      ],
+      "geography": [
+        {
+          "geoRuleId": 9,
+          "isIncluded": true,
+          "level": "REGION",
+          "code": "SOUTH",
+          "name": "South"
+        }
+      ],
+      "values": {
+        "financeTerms": [],
+        "components": [
+          {
+            "componentId": 4,
+            "componentCode": "FLAT_CASH",
+            "componentName": "Flat Customer Cash",
+            "sequenceNo": 1,
+            "attributes": [
+              {
+                "attributeId": 6,
+                "key": "CASH_AMOUNT",
+                "numberValue": 1000,
+                "textValue": null
+              }
+            ],
+            "vehicleOverrides": []
+          }
+        ]
+      },
+      "summary": {},
+      "copiedFromRevisionId": null
+    },
+    {
+      "id": 105,
+      "programId": 5,
+      "majorRevision": 1,
+      "minorRevision": 0,
+      "status": "DRAFT",
+      "isMinorRevision": false,
+      "createdAt": "2026-08-12T09:00:00.000Z",
+      "createdBy": "jsmith",
+      "postedAt": null,
+      "postedBy": null,
+      "approval": {
+        "revisionId": 105,
+        "isSubmitted": false,
+        "submittedAt": null,
+        "submittedBy": null,
+        "approved": false,
+        "approvedAt": null,
+        "approvedBy": null,
+        "approvalComment": null,
+        "rejectedAt": null,
+        "rejectedBy": null,
+        "rejectionReason": null
+      },
+      "setup": {
+        "programName": "Q3 Customer Cash",
+        "programTypeCode": "CUSTOMER_CASH",
+        "purchaseType": null,
+        "customerTypeCodes": [],
+        "contactName": null,
+        "contactEmail": null,
+        "contactPhone": null,
+        "financialProviderCode": null,
+        "conditionCode": null,
+        "mileageCeiling": null,
+        "topOfDeal": false,
+        "vinException": false,
+        "mfpnText": null,
+        "disclosureText": null,
+        "localeCode": "en-US",
+        "deliveryStartDate": "2026-09-01",
+        "deliveryEndDate": "2026-11-30",
+        "effectiveStartDate": null,
+        "effectiveEndDate": null,
+        "financeTerms": [],
+        "creditTiers": []
+      },
+      "vehicles": [],
+      "geography": [],
+      "values": {
+        "financeTerms": [],
+        "components": []
+      },
+      "summary": {},
+      "copiedFromRevisionId": null
+    },
+    {
+      "id": 106,
+      "programId": 6,
+      "majorRevision": 1,
+      "minorRevision": 0,
+      "status": "ACTIVE",
+      "isMinorRevision": false,
+      "createdAt": "2026-05-28T09:00:00.000Z",
+      "createdBy": "jsmith",
+      "postedAt": "2026-06-01T13:00:00.000Z",
+      "postedBy": "admin",
+      "approval": {
+        "revisionId": 106,
+        "isSubmitted": true,
+        "submittedAt": "2026-06-01T09:00:00.000Z",
+        "submittedBy": "jsmith",
+        "approved": true,
+        "approvedAt": "2026-06-01T12:00:00.000Z",
+        "approvedBy": "mreviewer",
+        "approvalComment": null,
+        "rejectedAt": null,
+        "rejectedBy": null,
+        "rejectionReason": null
+      },
+      "setup": {
+        "programName": "Northeast APR Special",
+        "programTypeCode": "APR",
+        "purchaseType": "FINANCE",
+        "customerTypeCodes": [
+          "STANDARD"
+        ],
+        "contactName": null,
+        "contactEmail": null,
+        "contactPhone": null,
+        "financialProviderCode": "CHASE",
+        "conditionCode": "CARBRAVO",
+        "mileageCeiling": null,
+        "topOfDeal": false,
+        "vinException": false,
+        "mfpnText": null,
+        "disclosureText": null,
+        "localeCode": "en-US",
+        "deliveryStartDate": "2026-06-01",
+        "deliveryEndDate": "2026-12-31",
+        "effectiveStartDate": null,
+        "effectiveEndDate": null,
+        "financeTerms": [
+          48,
+          60
+        ],
+        "creditTiers": [
+          "A1",
+          "A2"
+        ]
+      },
+      "vehicles": [
+        {
+          "revisionVehicleId": 5,
+          "vehicleCatalogId": 2001
+        }
+      ],
+      "geography": [
+        {
+          "geoRuleId": 10,
+          "isIncluded": true,
+          "level": "STATE",
+          "code": "NY",
+          "name": "New York"
+        },
+        {
+          "geoRuleId": 11,
+          "isIncluded": true,
+          "level": "STATE",
+          "code": "MA",
+          "name": "Massachusetts"
+        }
+      ],
+      "values": {
+        "financeTerms": [
+          48,
+          60
+        ],
+        "components": [
+          {
+            "componentId": 5,
+            "componentCode": "TERM_48",
+            "componentName": "48 Month APR",
+            "sequenceNo": 1,
+            "attributes": [
+              {
+                "attributeId": 7,
+                "key": "TERM_MONTHS",
+                "numberValue": 48,
+                "textValue": null
+              },
+              {
+                "attributeId": 8,
+                "key": "APR_RATE",
+                "numberValue": 3.9,
+                "textValue": null
+              }
+            ],
+            "vehicleOverrides": []
+          }
+        ]
+      },
+      "summary": {},
+      "copiedFromRevisionId": null
+    },
+    {
+      "id": 107,
+      "programId": 6,
+      "majorRevision": 2,
+      "minorRevision": 0,
+      "status": "DRAFT",
+      "isMinorRevision": false,
+      "createdAt": "2026-08-10T12:00:00.000Z",
+      "createdBy": "jsmith",
+      "postedAt": null,
+      "postedBy": null,
+      "approval": {
+        "revisionId": 107,
+        "isSubmitted": true,
+        "submittedAt": "2026-08-13T13:01:48.063Z",
+        "submittedBy": "demo.author",
+        "approved": false,
+        "approvedAt": null,
+        "approvedBy": null,
+        "approvalComment": null,
+        "rejectedAt": null,
+        "rejectedBy": null,
+        "rejectionReason": null
+      },
+      "setup": {
+        "programName": "Northeast APR Special",
+        "programTypeCode": "APR",
+        "purchaseType": "FINANCE",
+        "customerTypeCodes": [
+          "STANDARD"
+        ],
+        "contactName": "John Smith",
+        "contactEmail": "john@example.com",
+        "contactPhone": "555-0100",
+        "financialProviderCode": "GM_FINANCIAL",
+        "conditionCode": "CARBRAVO",
+        "mileageCeiling": 75000,
+        "topOfDeal": true,
+        "vinException": false,
+        "mfpnText": "Sample marketing text",
+        "disclosureText": "Sample disclosure",
+        "localeCode": "en-US",
+        "deliveryStartDate": "2026-08-01",
+        "deliveryEndDate": "2026-12-31",
+        "effectiveStartDate": "2026-08-01",
+        "effectiveEndDate": "2026-12-31",
+        "financeTerms": [
+          36,
+          48,
+          60
+        ],
+        "creditTiers": [
+          "A_PLUS",
+          "A1"
+        ]
+      },
+      "vehicles": [
+        1001,
+        1002,
+        2001
+      ],
+      "geography": [
+        {
+          "geoRuleId": 12,
+          "isIncluded": true,
+          "level": "STATE",
+          "code": "NY",
+          "name": "New York"
+        },
+        {
+          "geoRuleId": 13,
+          "isIncluded": true,
+          "level": "STATE",
+          "code": "MA",
+          "name": "Massachusetts"
+        },
+        {
+          "geoRuleId": 14,
+          "isIncluded": true,
+          "level": "STATE",
+          "code": "PA",
+          "name": "Pennsylvania"
+        }
+      ],
+      "values": {
+        "components": [
+          {
+            "componentCode": "APR",
+            "componentType": "RATE",
+            "amount": 2.9,
+            "unit": "PERCENT",
+            "termMonths": 36
+          },
+          {
+            "componentCode": "BONUS",
+            "componentType": "CASH",
+            "amount": 1500,
+            "unit": "USD"
+          }
+        ]
+      },
+      "summary": {},
+      "copiedFromRevisionId": 106
+    }
+  ],
+  "vehicles": [
+    {
+      "vehicleCatalogId": 1001,
+      "vehicleId": "GM:2026:SIL1500",
+      "year": 2026,
+      "make": "Chevrolet",
+      "model": "Silverado 1500",
+      "trimName": "LT",
+      "bodyStyle": "Crew Cab",
+      "segment": "Full-Size Truck",
+      "fuelType": "Gas",
+      "drivetrain": "4WD",
+      "oemCode": "GM"
+    },
+    {
+      "vehicleCatalogId": 1002,
+      "vehicleId": "GM:2026:EQUINOX",
+      "year": 2026,
+      "make": "Chevrolet",
+      "model": "Equinox",
+      "trimName": "LT",
+      "bodyStyle": "SUV",
+      "segment": "Compact SUV",
+      "fuelType": "Gas",
+      "drivetrain": "FWD",
+      "oemCode": "GM"
+    },
+    {
+      "vehicleCatalogId": 1003,
+      "vehicleId": "GM:2026:CT5",
+      "year": 2026,
+      "make": "Cadillac",
+      "model": "CT5",
+      "trimName": "Luxury",
+      "bodyStyle": "Sedan",
+      "segment": "Luxury Sedan",
+      "fuelType": "Gas",
+      "drivetrain": "RWD",
+      "oemCode": "GM"
+    },
+    {
+      "vehicleCatalogId": 1004,
+      "vehicleId": "GM:2026:LYRIQ",
+      "year": 2026,
+      "make": "Cadillac",
+      "model": "LYRIQ",
+      "trimName": "Tech",
+      "bodyStyle": "SUV",
+      "segment": "Luxury SUV",
+      "fuelType": "Electric",
+      "drivetrain": "AWD",
+      "oemCode": "GM"
+    },
+    {
+      "vehicleCatalogId": 2001,
+      "vehicleId": "GM:2026:TRAVERSE",
+      "year": 2026,
+      "make": "Chevrolet",
+      "model": "Traverse",
+      "trimName": "LT",
+      "bodyStyle": "SUV",
+      "segment": "Mid-Size SUV",
+      "fuelType": "Gas",
+      "drivetrain": "AWD",
+      "oemCode": "GM"
+    },
+    {
+      "vehicleCatalogId": 3001,
+      "vehicleId": "GM:2026:ESCALADE",
+      "year": 2026,
+      "make": "Cadillac",
+      "model": "Escalade",
+      "trimName": "Premium",
+      "bodyStyle": "SUV",
+      "segment": "Full-Size Luxury SUV",
+      "fuelType": "Gas",
+      "drivetrain": "4WD",
+      "oemCode": "GM"
+    },
+    {
+      "vehicleCatalogId": 5001,
+      "vehicleId": "IND:2026:F150",
+      "year": 2026,
+      "make": "Ford",
+      "model": "F-150",
+      "trimName": "XLT",
+      "bodyStyle": "Crew Cab",
+      "segment": "Full-Size Truck",
+      "fuelType": "Gas",
+      "drivetrain": "4WD",
+      "oemCode": "IND"
+    },
+    {
+      "vehicleCatalogId": 5002,
+      "vehicleId": "IND:2026:RAV4",
+      "year": 2026,
+      "make": "Toyota",
+      "model": "RAV4",
+      "trimName": "XLE",
+      "bodyStyle": "SUV",
+      "segment": "Compact SUV",
+      "fuelType": "Hybrid",
+      "drivetrain": "AWD",
+      "oemCode": "IND"
+    },
+    {
+      "vehicleCatalogId": 5003,
+      "vehicleId": "GM:2025:SIL1500",
+      "year": 2025,
+      "make": "Chevrolet",
+      "model": "Silverado 1500",
+      "trimName": "LT",
+      "bodyStyle": "Crew Cab",
+      "segment": "Full-Size Truck",
+      "fuelType": "Gas",
+      "drivetrain": "4WD",
+      "oemCode": "GM"
+    },
+    {
+      "vehicleCatalogId": 5004,
+      "vehicleId": "GM:2025:TAHOE",
+      "year": 2025,
+      "make": "Chevrolet",
+      "model": "Tahoe",
+      "trimName": "LT",
+      "bodyStyle": "SUV",
+      "segment": "Full-Size SUV",
+      "fuelType": "Gas",
+      "drivetrain": "4WD",
+      "oemCode": "GM"
+    },
+    {
+      "vehicleCatalogId": 5005,
+      "vehicleId": "GM:2024:CT4",
+      "year": 2024,
+      "make": "Cadillac",
+      "model": "CT4",
+      "trimName": "Luxury",
+      "bodyStyle": "Sedan",
+      "segment": "Luxury Sedan",
+      "fuelType": "Gas",
+      "drivetrain": "RWD",
+      "oemCode": "GM"
+    }
+  ],
+  "geography": {
+    "regions": [
+      {
+        "code": "NORTHEAST",
+        "name": "Northeast"
+      },
+      {
+        "code": "MIDWEST",
+        "name": "Midwest"
+      },
+      {
+        "code": "SOUTH",
+        "name": "South"
+      },
+      {
+        "code": "WEST",
+        "name": "West"
+      }
+    ],
+    "states": [
+      {
+        "code": "NY",
+        "name": "New York",
+        "region": "NORTHEAST"
+      },
+      {
+        "code": "MA",
+        "name": "Massachusetts",
+        "region": "NORTHEAST"
+      },
+      {
+        "code": "PA",
+        "name": "Pennsylvania",
+        "region": "NORTHEAST"
+      },
+      {
+        "code": "MI",
+        "name": "Michigan",
+        "region": "MIDWEST"
+      },
+      {
+        "code": "OH",
+        "name": "Ohio",
+        "region": "MIDWEST"
+      },
+      {
+        "code": "IL",
+        "name": "Illinois",
+        "region": "MIDWEST"
+      },
+      {
+        "code": "FL",
+        "name": "Florida",
+        "region": "SOUTH"
+      },
+      {
+        "code": "TX",
+        "name": "Texas",
+        "region": "SOUTH"
+      },
+      {
+        "code": "GA",
+        "name": "Georgia",
+        "region": "SOUTH"
+      },
+      {
+        "code": "CA",
+        "name": "California",
+        "region": "WEST"
+      },
+      {
+        "code": "WA",
+        "name": "Washington",
+        "region": "WEST"
+      },
+      {
+        "code": "AZ",
+        "name": "Arizona",
+        "region": "WEST"
+      }
+    ],
+    "dmas": [
+      {
+        "code": "NYC",
+        "name": "New York",
+        "state": "NY",
+        "region": "NORTHEAST"
+      },
+      {
+        "code": "BOS",
+        "name": "Boston",
+        "state": "MA",
+        "region": "NORTHEAST"
+      },
+      {
+        "code": "PHL",
+        "name": "Philadelphia",
+        "state": "PA",
+        "region": "NORTHEAST"
+      },
+      {
+        "code": "DET",
+        "name": "Detroit",
+        "state": "MI",
+        "region": "MIDWEST"
+      },
+      {
+        "code": "CLE",
+        "name": "Cleveland",
+        "state": "OH",
+        "region": "MIDWEST"
+      },
+      {
+        "code": "CHI",
+        "name": "Chicago",
+        "state": "IL",
+        "region": "MIDWEST"
+      },
+      {
+        "code": "MIA",
+        "name": "Miami",
+        "state": "FL",
+        "region": "SOUTH"
+      },
+      {
+        "code": "DAL",
+        "name": "Dallas",
+        "state": "TX",
+        "region": "SOUTH"
+      },
+      {
+        "code": "ATL",
+        "name": "Atlanta",
+        "state": "GA",
+        "region": "SOUTH"
+      },
+      {
+        "code": "LAX",
+        "name": "Los Angeles",
+        "state": "CA",
+        "region": "WEST"
+      },
+      {
+        "code": "SEA",
+        "name": "Seattle",
+        "state": "WA",
+        "region": "WEST"
+      },
+      {
+        "code": "PHX",
+        "name": "Phoenix",
+        "state": "AZ",
+        "region": "WEST"
+      }
+    ],
+    "counties": [
+      {
+        "code": "NY001",
+        "name": "New York County",
+        "state": "NY",
+        "dma": "NYC"
+      },
+      {
+        "code": "NY003",
+        "name": "Kings County",
+        "state": "NY",
+        "dma": "NYC"
+      },
+      {
+        "code": "MA025",
+        "name": "Suffolk County",
+        "state": "MA",
+        "dma": "BOS"
+      },
+      {
+        "code": "PA101",
+        "name": "Philadelphia County",
+        "state": "PA",
+        "dma": "PHL"
+      },
+      {
+        "code": "MI163",
+        "name": "Wayne County",
+        "state": "MI",
+        "dma": "DET"
+      },
+      {
+        "code": "OH035",
+        "name": "Cuyahoga County",
+        "state": "OH",
+        "dma": "CLE"
+      },
+      {
+        "code": "IL031",
+        "name": "Cook County",
+        "state": "IL",
+        "dma": "CHI"
+      },
+      {
+        "code": "FL086",
+        "name": "Miami-Dade County",
+        "state": "FL",
+        "dma": "MIA"
+      },
+      {
+        "code": "TX113",
+        "name": "Dallas County",
+        "state": "TX",
+        "dma": "DAL"
+      },
+      {
+        "code": "GA121",
+        "name": "Fulton County",
+        "state": "GA",
+        "dma": "ATL"
+      },
+      {
+        "code": "CA037",
+        "name": "Los Angeles County",
+        "state": "CA",
+        "dma": "LAX"
+      },
+      {
+        "code": "WA033",
+        "name": "King County",
+        "state": "WA",
+        "dma": "SEA"
+      },
+      {
+        "code": "AZ013",
+        "name": "Maricopa County",
+        "state": "AZ",
+        "dma": "PHX"
+      }
+    ]
+  },
+  "referenceSetup": {
+    "programTypes": [
+      {
+        "code": "CUSTOMER_CASH",
+        "name": "Customer Cash",
+        "supportsCash": true,
+        "supportsRate": false
+      },
+      {
+        "code": "APR",
+        "name": "APR",
+        "supportsCash": false,
+        "supportsRate": true
+      },
+      {
+        "code": "BONUS_CASH",
+        "name": "Bonus Cash",
+        "supportsCash": true,
+        "supportsRate": false
+      }
+    ],
+    "purchaseTypes": [
+      {
+        "code": "CASH",
+        "name": "Cash"
+      },
+      {
+        "code": "FINANCE",
+        "name": "Finance"
+      }
+    ],
+    "customerTypes": [
+      {
+        "code": "STANDARD",
+        "name": "Standard"
+      },
+      {
+        "code": "LOYALTY",
+        "name": "Loyalty"
+      },
+      {
+        "code": "CONQUEST",
+        "name": "Conquest"
+      }
+    ],
+    "conditionCodes": [
+      {
+        "code": "CARBRAVO",
+        "name": "CarBravo"
+      },
+      {
+        "code": "MANUFACTURER_CERTIFIED",
+        "name": "Manufacturer Certified"
+      },
+      {
+        "code": "USED_INSPECTED",
+        "name": "Used Inspected"
+      },
+      {
+        "code": "USED_AS_IS",
+        "name": "Used As-Is"
+      }
+    ],
+    "financeTermOptions": [
+      {
+        "termMonths": 24,
+        "label": "24 Months"
+      },
+      {
+        "termMonths": 36,
+        "label": "36 Months"
+      },
+      {
+        "termMonths": 48,
+        "label": "48 Months"
+      },
+      {
+        "termMonths": 60,
+        "label": "60 Months"
+      },
+      {
+        "termMonths": 72,
+        "label": "72 Months"
+      }
+    ],
+    "creditTierOptions": [
+      {
+        "code": "A_PLUS",
+        "name": "A+",
+        "sortOrder": 1
+      },
+      {
+        "code": "A1",
+        "name": "A1",
+        "sortOrder": 2
+      },
+      {
+        "code": "A2",
+        "name": "A2",
+        "sortOrder": 3
+      },
+      {
+        "code": "B",
+        "name": "B",
+        "sortOrder": 4
+      }
+    ],
+    "financialProviders": [
+      {
+        "code": "GM_FINANCIAL",
+        "name": "GM Financial",
+        "isActive": true,
+        "supportedTerms": [
+          24,
+          36,
+          48,
+          60,
+          72
+        ],
+        "supportsCash": false,
+        "supportsRate": true
+      },
+      {
+        "code": "CHASE",
+        "name": "Chase",
+        "isActive": true,
+        "supportedTerms": [
+          36,
+          48,
+          60,
+          72
+        ],
+        "supportsCash": false,
+        "supportsRate": true
+      },
+      {
+        "code": "ALLY",
+        "name": "Ally",
+        "isActive": true,
+        "supportedTerms": [
+          36,
+          48,
+          60
+        ],
+        "supportsCash": false,
+        "supportsRate": true
+      },
+      {
+        "code": "GMF",
+        "name": "GM Financial",
+        "isActive": true,
+        "supportedTerms": [
+          24,
+          36,
+          48,
+          60
+        ],
+        "supportsCash": false,
+        "supportsRate": true
+      }
+    ]
+  },
+  "activity": [
+    {
+      "id": 9,
+      "entityType": "INCENTIVE_REVISION",
+      "entityId": 107,
+      "operation": "SUBMIT",
+      "changedBy": "demo.author",
+      "changedAt": "2026-08-13T13:01:48.063Z",
+      "programName": "Northeast APR Special",
+      "programIdentifier": "PROG-2026-0006"
+    },
+    {
+      "id": 8,
+      "entityType": "INCENTIVE_REVISION",
+      "entityId": 107,
+      "operation": "UPDATE",
+      "changedBy": "demo.author",
+      "changedAt": "2026-08-13T12:49:46.979Z",
+      "programName": "Northeast APR Special",
+      "programIdentifier": "PROG-2026-0006"
+    },
+    {
+      "id": 7,
+      "entityType": "INCENTIVE_REVISION",
+      "entityId": 107,
+      "operation": "UPDATE",
+      "changedBy": "demo.user",
+      "changedAt": "2026-08-13T12:48:11.444Z",
+      "programName": "Northeast APR Special",
+      "programIdentifier": "PROG-2026-0006"
+    },
+    {
+      "id": 6,
+      "entityType": "INCENTIVE_REVISION",
+      "entityId": 107,
+      "operation": "UPDATE",
+      "changedBy": "demo.user",
+      "changedAt": "2026-08-13T12:47:29.360Z",
+      "programName": "Northeast APR Special",
+      "programIdentifier": "PROG-2026-0006"
+    },
+    {
+      "id": 1,
+      "entityType": "INCENTIVE_REVISION",
+      "entityId": 104,
+      "operation": "SUBMIT",
+      "changedBy": "jsmith",
+      "changedAt": "2026-08-13T08:20:00.000Z",
+      "programName": "Non-GM Certified Cash",
+      "programIdentifier": "PROG-2026-0004"
+    },
+    {
+      "id": 2,
+      "entityType": "INCENTIVE_REVISION",
+      "entityId": 102,
+      "operation": "APPROVE",
+      "changedBy": "mreviewer",
+      "changedAt": "2026-08-13T07:30:00.000Z",
+      "programName": "EV Bonus Cash",
+      "programIdentifier": "PROG-2026-0002"
+    },
+    {
+      "id": 3,
+      "entityType": "INCENTIVE_PROGRAM",
+      "entityId": 1,
+      "operation": "POST_TO_PRODUCTION",
+      "changedBy": "admin",
+      "changedAt": "2026-08-13T05:30:00.000Z",
+      "programName": "Summer Finance Event",
+      "programIdentifier": "PROG-2026-0001"
+    },
+    {
+      "id": 4,
+      "entityType": "INCENTIVE_PROGRAM",
+      "entityId": 4,
+      "operation": "CREATE",
+      "changedBy": "jsmith",
+      "changedAt": "2026-08-12T10:00:00.000Z",
+      "programName": "Non-GM Certified Cash",
+      "programIdentifier": "PROG-2026-0004"
+    },
+    {
+      "id": 5,
+      "entityType": "INCENTIVE_REVISION",
+      "entityId": 107,
+      "operation": "REVISE",
+      "changedBy": "jsmith",
+      "changedAt": "2026-08-10T12:00:00.000Z",
+      "programName": "Northeast APR Special",
+      "programIdentifier": "PROG-2026-0006"
+    }
+  ]
+}

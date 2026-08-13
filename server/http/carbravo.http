@@ -1,0 +1,74 @@
+### ==========================================
+### CarBravo Incentives API - Program Setup
+### ==========================================
+
+@baseUrl = http://localhost:3001/api
+@contentType = application/json
+@token = mock-token
+
+
+### ==========================================
+### Get Program Setup
+### ==========================================
+
+GET {{baseUrl}}/programs/1/revisions/101/setup
+Authorization: Bearer {{token}}
+
+
+### ==========================================
+### Get Program Setup - Program with Draft
+### ==========================================
+
+GET {{baseUrl}}/programs/6/revisions/107/setup
+Authorization: Bearer {{token}}
+
+
+### ==========================================
+### Update Program Setup
+### ==========================================
+
+PUT {{baseUrl}}/programs/6/revisions/107/setup
+Authorization: Bearer {{token}}
+X-User-Role: AUTHOR
+X-User-Name: demo.author
+Content-Type: {{contentType}}
+
+{
+  "programTypeCode": "APR",
+  "purchaseType": "FINANCE",
+  "customerTypeCodes": [
+    "STANDARD"
+  ],
+  "contactName": "Demo User",
+  "contactEmail": "demo@example.com",
+  "contactPhone": "555-123-4567",
+  "financialProviderCode": "GMF",
+  "conditionCode": "CARBRAVO",
+  "mileageCeiling": 100000,
+  "topOfDeal": false,
+  "vinException": false,
+  "mfpnText": "Demo program terms",
+  "disclosureText": "Demo disclosure",
+  "localeCode": "en-US",
+  "deliveryStartDate": "2026-09-01",
+  "deliveryEndDate": "2026-12-31",
+  "effectiveStartDate": "2026-09-01",
+  "effectiveEndDate": "2026-12-31",
+  "financeTerms": [
+    36,
+    48,
+    60
+  ],
+  "creditTiers": [
+    "A1",
+    "A2"
+  ]
+}
+
+
+### ==========================================
+### Get Reference Setup
+### ==========================================
+
+GET {{baseUrl}}/reference/setup
+Authorization: Bearer {{token}}

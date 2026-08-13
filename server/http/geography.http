@@ -1,0 +1,44 @@
+### Regions
+GET http://localhost:3001/api/geography/regions
+Authorization: Bearer mock-token
+
+### States
+GET http://localhost:3001/api/geography/states
+Authorization: Bearer mock-token
+
+### States by region
+GET http://localhost:3001/api/geography/states?region=WEST
+Authorization: Bearer mock-token
+
+### DMAs
+GET http://localhost:3001/api/geography/dmas?state=NY
+Authorization: Bearer mock-token
+
+### Counties
+GET http://localhost:3001/api/geography/counties?state=NY
+Authorization: Bearer mock-token
+
+### Search
+GET http://localhost:3001/api/geography/search?q=California
+Authorization: Bearer mock-token
+
+### Revision geography
+GET http://localhost:3001/api/programs/6/revisions/107/geography
+Authorization: Bearer mock-token
+
+### Update revision geography
+PUT http://localhost:3001/api/programs/6/revisions/107/geography
+Authorization: Bearer mock-token
+Content-Type: application/json
+
+{
+  "rules": [
+    {
+      "geoRuleId": 1,
+      "isIncluded": true,
+      "level": "STATE",
+      "code": "NY",
+      "name": "New York"
+    }
+  ]
+}

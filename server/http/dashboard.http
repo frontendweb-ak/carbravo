@@ -1,0 +1,31 @@
+### ==========================================
+### CarBravo Incentives API - Dashboard
+### ==========================================
+
+@baseUrl = http://localhost:3001/api
+@contentType = application/json
+@token = mock-token
+
+
+### ==========================================
+### Dashboard Summary
+### ==========================================
+
+GET {{baseUrl}}/dashboard/summary
+Authorization: Bearer {{token}}
+
+
+### ==========================================
+### Dashboard Activity
+### ==========================================
+
+GET {{baseUrl}}/dashboard/activity
+Authorization: Bearer {{token}}
+
+
+### ==========================================
+### Dashboard Expiring Programs
+### ==========================================
+
+GET {{baseUrl}}/dashboard/expiring
+Authorization: Bearer {{token}}

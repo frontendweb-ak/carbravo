@@ -1,0 +1,57 @@
+### ==========================================
+### Revision Approval
+### ==========================================
+
+@baseUrl = http://localhost:3001/api
+@token = mock-token
+
+GET {{baseUrl}}/programs/6/revisions/107/approval
+Authorization: Bearer {{token}}
+
+### ==========================================
+### Submit Revision
+### ==========================================
+
+@baseUrl = http://localhost:3001/api
+@token = mock-token
+
+POST {{baseUrl}}/programs/6/revisions/107/submit
+Authorization: Bearer {{token}}
+X-User-Role: AUTHOR
+X-User-Name: demo.author
+
+
+### ==========================================
+### Approve Revision
+### ==========================================
+
+@baseUrl = http://localhost:3001/api
+@token = mock-token
+
+POST {{baseUrl}}/programs/6/revisions/107/approve
+Authorization: Bearer {{token}}
+X-User-Role: APPROVER
+X-User-Name: demo.approver
+Content-Type: application/json
+
+{
+  "approvalComment": "Revision approved for production."
+}
+
+
+### ==========================================
+### Reject Revision
+### ==========================================
+
+@baseUrl = http://localhost:3001/api
+@token = mock-token
+
+POST {{baseUrl}}/programs/6/revisions/107/reject
+Authorization: Bearer {{token}}
+X-User-Role: APPROVER
+X-User-Name: demo.approver
+Content-Type: application/json
+
+{
+  "rejectionReason": "Please update the delivery dates and finance terms."
+}

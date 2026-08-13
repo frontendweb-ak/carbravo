@@ -1,0 +1,52 @@
+### ==========================================
+### CarBravo Incentives API - Program Setup
+### ==========================================
+
+@baseUrl = http://localhost:3001/api
+@contentType = application/json
+@token = mock-token
+
+### Get Setup
+
+GET {{baseUrl}}/programs/6/revisions/107/setup
+Authorization: Bearer {{token}}
+
+
+### Save Setup
+
+PUT {{baseUrl}}/programs/6/revisions/107/setup
+Authorization: Bearer {{token}}
+Content-Type: {{contentType}}
+
+{
+  "programName": "Northeast APR Special",
+  "programTypeCode": "APR",
+  "purchaseType": "FINANCE",
+  "customerTypeCodes": [
+    "STANDARD"
+  ],
+  "contactName": "John Smith",
+  "contactEmail": "john@example.com",
+  "contactPhone": "555-0100",
+  "financialProviderCode": "GM_FINANCIAL",
+  "conditionCode": "CARBRAVO",
+  "mileageCeiling": 75000,
+  "topOfDeal": true,
+  "vinException": false,
+  "mfpnText": "Sample marketing text",
+  "disclosureText": "Sample disclosure",
+  "localeCode": "en-US",
+  "deliveryStartDate": "2026-08-01",
+  "deliveryEndDate": "2026-12-31",
+  "effectiveStartDate": "2026-08-01",
+  "effectiveEndDate": "2026-12-31",
+  "financeTerms": [
+    36,
+    48,
+    60
+  ],
+  "creditTiers": [
+    "A_PLUS",
+    "A1"
+  ]
+}
