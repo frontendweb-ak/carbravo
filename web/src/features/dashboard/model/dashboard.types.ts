@@ -19,11 +19,14 @@ export interface DashboardSummary {
 
 export interface ActivityItem {
 	id: string;
+
 	entityType: DashboardEventType;
 	entityId: number;
 
-	operation: string;
 	actor: string;
+
+	operation: string;
+	operationLabel: string;
 
 	changedAt: string;
 

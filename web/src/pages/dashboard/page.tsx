@@ -17,21 +17,14 @@ import { formatLongDate } from "@/utils";
 function DashboardPage() {
 	const navigate = useNavigate();
 
+	// Server
 	const summaryQuery = useDashboardSummary();
 	const activityQuery = useDashboardActivity();
 	const expiringQuery = useExpiringPrograms();
 
 	const statusCounts = getStatusCounts(summaryQuery.data?.counts ?? []);
-
 	const formattedDate = formatLongDate(new Date());
 
-	console.log(
-		"data",
-		summaryQuery.data,
-		activityQuery.data,
-		expiringQuery.data,
-		JSON.stringify(summaryQuery.data, null, 2),
-	);
 	return (
 		<main className="min-h-[calc(100vh-60px)] bg-background">
 			<Container size="2xl" className="py-7">
@@ -61,7 +54,10 @@ function DashboardPage() {
 
 					{/* Right column */}
 					<div className="space-y-5">
-						<RecentActivity items={activityQuery.data?.items ?? []} />
+						<RecentActivity
+							loading={activityQuery.isLoading}
+							items={activityQuery.data?.items ?? []}
+						/>
 
 						<QuickActions
 							reviewCount={statusCounts.review}

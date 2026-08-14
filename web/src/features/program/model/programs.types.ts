@@ -4,6 +4,12 @@ import type { ProgramStatusDto, ProgramTypeDto } from "../api/programs.api";
 
 export type ProgramStatus = ProgramStatusDto;
 export type ProgramType = ProgramTypeDto;
+export type ProgramWorkflowStatus =
+	| "DRAFT"
+	| "REVIEW"
+	| "APPROVED"
+	| "ACTIVE"
+	| "EXPIRED";
 
 export interface ProgramRevision {
 	id: number | null;
@@ -36,6 +42,10 @@ export interface Program {
 	updatedAt: string | null;
 }
 
+export interface ProgramDetail extends Program {
+	activeRevision: ProgramRevision | null;
+	draftRevision: ProgramRevision | null;
+}
 export interface ProgramsStatusCounts {
 	all: number;
 	draft: number;

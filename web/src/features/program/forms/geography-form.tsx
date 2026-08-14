@@ -90,30 +90,26 @@ export function GeographyForm() {
 		});
 	};
 
-	const onSubmit = (values: GeographyFormValues) => {
-		console.log("GEOGRAPHY SUBMIT", values);
-	};
+return (
+	<FormProvider {...form}>
+		<form className="space-y-5">
+			<GeographyTargeting
+				control={form.control}
+				setValue={form.setValue}
+				onAdd={addRule}
+			/>
 
-	return (
-		<FormProvider {...form}>
-			<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
-				<GeographyTargeting
-					control={form.control}
-					setValue={form.setValue}
-					onAdd={addRule}
-				/>
+			<CoverageRules
+				included={included}
+				excluded={excluded}
+				onRemoveInclude={removeIncluded}
+				onRemoveExclude={removeExcluded}
+			/>
 
-				<CoverageRules
-					included={included}
-					excluded={excluded}
-					onRemoveInclude={removeIncluded}
-					onRemoveExclude={removeExcluded}
-				/>
-
-				<div className="flex justify-end">
-					<Button type="submit">Save Geography</Button>
-				</div>
-			</form>
-		</FormProvider>
-	);
+			<div className="flex justify-end">
+				<Button type="submit">Save Geography</Button>
+			</div>
+		</form>
+	</FormProvider>
+);
 }

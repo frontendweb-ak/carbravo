@@ -8,4 +8,5 @@ export {
 	type SidebarProgramSection,
 } from "./program-section-sidebar";
 export { ProgramStatusBadge } from "./program-status-badge";
+export * from "./revision";
 export * from "./vehicle";

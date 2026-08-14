@@ -1,45 +1,36 @@
 // src/features/program/model/programs.mapper.ts
 
 import type {
-	ConditionTierDto,
-	CreditTierDto,
 	PaginationDto,
+	ProgramDetailDto,
 	ProgramListItemDto,
-	ProgramSetupDto,
 	ProgramStatusCountsDto,
-	ProgramTypeDto,
-	PurchaseTypeDto,
+	RevisionRefDto,
 } from "../api/programs.api";
-import type { SetupFormValues } from "../schema";
 
 import type {
 	Program,
+	ProgramDetail,
 	ProgramRevision,
 	ProgramsList,
 	ProgramsPagination,
 	ProgramsStatusCounts,
+	ProgramWorkflowStatus,
 } from "./programs.types";
 
 /* -------------------------------------------------------------------------- */
 /* Revision                                                                   */
 /* -------------------------------------------------------------------------- */
 
-function mapRevision(
-	dto?: ProgramListItemDto["currentRevision"],
-): ProgramRevision | null {
-	if (!dto) {
-		return null;
-	}
+function mapRevision(dto?: RevisionRefDto): ProgramRevision | null {
+	if (!dto) return null;
 
 	return {
 		id: dto.revisionId ?? null,
 		label: dto.revisionLabel ?? null,
-
 		major: dto.majorRevision ?? null,
 		minor: dto.minorRevision ?? null,
-
 		status: dto.revisionStatus ?? null,
-
 		isMinorRevision: dto.isMinorRevision ?? false,
 		isSubmitted: dto.isSubmitted ?? false,
 		approved: dto.approved ?? false,
@@ -123,49 +114,69 @@ export function mapProgramsList(dto: {
 	};
 }
 
-/* -------------------------------------------------------------------------- */
-/* Setup mapper                                                               */
-/* -------------------------------------------------------------------------- */
+export function getWorkflowStatus(
+	program: ProgramListItemDto,
+): ProgramWorkflowStatus {
+	if (program.programStatus === "ACTIVE") return "ACTIVE";
+	if (program.programStatus === "EXPIRED") return "EXPIRED";
+	if (
+		program.currentRevision?.isSubmitted &&
+		!program.currentRevision?.approved
+	) {
+		return "REVIEW";
+	}
+
+	if (
+		program.currentRevision?.isSubmitted &&
+		program.currentRevision?.approved
+	) {
+		return "APPROVED";
+	}
+
+	return "DRAFT";
+}
 
 /**
- * Form -> API DTO
+ * Program detail mapper.
  *
- * Keep this conversion here rather than leaking React Hook Form values
- * into the API layer.
+ * The detail API exposes both the active and draft revisions.
+ *
+ * `revision` represents the active/current revision context.
+ * `draftRevision` represents the revision that the editor can modify.
  */
-export function mapSetupFormToDto(values: SetupFormValues): ProgramSetupDto {
+export function mapProgramDetail(dto: ProgramDetailDto): ProgramDetail {
+	if (dto.programId == null) {
+		throw new Error("Program detail response is missing programId");
+	}
+
+	if (!dto.programStatus) {
+		throw new Error(
+			`Program ${dto.programId} response is missing programStatus`,
+		);
+	}
+
+	if (!dto.programType) {
+		throw new Error(`Program ${dto.programId} response is missing programType`);
+	}
+
 	return {
-		programName: values.programName,
-		programNumber: values.programNumber,
-		incentiveCodes: values.incentiveCodes,
-		country: values.country,
+		id: dto.programId,
 
-		deliveryStart: values.deliveryStart,
-		deliveryEnd: values.deliveryEnd,
+		identifier: dto.programIdentifier ?? "",
+		name: dto.programName ?? "Untitled program",
 
-		firstVisibleDate: values.firstVisibleDate,
-		firstVisibleTime: values.firstVisibleTime || undefined,
+		status: dto.programStatus,
+		type: dto.programType,
 
-		programType: values.programType as ProgramTypeDto,
-		purchaseType: values.purchaseType as PurchaseTypeDto,
+		revision: mapRevision(dto.activeRevision),
+		activeRevision: mapRevision(dto.activeRevision),
+		draftRevision: mapRevision(dto.draftRevision),
 
-		mileageMaximum:
-			values.mileageMaximum === undefined ||
-			values.mileageMaximum === null ||
-			values.mileageMaximum === 0
-				? undefined
-				: Number(values.mileageMaximum),
+		hasDraft: dto.draftRevision != null,
 
-		conditionTier: values.conditionTier as ConditionTierDto,
+		deliveryStartDate: dto.deliveryStartDate ?? null,
+		deliveryEndDate: dto.deliveryEndDate ?? null,
 
-		creditTiers: values.creditTiers as CreditTierDto[],
-
-		contact: values.contact,
-
-		flags: {
-			vinException: values.flags.vinException,
-			topOfDeal: values.flags.topOfDeal,
-			noAddOns: values.flags.noAddOns,
-		},
+		updatedAt: dto.updatedAt ?? null,
 	};
 }

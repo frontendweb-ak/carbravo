@@ -1,34 +1,54 @@
-import { ProgramSectionSidebar } from "@/features/program";
+import {
+	ProgramSectionSidebar,
+	useProgram,
+	useProgramRevisionHistory,
+} from "@/features/program";
+import { ProgramRevisionHistory } from "@/features/program/components";
 import { PROGRAM_SIDE_MENU } from "@/features/program/constants";
+
 import {
 	type ProgramEditorMode,
 	ProgramEditorProvider,
 	useProgramEditor,
 } from "@/features/program/editor/program-editor-context";
+
+import {
+	getCurrentRevision,
+	getProgramRevisionSelection,
+	getProgramRevisionTabs,
+	getSelectedRevision,
+	type ProgramRevisionView,
+} from "@/features/program/utils";
+
+import type { ProgramRevisionHistoryState } from "@/features/program/model/revisions.types";
+
 import { Outlet, useLocation, useNavigate, useParams } from "react-router-dom";
 
-import { ProgramContextHeader } from "./program-context-header";
+import { PageState } from "../ui";
+import {
+	ProgramContextHeader,
+	type ProgramRevisionTab,
+} from "./program-context-header";
 
 interface ProgramLayoutProps {
 	mode?: ProgramEditorMode;
 }
 
-/**
- * Inner layout.
- *
- * This component must be inside ProgramEditorProvider because
- * the provider owns:
- *
- * - program identity
- * - current section
- * - section completion
- * - save handler
- * - saving state
- * - workflow status
- */
-function ProgramLayoutContent() {
+interface ProgramLayoutContentProps {
+	revisionTabs: ProgramRevisionTab[];
+	revisionHistory?: ProgramRevisionHistoryState;
+	currentRevisionId?: number;
+}
+
+function ProgramLayoutContent({
+	revisionTabs,
+	revisionHistory,
+	currentRevisionId,
+}: ProgramLayoutContentProps) {
 	const navigate = useNavigate();
+
 	const location = useLocation();
+	const revisionSelection = getProgramRevisionSelection(location.search);
 
 	const {
 		mode,
@@ -45,8 +65,7 @@ function ProgramLayoutContent() {
 	} = useProgramEditor();
 
 	/*
-	 * The URL remains the source of truth for which editor page
-	 * is currently displayed.
+	 * The URL determines which section is displayed.
 	 */
 	const activeSection =
 		PROGRAM_SIDE_MENU.find((section) =>
@@ -54,14 +73,7 @@ function ProgramLayoutContent() {
 		)?.id ?? "setup";
 
 	/*
-	 * Convert the static sidebar definition into the runtime
-	 * section state from ProgramEditorContext.
-	 *
-	 * This gives us:
-	 *
-	 * pending
-	 * warning
-	 * completed
+	 * Runtime sidebar state.
 	 */
 	const sidebarSections = PROGRAM_SIDE_MENU.map((menuSection) => {
 		const runtimeSection = sections.find(
@@ -75,23 +87,113 @@ function ProgramLayoutContent() {
 		};
 	});
 
+	/**
+	 * Whether we are displaying the history list.
+	 *
+	 * History list:
+	 *
+	 *   ?view=history
+	 *
+	 * Historical revision:
+	 *
+	 *   ?view=history&revision=106
+	 */
+	const isHistoryList =
+		revisionSelection.view === "history" &&
+		revisionSelection.revisionId == null;
+
+	/**
+	 * All revision views except the history list use
+	 * the normal editor layout.
+	 */
+	const isRevisionEditor = !isHistoryList;
+
+	/**
+	 * Current is editable.
+	 *
+	 * Active and historical revisions are read-only.
+	 *
+	 * `isReadOnly` from the editor context remains the final
+	 * source of truth for any additional application-level
+	 * restrictions.
+	 */
+	const revisionReadOnly = isReadOnly || revisionSelection.view !== "current";
+
 	const handleSectionChange = (sectionId: string) => {
-		/*
-		 * New program has no ID until the first successful save.
-		 */
 		if (mode === "new") {
 			navigate(`/programs/new/${sectionId}`);
 			return;
 		}
 
-		/*
-		 * Existing program.
-		 */
 		if (!programId) {
 			return;
 		}
 
-		navigate(`/programs/${programId}/edit/${sectionId}`);
+		/*
+		 * Preserve the selected revision view when moving
+		 * between sections.
+		 *
+		 * Example:
+		 *
+		 * /programs/6/setup?view=active
+		 *
+		 * ->
+		 *
+		 * /programs/6/vehicles?view=active
+		 */
+		const params = new URLSearchParams(location.search);
+
+		navigate({
+			pathname: `/programs/${programId}/${sectionId}`,
+			search: params.toString() ? `?${params.toString()}` : "",
+		});
+	};
+
+	const handleRevisionChange = (view: ProgramRevisionView) => {
+		if (mode !== "edit" || !programId) {
+			return;
+		}
+
+		const params = new URLSearchParams(location.search);
+
+		switch (view) {
+			case "current":
+				/*
+				 * Current does not need a query parameter.
+				 */
+				params.delete("view");
+				params.delete("revision");
+				break;
+
+			case "active":
+				params.set("view", "active");
+				params.delete("revision");
+				break;
+
+			case "history":
+				params.set("view", "history");
+				params.delete("revision");
+				break;
+		}
+
+		const search = params.toString();
+
+		navigate({
+			pathname: location.pathname,
+			search: search ? `?${search}` : "",
+		});
+	};
+
+	const handleViewRevision = (revisionId: number) => {
+		const params = new URLSearchParams(location.search);
+
+		params.set("view", "history");
+		params.set("revision", String(revisionId));
+
+		navigate({
+			pathname: location.pathname,
+			search: `?${params.toString()}`,
+		});
 	};
 
 	const handleSave = async () => {
@@ -118,100 +220,207 @@ function ProgramLayoutContent() {
 		}
 	})();
 
-	/*
-	 * For a newly-created program we still don't have an ID.
-	 * The header can therefore safely display the temporary values.
-	 */
 	const headerName = programName || "Untitled program";
 	const headerNumber = programIdentifier || "—";
 	const headerRevision = revisionLabel || "1.0";
 
 	return (
 		<div className="min-h-screen bg-background">
-			{/* -------------------------------------------------------------- */}
-			{/* Program context header                                         */}
-			{/* -------------------------------------------------------------- */}
+			{/* ---------------------------------------------------------- */}
+			{/* Program context header                                     */}
+			{/* ---------------------------------------------------------- */}
 
-			<div className="sticky top-[65px] z-30 border-b bg-background">
+			<div className="sticky top-16.25 z-30 border-b bg-background">
 				<ProgramContextHeader
 					name={headerName}
 					type="INC"
 					number={headerNumber}
 					revision={headerRevision}
 					status={headerStatus}
+					revisionTabs={revisionTabs.map((tab) => ({
+						...tab,
+						active: tab.id === revisionSelection.view,
+					}))}
+					onRevisionChange={handleRevisionChange}
 					saved={!isSaving}
 					saveLabel={isSaving ? "Saving..." : "Save draft"}
-					saveDisabled={isReadOnly || isSaving}
-					hideSave={isReadOnly}
+					saveDisabled={revisionReadOnly || isSaving}
+					hideSave={revisionReadOnly}
 					onSave={handleSave}
 				/>
 			</div>
 
-			{/* -------------------------------------------------------------- */}
-			{/* Editor                                                          */}
-			{/* -------------------------------------------------------------- */}
+			{/* ---------------------------------------------------------- */}
+			{/* Content                                                     */}
+			{/* ---------------------------------------------------------- */}
 
 			<div className="mx-auto w-full max-w-7xl py-4">
-				<div className="grid min-w-0 grid-cols-1 items-start gap-5 lg:grid-cols-[245px_minmax(0,1fr)]">
-					{/* ------------------------------------------------------ */}
-					{/* Sidebar                                                 */}
-					{/* ------------------------------------------------------ */}
-
-					<div className="sticky top-[160px] hidden lg:block">
-						<ProgramSectionSidebar
-							sections={sidebarSections}
-							activeSection={activeSection}
-							onSectionChange={handleSectionChange}
-							completion={completion}
-							disabled={false}
-						/>
-					</div>
-
-					{/* ------------------------------------------------------ */}
-					{/* Current section                                         */}
-					{/* ------------------------------------------------------ */}
-
+				{isHistoryList ? (
+					/*
+					 * ---------------------------------------------------
+					 * History list
+					 * ---------------------------------------------------
+					 *
+					 * No sidebar.
+					 */
 					<main className="min-w-0">
-						<Outlet />
+						{revisionHistory ? (
+							<ProgramRevisionHistory
+								history={revisionHistory}
+								currentRevisionId={currentRevisionId ?? null}
+								onViewRevision={handleViewRevision}
+							/>
+						) : (
+							<div className="rounded-xl border bg-card p-6">
+								<p className="text-sm text-muted-foreground">
+									Loading revision history...
+								</p>
+							</div>
+						)}
 					</main>
-				</div>
+				) : (
+					/*
+					 * ---------------------------------------------------
+					 * Current / Active / Historical revision
+					 * ---------------------------------------------------
+					 *
+					 * Sidebar remains visible.
+					 */
+					isRevisionEditor && (
+						<div className="grid min-w-0 grid-cols-1 items-start gap-5 lg:grid-cols-[245px_minmax(0,1fr)]">
+							<aside className="sticky top-40 hidden lg:block">
+								<ProgramSectionSidebar
+									sections={sidebarSections}
+									activeSection={activeSection}
+									onSectionChange={handleSectionChange}
+									completion={completion}
+									disabled={false}
+								/>
+							</aside>
+
+							<main className="min-w-0">
+								<Outlet />
+							</main>
+						</div>
+					)
+				)}
 			</div>
 		</div>
 	);
 }
 
-/**
- * Program editor layout.
- *
- * Used by BOTH:
- *
- * /programs/new/*
- *
- * /programs/:programId/edit/*
- *
- * For a new program:
- *
- *   programId === undefined
- *
- * After the first save:
- *
- *   programId === actual database ID
- */
 function ProgramLayout({ mode = "edit" }: ProgramLayoutProps) {
-	const { programId } = useParams<{
-		programId: string;
-	}>();
+	const { programId } = useParams<{ programId: string }>();
 
-	/*
-	 * React Router params are strings.
-	 *
-	 * Convert only when a real program ID exists.
+	const location = useLocation();
+
+	/**
+	 * Route params are strings.
 	 */
 	const numericProgramId = programId ? Number(programId) : undefined;
 
+	/**
+	 * Existing program detail.
+	 */
+	const programQuery = useProgram(
+		mode === "edit" ? numericProgramId : undefined,
+	);
+
+	/**
+	 * Revision history.
+	 */
+	const revisionHistoryQuery = useProgramRevisionHistory(
+		mode === "edit" ? numericProgramId : undefined,
+	);
+
+	/*
+	 * Existing program must be resolved before
+	 * initializing the editor provider.
+	 */
+	if (mode === "edit") {
+		if (programQuery.isLoading) {
+			return <PageState status="loading" loadingMessage="Loading program..." />;
+		}
+
+		if (programQuery.isError) {
+			return (
+				<PageState
+					status="error"
+					errorTitle="Failed to load program"
+					errorDescription="We couldn't load this program. Please try again."
+					onRetry={programQuery.refetch}
+				/>
+			);
+		}
+
+		if (!programQuery.data) {
+			return (
+				<PageState
+					status="empty"
+					emptyTitle="Program not found"
+					emptyDescription="The requested program could not be found."
+				/>
+			);
+		}
+	}
+
+	const program = programQuery.data;
+	const revisionHistory = revisionHistoryQuery.data;
+
+	/**
+	 * Determine which revision view the URL requests.
+	 */
+	const revisionSelection = getProgramRevisionSelection(location.search);
+
+	/**
+	 * Current revision is used to build the
+	 * Current tab and as the fallback editor revision.
+	 */
+	const currentRevision =
+		mode === "edit" && program ? getCurrentRevision(program) : null;
+
+	/**
+	 * Build tabs from API data.
+	 */
+	const revisionTabs =
+		mode === "edit" && program && revisionHistory
+			? getProgramRevisionTabs(program, revisionHistory)
+			: [];
+
+	/**
+	 * Resolve the actual revision the editor
+	 * must work against.
+	 *
+	 * Current  -> draft
+	 * Active   -> active revision
+	 * History  -> selected historical revision
+	 */
+	const selectedRevision =
+		mode === "edit" && program && revisionHistory
+			? getSelectedRevision(program, revisionHistory, revisionSelection)
+			: null;
+
+	const revisionId = selectedRevision?.id ?? undefined;
+
 	return (
-		<ProgramEditorProvider mode={mode} programId={numericProgramId}>
-			<ProgramLayoutContent />
+		<ProgramEditorProvider
+			mode={mode}
+			programId={mode === "edit" ? program?.id : undefined}
+			revisionId={revisionId}
+			programIdentifier={mode === "edit" ? program?.identifier : undefined}
+			programName={mode === "edit" ? program?.name : undefined}
+			revisionLabel={
+				mode === "edit" ? (selectedRevision?.label ?? undefined) : undefined
+			}
+			programStatus={
+				mode === "edit" ? (selectedRevision?.status ?? undefined) : undefined
+			}
+		>
+			<ProgramLayoutContent
+				revisionTabs={revisionTabs}
+				revisionHistory={revisionHistory}
+				currentRevisionId={currentRevision?.id ?? undefined}
+			/>
 		</ProgramEditorProvider>
 	);
 }

@@ -1,37 +1,38 @@
 // src/seed.ts
 
 import {
-	type MockDb,
-	type MockProgram,
-	type MockRevision,
-	type Vehicle,
-	writeDb,
+  type MockDb,
+  type MockProgram,
+  type MockRevision,
+  Setup,
+  type Vehicle,
+  writeDb,
 } from "./store.js";
 
 const iso = (value: string) => new Date(value).toISOString();
 
-const emptySetup = () => ({
-	programName: null,
-	programTypeCode: null,
-	purchaseType: null,
-	customerTypeCodes: [],
-	contactName: null,
-	contactEmail: null,
-	contactPhone: null,
-	financialProviderCode: null,
-	conditionCode: null,
-	mileageCeiling: null,
-	topOfDeal: false,
-	vinException: false,
-	mfpnText: null,
-	disclosureText: null,
-	localeCode: "en-US",
-	deliveryStartDate: null,
-	deliveryEndDate: null,
-	effectiveStartDate: null,
-	effectiveEndDate: null,
-	financeTerms: [],
-	creditTiers: [],
+const emptySetup = (): Setup => ({
+  programName: null,
+  programTypeCode: null,
+  purchaseType: null,
+  customerTypeCodes: [],
+  contactName: null,
+  contactEmail: null,
+  contactPhone: null,
+  financialProviderCode: null,
+  conditionCode: null,
+  mileageCeiling: null,
+  topOfDeal: false,
+  vinException: false,
+  mfpnText: null,
+  disclosureText: null,
+  localeCode: "en-US",
+  deliveryStartDate: null,
+  deliveryEndDate: null,
+  effectiveStartDate: null,
+  effectiveEndDate: null,
+  financeTerms: [],
+  creditTiers: [],
 });
 
 const approval = (

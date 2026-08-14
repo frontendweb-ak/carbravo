@@ -16,25 +16,27 @@ import {
 
 export const geography = new Hono();
 
-/**
+/* ============================================================
  * GET /api/geography/regions
- */
+ * ============================================================ */
+
 geography.get("/geography/regions", async (c) => {
 	currentUser(c);
 
 	const db = await readDb();
 
 	return c.json({
-		items: db.geography.regions,
+		regions: db.geography.regions,
 	});
 });
 
-/**
+/* ============================================================
  * GET /api/geography/states
  *
  * Optional:
  * ?region=WEST
- */
+ * ============================================================ */
+
 geography.get("/geography/states", async (c) => {
 	currentUser(c);
 
@@ -42,48 +44,76 @@ geography.get("/geography/states", async (c) => {
 
 	const region = c.req.query("region")?.trim().toUpperCase();
 
-	let items = db.geography.states;
+	let states = db.geography.states;
 
 	if (region) {
-		items = items.filter((state) => state.region.toUpperCase() === region);
+		states = states.filter(
+			(state) => state.region.toUpperCase() === region,
+		);
 	}
 
 	return c.json({
-		items,
+		states,
 	});
 });
 
-/**
+/* ============================================================
  * GET /api/geography/dmas
  *
- * Optional:
+ * Required:
  * ?state=NY
- */
+ *
+ * Optional:
+ * ?region=NORTHEAST
+ * ============================================================ */
+
 geography.get("/geography/dmas", async (c) => {
 	currentUser(c);
 
 	const db = await readDb();
 
 	const state = c.req.query("state")?.trim().toUpperCase();
+	const region = c.req.query("region")?.trim().toUpperCase();
 
-	let items = db.geography.dmas;
-
-	if (state) {
-		items = items.filter((dma) => dma.state.toUpperCase() === state);
+	if (!state) {
+		throw badRequest("BAD_REQUEST", "state is required");
 	}
 
+	let dmas = db.geography.dmas.filter(
+		(dma) => dma.state.toUpperCase() === state,
+	);
+
+	if (region) {
+		dmas = dmas.filter(
+			(dma) => dma.region.toUpperCase() === region,
+		);
+	}
+
+	/*
+	 * OpenAPI GeoNode only exposes:
+	 *   code
+	 *   name
+	 *
+	 * Do not return internal hierarchy fields here.
+	 */
 	return c.json({
-		items,
+		dmas: dmas.map(({ code, name }) => ({
+			code,
+			name,
+		})),
 	});
 });
 
-/**
+/* ============================================================
  * GET /api/geography/counties
  *
- * Optional:
+ * Required:
  * ?state=NY
+ *
+ * Optional:
  * ?dma=NYC
- */
+ * ============================================================ */
+
 geography.get("/geography/counties", async (c) => {
 	currentUser(c);
 
@@ -92,134 +122,138 @@ geography.get("/geography/counties", async (c) => {
 	const state = c.req.query("state")?.trim().toUpperCase();
 	const dma = c.req.query("dma")?.trim().toUpperCase();
 
-	let items = db.geography.counties;
-
-	if (state) {
-		items = items.filter((county) => county.state.toUpperCase() === state);
+	if (!state) {
+		throw badRequest("BAD_REQUEST", "state is required");
 	}
 
+	let counties = db.geography.counties.filter(
+		(county) => county.state.toUpperCase() === state,
+	);
+
 	if (dma) {
-		items = items.filter((county) => county.dma?.toUpperCase() === dma);
+		counties = counties.filter(
+			(county) => county.dma?.toUpperCase() === dma,
+		);
 	}
 
 	return c.json({
-		items,
+		counties: counties.map(({ code, name }) => ({
+			code,
+			name,
+		})),
 	});
 });
 
-/**
+/* ============================================================
  * GET /api/geography/search
  *
- * Examples:
+ * Required:
+ * ?search=detroit
  *
- * ?q=California
- * ?q=New&level=STATE
- * ?q=York&level=COUNTY
- */
+ * Searches across:
+ * REGION
+ * STATE
+ * DMA
+ * COUNTY
+ *
+ * OpenAPI response:
+ * {
+ *   results: GeoSearchResult[]
+ * }
+ * ============================================================ */
+
 geography.get("/geography/search", async (c) => {
 	currentUser(c);
 
 	const db = await readDb();
 
-	const query = c.req.query("q")?.trim().toLowerCase();
+	const search = c.req.query("search")?.trim().toLowerCase();
 
-	const levelParam = c.req.query("level")?.trim().toUpperCase();
-
-	if (!query) {
-		throw badRequest("BAD_REQUEST", "q is required");
+	if (!search) {
+		throw badRequest("BAD_REQUEST", "search is required");
 	}
 
-	const validLevels: GeoLevel[] = ["REGION", "STATE", "DMA", "COUNTY"];
-
-	if (levelParam && !validLevels.includes(levelParam as GeoLevel)) {
-		throw badRequest("BAD_REQUEST", "Invalid geography level");
-	}
-
-	const level = levelParam as GeoLevel | undefined;
-
-	const items: Array<{
+	const results: Array<{
 		level: GeoLevel;
 		code: string;
 		name: string;
-		region?: string;
-		state?: string;
-		dma?: string;
 	}> = [];
 
-	if (!level || level === "REGION") {
-		for (const item of db.geography.regions) {
-			if (
-				item.code.toLowerCase().includes(query) ||
-				item.name.toLowerCase().includes(query)
-			) {
-				items.push({
-					level: "REGION",
-					code: item.code,
-					name: item.name,
-				});
-			}
+	/* Regions */
+
+	for (const item of db.geography.regions) {
+		if (
+			item.code.toLowerCase().includes(search) ||
+			item.name.toLowerCase().includes(search)
+		) {
+			results.push({
+				level: "REGION",
+				code: item.code,
+				name: item.name,
+			});
 		}
 	}
 
-	if (!level || level === "STATE") {
-		for (const item of db.geography.states) {
-			if (
-				item.code.toLowerCase().includes(query) ||
-				item.name.toLowerCase().includes(query)
-			) {
-				items.push({
-					level: "STATE",
-					code: item.code,
-					name: item.name,
-					region: item.region,
-				});
-			}
+	/* States */
+
+	for (const item of db.geography.states) {
+		if (
+			item.code.toLowerCase().includes(search) ||
+			item.name.toLowerCase().includes(search)
+		) {
+			results.push({
+				level: "STATE",
+				code: item.code,
+				name: item.name,
+			});
 		}
 	}
 
-	if (!level || level === "DMA") {
-		for (const item of db.geography.dmas) {
-			if (
-				item.code.toLowerCase().includes(query) ||
-				item.name.toLowerCase().includes(query)
-			) {
-				items.push({
-					level: "DMA",
-					code: item.code,
-					name: item.name,
-					state: item.state,
-					region: item.region,
-				});
-			}
+	/* DMAs */
+
+	for (const item of db.geography.dmas) {
+		if (
+			item.code.toLowerCase().includes(search) ||
+			item.name.toLowerCase().includes(search)
+		) {
+			results.push({
+				level: "DMA",
+				code: item.code,
+				name: item.name,
+			});
 		}
 	}
 
-	if (!level || level === "COUNTY") {
-		for (const item of db.geography.counties) {
-			if (
-				item.code.toLowerCase().includes(query) ||
-				item.name.toLowerCase().includes(query)
-			) {
-				items.push({
-					level: "COUNTY",
-					code: item.code,
-					name: item.name,
-					state: item.state,
-					dma: item.dma,
-				});
-			}
+	/* Counties */
+
+	for (const item of db.geography.counties) {
+		if (
+			item.code.toLowerCase().includes(search) ||
+			item.name.toLowerCase().includes(search)
+		) {
+			results.push({
+				level: "COUNTY",
+				code: item.code,
+				name: item.name,
+			});
 		}
 	}
 
 	return c.json({
-		items,
+		results,
 	});
 });
 
-/**
+/* ============================================================
  * GET
  * /api/programs/:programId/revisions/:revisionId/geography
- */
+ *
+ * OpenAPI response:
+ * {
+ *   geoRules: GeoRule[]
+ * }
+ * ============================================================ */
+
 geography.get(
 	"/programs/:programId/revisions/:revisionId/geography",
 	async (c) => {
@@ -228,31 +262,44 @@ geography.get(
 		const db = await readDb();
 
 		const programId = Number(c.req.param("programId"));
-
 		const revisionId = Number(c.req.param("revisionId"));
 
 		const program = getProgramOrThrow(db, programId);
 
 		const revision = db.revisions.find(
-			(item) => item.id === revisionId && item.programId === program.id,
+			(item) =>
+				item.id === revisionId &&
+				item.programId === program.id,
 		);
 
 		if (!revision) {
-			throw notFound("REVISION_NOT_FOUND", "Revision not found");
+			throw notFound(
+				"REVISION_NOT_FOUND",
+				"Revision not found",
+			);
 		}
 
 		return c.json({
-			programId: program.id,
-			revisionId: revision.id,
-			rules: revision.geography,
+			geoRules: revision.geography,
 		});
 	},
 );
 
-/**
+/* ============================================================
  * PUT
  * /api/programs/:programId/revisions/:revisionId/geography
- */
+ *
+ * Request:
+ * {
+ *   geoRules: GeoRuleInput[]
+ * }
+ *
+ * Response:
+ * {
+ *   geoRules: GeoRule[]
+ * }
+ * ============================================================ */
+
 geography.put(
 	"/programs/:programId/revisions/:revisionId/geography",
 	async (c) => {
@@ -261,19 +308,27 @@ geography.put(
 		const db = await readDb();
 
 		const programId = Number(c.req.param("programId"));
-
 		const revisionId = Number(c.req.param("revisionId"));
 
 		const program = getProgramOrThrow(db, programId);
 
 		const revision = db.revisions.find(
-			(item) => item.id === revisionId && item.programId === program.id,
+			(item) =>
+				item.id === revisionId &&
+				item.programId === program.id,
 		);
 
 		if (!revision) {
-			throw notFound("REVISION_NOT_FOUND", "Revision not found");
+			throw notFound(
+				"REVISION_NOT_FOUND",
+				"Revision not found",
+			);
 		}
 
+		/*
+		 * OpenAPI guard:
+		 * revision status must be DRAFT.
+		 */
 		if (revision.status !== "DRAFT") {
 			throw badRequest(
 				"REVISION_NOT_EDITABLE",
@@ -284,76 +339,139 @@ geography.put(
 		const body = await c.req.json().catch(() => null);
 
 		if (!body || typeof body !== "object") {
-			throw badRequest("BAD_REQUEST", "Request body is required");
+			throw badRequest(
+				"BAD_REQUEST",
+				"Request body is required",
+			);
 		}
 
-		const rules = (
+		const geoRules = (
 			body as {
-				rules?: unknown;
+				geoRules?: unknown;
 			}
-		).rules;
+		).geoRules;
 
-		if (!Array.isArray(rules)) {
-			throw badRequest("BAD_REQUEST", "rules must be an array");
+		if (!Array.isArray(geoRules)) {
+			throw badRequest(
+				"BAD_REQUEST",
+				"geoRules must be an array",
+			);
 		}
 
-		const validLevels: GeoLevel[] = ["REGION", "STATE", "DMA", "COUNTY"];
-
-		const normalizedRules: GeoRule[] = rules.map((rule) => {
-			if (!rule || typeof rule !== "object") {
-				throw badRequest("BAD_REQUEST", "Invalid geography rule");
-			}
-
-			const value = rule as Partial<GeoRule>;
-
-			if (
-				typeof value.geoRuleId !== "number" ||
-				typeof value.isIncluded !== "boolean" ||
-				typeof value.level !== "string" ||
-				typeof value.code !== "string"
-			) {
-				throw badRequest("BAD_REQUEST", "Invalid geography rule fields");
-			}
-
-			if (!validLevels.includes(value.level as GeoLevel)) {
-				throw badRequest("BAD_REQUEST", "Invalid geography level");
-			}
-
-			return {
-				geoRuleId: value.geoRuleId,
-
-				isIncluded: value.isIncluded,
-
-				level: value.level as GeoLevel,
-
-				code: value.code,
-
-				name: value.name,
-			};
-		});
-
-		/**
-		 * Validate every geography
-		 * reference against db.json.
+		/*
+		 * OpenAPI says:
+		 *
+		 * at least one include rule required.
 		 */
-		for (const rule of normalizedRules) {
-			if (!geographyExists(db, rule)) {
-				throw badRequest(
-					"INVALID_GEOGRAPHY",
-					`Unknown geography: ${rule.level}/${rule.code}`,
-				);
-			}
+		const hasIncludeRule = geoRules.some(
+			(rule) =>
+				rule &&
+				typeof rule === "object" &&
+				(rule as { isIncluded?: unknown }).isIncluded === true,
+		);
+
+		if (!hasIncludeRule) {
+			throw badRequest(
+				"BAD_REQUEST",
+				"At least one include geography rule is required",
+			);
 		}
 
-		revision.geography = normalizedRules;
+		const validLevels: GeoLevel[] = [
+			"REGION",
+			"STATE",
+			"DMA",
+			"COUNTY",
+		];
 
-		/**
-		 * Geography changes reset
-		 * approval state for major revisions.
+		/*
+		 * IMPORTANT:
+		 *
+		 * Request uses GeoRuleInput.
+		 *
+		 * Therefore geoRuleId must NOT be required
+		 * from the client.
+		 */
+		const normalizedRules: GeoRule[] = geoRules.map(
+			(rule) => {
+				if (!rule || typeof rule !== "object") {
+					throw badRequest(
+						"BAD_REQUEST",
+						"Invalid geography rule",
+					);
+				}
+
+				const value = rule as {
+					isIncluded?: unknown;
+					level?: unknown;
+					code?: unknown;
+					name?: unknown;
+				};
+
+				if (
+					typeof value.isIncluded !== "boolean" ||
+					typeof value.level !== "string" ||
+					typeof value.code !== "string"
+				) {
+					throw badRequest(
+						"BAD_REQUEST",
+						"Invalid geography rule fields",
+					);
+				}
+
+				if (
+					!validLevels.includes(
+						value.level as GeoLevel,
+					)
+				) {
+					throw badRequest(
+						"BAD_REQUEST",
+						"Invalid geography level",
+					);
+				}
+
+				const candidate: Omit<GeoRule, "geoRuleId"> = {
+					isIncluded: value.isIncluded,
+					level: value.level as GeoLevel,
+					code: value.code.trim(),
+					name:
+						typeof value.name === "string"
+							? value.name
+							: undefined,
+				};
+
+				if (
+					!geographyExists(db, candidate)
+				) {
+					throw badRequest(
+						"INVALID_GEOGRAPHY",
+						`Unknown geography: ${candidate.level}/${candidate.code}`,
+					);
+				}
+
+				return {
+					geoRuleId: getNextId(
+						revision.geography.map(
+							(item) => ({
+								id: item.geoRuleId,
+							}),
+						),
+					),
+					...candidate,
+				};
+			},
+		);
+
+		/*
+		 * Major revision edits reset approval.
+		 *
+		 * Minor revisions intentionally preserve approval state.
 		 */
 		if (!revision.isMinorRevision) {
 			resetApproval(revision);
 		}
+
+		revision.geography = normalizedRules;
 
 		const now = new Date().toISOString();
 
@@ -380,60 +498,61 @@ geography.put(
 		await writeDb(db);
 
 		return c.json({
-			programId: program.id,
-
-			revisionId: revision.id,
-
-			rules: revision.geography,
-
-			approval: {
-				isSubmitted: revision.approval.isSubmitted,
-
-				approved: revision.approval.approved,
-			},
+			geoRules: revision.geography,
 		});
 	},
 );
 
-/**
- * Validate that a geography rule
- * references a real geography node.
- */
+/* ============================================================
+ * Geography validation
+ * ============================================================ */
+
 function geographyExists(
 	db: Awaited<ReturnType<typeof readDb>>,
-	rule: GeoRule,
+	rule: Omit<GeoRule, "geoRuleId">,
 ): boolean {
 	switch (rule.level) {
 		case "REGION":
-			return db.geography.regions.some((item) => item.code === rule.code);
+			return db.geography.regions.some(
+				(item) => item.code === rule.code,
+			);
 
 		case "STATE":
-			return db.geography.states.some((item) => item.code === rule.code);
+			return db.geography.states.some(
+				(item) => item.code === rule.code,
+			);
 
 		case "DMA":
-			return db.geography.dmas.some((item) => item.code === rule.code);
+			return db.geography.dmas.some(
+				(item) => item.code === rule.code,
+			);
 
 		case "COUNTY":
-			return db.geography.counties.some((item) => item.code === rule.code);
+			return db.geography.counties.some(
+				(item) => item.code === rule.code,
+			);
 
 		default:
 			return false;
 	}
 }
 
-/**
- * Reset approval state after
- * a major revision edit.
- */
+/* ============================================================
+ * Approval reset
+ * ============================================================ */
+
 function resetApproval(revision: {
 	approval: {
 		isSubmitted: boolean;
 		submittedAt: string | null;
 		submittedBy: string | null;
+
 		approved: boolean;
 		approvedAt: string | null;
 		approvedBy: string | null;
+
 		approvalComment: string | null;
+
 		rejectedAt: string | null;
 		rejectedBy: string | null;
 		rejectionReason: string | null;
@@ -446,9 +565,10 @@ function resetApproval(revision: {
 	revision.approval.approved = false;
 	revision.approval.approvedAt = null;
 	revision.approval.approvedBy = null;
+
 	revision.approval.approvalComment = null;
 
 	revision.approval.rejectedAt = null;
-	revision.approval.rejectedBy = null;
 	revision.approval.rejectionReason = null;
+	revision.approval.rejectedBy = null;
 }

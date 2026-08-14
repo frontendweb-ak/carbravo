@@ -39,29 +39,33 @@ vehicles.get("/vehicles/years", async (c) => {
  * ?year=2026
  */
 vehicles.get("/vehicles/makes", async (c) => {
-	currentUser(c);
+  currentUser(c);
+  const db = await readDb();
+  const yearParam = c.req.query("year");
 
-	const db = await readDb();
-
-	const yearParam = c.req.query("year");
-
-	let vehicles = db.vehicles;
-
-	if (yearParam) {
-		const year = Number(yearParam);
-
-		if (!Number.isInteger(year)) {
-			throw badRequest("BAD_REQUEST", "year must be a valid number");
-		}
-
-		vehicles = vehicles.filter((vehicle) => vehicle.year === year);
-	}
-
-	const makes = [...new Set(vehicles.map((vehicle) => vehicle.make))].sort();
-
-	return c.json({
-		makes,
-	});
+  if (!yearParam) {
+    throw badRequest("BAD_REQUEST", "year is required");
+  }
+  let vehicles = db.vehicles;
+  if (yearParam) {
+    const year = Number(yearParam);
+    if (!Number.isInteger(year)) {
+      throw badRequest("BAD_REQUEST", "year must be a valid number");
+    }
+    vehicles = vehicles.filter((vehicle) => vehicle.year === year);
+  }
+  const makes = Array.from(
+    new Map(
+      vehicles.map((vehicle) => [
+        vehicle.make,
+        {
+          make: vehicle.make,
+          oemCode: vehicle.oemCode,
+        },
+      ]),
+    ).values(),
+  ).sort((a, b) => a.make.localeCompare(b.make));
+  return c.json({ makes });
 });
 
 /**
@@ -71,37 +75,40 @@ vehicles.get("/vehicles/makes", async (c) => {
  * ?year=2026&make=Chevrolet
  */
 vehicles.get("/vehicles/models", async (c) => {
-	currentUser(c);
+  currentUser(c);
+  const db = await readDb();
+  const yearParam = c.req.query("year");
+  const make = c.req.query("make")?.trim();
+  if (!yearParam) {
+    throw badRequest("BAD_REQUEST", "year is required");
+  }
 
-	const db = await readDb();
+  if (!make) {
+    throw badRequest("BAD_REQUEST", "make is required");
+  }
+  let vehicles = db.vehicles;
+  if (yearParam) {
+    const year = Number(yearParam);
+    if (!Number.isInteger(year)) {
+      throw badRequest("BAD_REQUEST", "year must be a valid number");
+    }
+    vehicles = vehicles.filter((vehicle) => vehicle.year === year);
+  }
+  if (make) {
+    vehicles = vehicles.filter(
+      (vehicle) => vehicle.make.toLowerCase() === make.toLowerCase(),
+    );
+  }
+  const models = Array.from(
+    new Map(
+      vehicles.map((vehicle) => [
+        vehicle.model,
+        { model: vehicle.model, division: vehicle.make },
+      ]),
+    ).values(),
+  ).sort((a, b) => a.model.localeCompare(b.model));
 
-	const yearParam = c.req.query("year");
-
-	const make = c.req.query("make")?.trim();
-
-	let vehicles = db.vehicles;
-
-	if (yearParam) {
-		const year = Number(yearParam);
-
-		if (!Number.isInteger(year)) {
-			throw badRequest("BAD_REQUEST", "year must be a valid number");
-		}
-
-		vehicles = vehicles.filter((vehicle) => vehicle.year === year);
-	}
-
-	if (make) {
-		vehicles = vehicles.filter(
-			(vehicle) => vehicle.make.toLowerCase() === make.toLowerCase(),
-		);
-	}
-
-	const models = [...new Set(vehicles.map((vehicle) => vehicle.model))].sort();
-
-	return c.json({
-		models,
-	});
+  return c.json({ models });
 });
 
 /**
@@ -114,89 +121,70 @@ vehicles.get("/vehicles/models", async (c) => {
  * ?model=Silverado
  */
 vehicles.get("/vehicles/search", async (c) => {
-	currentUser(c);
+  currentUser(c);
 
-	const db = await readDb();
+  const db = await readDb();
+  const search = c.req.query("search")?.trim().toLowerCase();
+  const yearParam = c.req.query("year");
+  const make = c.req.query("make")?.trim().toLowerCase();
+  const model = c.req.query("model")?.trim().toLowerCase();
+  const segment = c.req.query("segment")?.trim().toLowerCase();
+  const fuelType = c.req.query("fuelType")?.trim().toLowerCase();
+  const oemCode = c.req.query("oemCode")?.trim().toLowerCase();
 
-	const search = c.req.query("search")?.trim().toLowerCase();
+  let items = db.vehicles;
 
-	const yearParam = c.req.query("year");
+  if (yearParam) {
+    const year = Number(yearParam);
 
-	const make = c.req.query("make")?.trim().toLowerCase();
+    if (!Number.isInteger(year)) {
+      throw badRequest("BAD_REQUEST", "year must be a valid number");
+    }
 
-	const model = c.req.query("model")?.trim().toLowerCase();
+    items = items.filter((vehicle) => vehicle.year === year);
+  }
 
-	let vehicles = db.vehicles;
+  if (make) {
+    items = items.filter((vehicle) => vehicle.make.toLowerCase() === make);
+  }
 
-	if (yearParam) {
-		const year = Number(yearParam);
+  if (model) {
+    items = items.filter((vehicle) => vehicle.model.toLowerCase() === model);
+  }
 
-		if (!Number.isInteger(year)) {
-			throw badRequest("BAD_REQUEST", "year must be a valid number");
-		}
+  if (segment) {
+    items = items.filter(
+      (vehicle) => vehicle.segment.toLowerCase() === segment,
+    );
+  }
 
-		vehicles = vehicles.filter((vehicle) => vehicle.year === year);
-	}
+  if (fuelType) {
+    items = items.filter(
+      (vehicle) => vehicle.fuelType.toLowerCase() === fuelType,
+    );
+  }
 
-	if (make) {
-		vehicles = vehicles.filter((vehicle) =>
-			vehicle.make.toLowerCase().includes(make),
-		);
-	}
+  if (search) {
+    items = items.filter((vehicle) => {
+      const value = [
+        vehicle.year,
+        vehicle.make,
+        vehicle.model,
+        vehicle.trimName,
+        vehicle.bodyStyle,
+        vehicle.segment,
+        vehicle.fuelType,
+        vehicle.drivetrain,
+        vehicle.oemCode,
+      ]
+        .join(" ")
+        .toLowerCase();
 
-	if (model) {
-		vehicles = vehicles.filter((vehicle) =>
-			vehicle.model.toLowerCase().includes(model),
-		);
-	}
+      return value.includes(search);
+    });
+  }
 
-	if (search) {
-		vehicles = vehicles.filter((vehicle) => {
-			const value = [
-				vehicle.year,
-				vehicle.make,
-				vehicle.model,
-				vehicle.trimName,
-				vehicle.bodyStyle,
-				vehicle.segment,
-				vehicle.fuelType,
-				vehicle.drivetrain,
-				vehicle.oemCode,
-			]
-				.join(" ")
-				.toLowerCase();
-
-			return value.includes(search);
-		});
-	}
-
-	return c.json({
-		items: vehicles.map((vehicle) => ({
-			vehicleCatalogId: vehicle.vehicleCatalogId,
-
-			vehicleId: vehicle.vehicleId,
-
-			year: vehicle.year,
-
-			make: vehicle.make,
-
-			model: vehicle.model,
-
-			trimName: vehicle.trimName,
-
-			bodyStyle: vehicle.bodyStyle,
-
-			segment: vehicle.segment,
-
-			fuelType: vehicle.fuelType,
-
-			drivetrain: vehicle.drivetrain,
-
-			oemCode: vehicle.oemCode,
-
-			label: vehicleLabel(vehicle),
-		})),
-	});
+  return c.json({ vehicles: items });
 });
 
 /**
@@ -206,48 +194,37 @@ vehicles.get("/vehicles/search", async (c) => {
  * by the revision.
  */
 vehicles.get(
-	"/programs/:programId/revisions/:revisionId/vehicles",
-	async (c) => {
-		currentUser(c);
+  "/programs/:programId/revisions/:revisionId/vehicles",
+  async (c) => {
+    currentUser(c);
+    const db = await readDb();
+    const programId = Number(c.req.param("programId"));
+    const revisionId = Number(c.req.param("revisionId"));
+    const program = getProgramOrThrow(db, programId);
+    const revision = db.revisions.find(
+      (item) => item.id === revisionId && item.programId === program.id,
+    );
 
-		const db = await readDb();
+    if (!revision) {
+      throw notFound("REVISION_NOT_FOUND", "Revision not found");
+    }
 
-		const programId = Number(c.req.param("programId"));
+    const selected = revision.vehicles.map((revisionVehicle) => {
+      const vehicle = db.vehicles.find(
+        (item) => item.vehicleCatalogId === revisionVehicle.vehicleCatalogId,
+      );
 
-		const revisionId = Number(c.req.param("revisionId"));
+      return {
+        revisionVehicleId: revisionVehicle.revisionVehicleId,
+        vehicleCatalogId: revisionVehicle.vehicleCatalogId,
+        label: vehicle
+          ? vehicleLabel(vehicle)
+          : `Vehicle ${revisionVehicle.vehicleCatalogId}`,
+      };
+    });
 
-		const program = getProgramOrThrow(db, programId);
-
-		const revision = db.revisions.find(
-			(item) => item.id === revisionId && item.programId === program.id,
-		);
-
-		if (!revision) {
-			throw notFound("REVISION_NOT_FOUND", "Revision not found");
-		}
-
-		const selected = revision.vehicles.map((revisionVehicle) => {
-			const vehicle = db.vehicles.find(
-				(item) => item.vehicleCatalogId === revisionVehicle.vehicleCatalogId,
-			);
-
-			return {
-				revisionVehicleId: revisionVehicle.revisionVehicleId,
-				vehicleCatalogId: revisionVehicle.vehicleCatalogId,
-				label: vehicle
-					? vehicleLabel(vehicle)
-					: `Vehicle ${revisionVehicle.vehicleCatalogId}`,
-			};
-		});
-
-		return c.json({
-			programId: program.id,
-
-			revisionId: revision.id,
-
-			vehicles: selected,
-		});
-	},
+    return c.json({ selectedVehicles: selected });
+  },
 );
 
 /**

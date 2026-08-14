@@ -2,10 +2,7 @@
 
 import { http } from "@/infra/api";
 
-/* -------------------------------------------------------------------------- */
-/* API enums                                                                  */
-/* -------------------------------------------------------------------------- */
-
+// API Enums
 export type ProgramStatusDto = "DRAFT" | "ACTIVE" | "EXPIRED";
 export type ProgramTypeDto = "CUSTOMER_CASH" | "APR" | "BONUS_CASH";
 export type RevisionStatusDto = "DRAFT" | "ACTIVE" | "EXPIRED";
@@ -17,10 +14,7 @@ export type ConditionTierDto =
 	| "USED_AS_IS";
 export type CreditTierDto = "A_PLUS" | "A1" | "A2" | "B";
 
-/* -------------------------------------------------------------------------- */
-/* API parameters                                                             */
-/* -------------------------------------------------------------------------- */
-
+// Api parameters
 export interface ListProgramsParams {
 	status?: ProgramStatusDto;
 	programType?: ProgramTypeDto;
@@ -48,17 +42,17 @@ export interface RevisionRefDto {
 	approved?: boolean;
 }
 
-export interface ProgramListItemDto {
+export interface ProgramSummaryDto {
 	programId?: number;
 	programIdentifier?: string;
 	programName?: string;
 
+	programNumber?: string;
+	incentiveCodes?: string;
+	country?: string;
+
 	programStatus?: ProgramStatusDto;
 	programType?: ProgramTypeDto;
-
-	currentRevision?: RevisionRefDto;
-
-	hasDraft?: boolean;
 
 	deliveryStartDate?: string;
 	deliveryEndDate?: string;
@@ -66,6 +60,15 @@ export interface ProgramListItemDto {
 	updatedAt?: string;
 }
 
+export interface ProgramListItemDto extends ProgramSummaryDto {
+	currentRevision?: RevisionRefDto;
+	hasDraft?: boolean;
+}
+
+export interface ProgramDetailDto extends ProgramSummaryDto {
+	activeRevision?: RevisionRefDto;
+	draftRevision?: RevisionRefDto;
+}
 export interface PaginationDto {
 	page?: number;
 	size?: number;
@@ -78,6 +81,7 @@ export interface ProgramStatusCountsDto {
 	active?: number;
 	expired?: number;
 }
+
 export interface ListProgramsResponseDto {
 	content?: ProgramListItemDto[];
 	pagination?: PaginationDto;
@@ -105,51 +109,6 @@ export interface CreateProgramResponseDto {
 	revisionLabel?: string;
 }
 
-export interface ProgramSetupDto {
-	programName: string;
-	programNumber: string;
-	incentiveCodes: string;
-	country: string;
-
-	deliveryStart: string;
-	deliveryEnd: string;
-
-	firstVisibleDate: string;
-	firstVisibleTime?: string;
-
-	programType: ProgramTypeDto;
-	purchaseType: PurchaseTypeDto;
-
-	mileageMaximum?: number;
-
-	conditionTier: ConditionTierDto;
-	creditTiers: CreditTierDto[];
-
-	contact: string;
-
-	flags: {
-		vinException: boolean;
-		topOfDeal: boolean;
-		noAddOns: boolean;
-	};
-}
-
-export interface SaveProgramSetupResponseDto {
-	programId?: number;
-	revisionId?: number;
-
-	programIdentifier?: string;
-	programName?: string;
-
-	programStatus?: ProgramStatusDto;
-
-	revisionStatus?: RevisionStatusDto;
-
-	majorRevision?: number;
-	minorRevision?: number;
-	revisionLabel?: string;
-}
-
 /* -------------------------------------------------------------------------- */
 /* API                                                                        */
 /* -------------------------------------------------------------------------- */
@@ -162,12 +121,12 @@ export const programsApi = {
 		return response.data;
 	},
 
-	async getDetail(programId: number) {
-		const response = await http.get(`/programs/${programId}`);
+	async getDetail(programId: number): Promise<ProgramDetailDto> {
+		const response = await http.get<ProgramDetailDto>(`/programs/${programId}`);
 		return response.data;
 	},
 
-	async createProgram(
+	async create(
 		payload: CreateProgramRequestDto,
 	): Promise<CreateProgramResponseDto> {
 		const response = await http.post<CreateProgramResponseDto>(
@@ -182,28 +141,5 @@ export const programsApi = {
 		return response.data;
 	},
 
-	// setup
-	async saveSetup(
-		payload: ProgramSetupDto,
-	): Promise<SaveProgramSetupResponseDto> {
-		const response = await http.post<SaveProgramSetupResponseDto>(
-			"/programs/setup",
-			payload,
-		);
-
-		return response.data;
-	},
-
-	async updateSetup(
-		programId: number,
-		revisionId: number,
-		payload: ProgramSetupDto,
-	): Promise<SaveProgramSetupResponseDto> {
-		const response = await http.patch<SaveProgramSetupResponseDto>(
-			`/programs/${programId}/revisions/${revisionId}/setup`,
-			payload,
-		);
-
-		return response.data;
-	},
+	
 };

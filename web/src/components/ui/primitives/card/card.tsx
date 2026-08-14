@@ -1,9 +1,6 @@
-import type { ComponentProps } from "react";
-
 import { cn } from "@/utils";
-
+import type { ComponentProps } from "react";
 export type CardSize = "default" | "sm";
-
 export interface CardProps extends ComponentProps<"div"> {
 	size?: CardSize;
 }
@@ -21,11 +18,8 @@ function Card({ className, size = "default", ...props }: CardProps) {
 				"bg-card",
 				"text-sm text-card-foreground",
 				"shadow-sm",
-
 				"[--card-spacing:--spacing(4)]",
-
 				"data-[size=sm]:[--card-spacing:--spacing(3)]",
-
 				className,
 			)}
 			{...props}
@@ -62,7 +56,6 @@ function CardHeader({ className, ...props }: CardHeaderProps) {
 }
 
 export type CardTitleProps = ComponentProps<"div">;
-
 function CardTitle({ className, ...props }: CardTitleProps) {
 	return (
 		<div
@@ -79,7 +72,6 @@ function CardTitle({ className, ...props }: CardTitleProps) {
 }
 
 export type CardDescriptionProps = ComponentProps<"div">;
-
 function CardDescription({ className, ...props }: CardDescriptionProps) {
 	return (
 		<div
@@ -95,7 +87,6 @@ function CardDescription({ className, ...props }: CardDescriptionProps) {
 }
 
 export type CardActionProps = ComponentProps<"div">;
-
 function CardAction({ className, ...props }: CardActionProps) {
 	return (
 		<div
@@ -113,7 +104,6 @@ function CardAction({ className, ...props }: CardActionProps) {
 }
 
 export type CardContentProps = ComponentProps<"div">;
-
 function CardContent({ className, ...props }: CardContentProps) {
 	return (
 		<div

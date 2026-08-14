@@ -3,68 +3,38 @@ import { Check } from "lucide-react";
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 
+export interface ProgramRevisionTab {
+	id: "current" | "active" | "history";
+	label: string;
+	subtitle: string;
+	active?: boolean;
+}
+
 export interface ProgramContextHeaderProps {
-	/**
-	 * Program name displayed in the header.
-	 */
 	name?: ReactNode;
-
-	/**
-	 * Program type/code.
-	 */
 	type?: ReactNode;
-
-	/**
-	 * Program identifier/number.
-	 */
 	number?: ReactNode;
-
-	/**
-	 * Current revision.
-	 */
 	revision?: ReactNode;
-
-	/**
-	 * Current program status.
-	 */
 	status?: ReactNode;
-
-	/**
-	 * Whether changes have been saved.
-	 */
 	saved?: boolean;
-
-	/**
-	 * Save button label.
-	 */
 	saveLabel?: ReactNode;
-
-	/**
-	 * Called when save is clicked.
-	 */
 	onSave?: () => void;
-
-	/**
-	 * Back destination.
-	 */
 	backHref?: string;
-
-	/**
-	 * Back label.
-	 */
 	backLabel?: ReactNode;
-
-	/**
-	 * Hide the save button.
-	 */
 	hideSave?: boolean;
-
-	/**
-	 * Disable save button.
-	 */
 	saveDisabled?: boolean;
-
 	className?: string;
+	/**
+	 * Revision navigation tabs.
+	 *
+	 * The parent determines which tabs exist based on the
+	 * actual revision history returned by the API.
+	 */
+	revisionTabs?: ProgramRevisionTab[];
+	/**
+	 * Called when the user changes the revision view.
+	 */
+	onRevisionChange?: (revisionId: ProgramRevisionTab["id"]) => void;
 }
 
 function ProgramContextHeader({
@@ -73,17 +43,17 @@ function ProgramContextHeader({
 	number = "—",
 	revision = "1.0",
 	status = "Draft",
-
 	saved = true,
-
 	saveLabel = "Save draft",
 	onSave,
-
 	backHref = "/programs",
 	backLabel = "← Programs",
 
 	hideSave = false,
 	saveDisabled = false,
+
+	revisionTabs = [],
+	onRevisionChange,
 
 	className,
 }: ProgramContextHeaderProps) {
@@ -140,6 +110,41 @@ function ProgramContextHeader({
 					)}
 				</div>
 			</Container>
+			{revisionTabs.length > 0 && (
+				<Container size="2xl" className="pb-3">
+					<div
+						className="flex items-center gap-2"
+						role="tablist"
+						aria-label="Program revisions"
+					>
+						{revisionTabs.map((tab) => (
+							<button
+								key={tab.id}
+								type="button"
+								role="tab"
+								aria-selected={tab.active ?? false}
+								onClick={() => onRevisionChange?.(tab.id)}
+								className={[
+									"inline-flex items-center gap-2 rounded-full border px-4 py-2",
+									"text-xs font-bold transition-colors",
+									tab.active
+										? "border-foreground bg-foreground text-background"
+										: "border-border bg-card text-muted-foreground hover:bg-muted hover:text-foreground",
+								].join(" ")}
+							>
+								<span>{tab.label}</span>
+								<span
+									className={
+										tab.active ? "text-background/70" : "text-muted-foreground"
+									}
+								>
+									{tab.subtitle}
+								</span>
+							</button>
+						))}
+					</div>
+				</Container>
+			)}
 			<Container>
 				<Separator orientation="horizontal" />
 			</Container>
@@ -148,3 +153,4 @@ function ProgramContextHeader({
 }
 
 export { ProgramContextHeader };
+

@@ -4,6 +4,7 @@ import type {
 	DashboardSummaryDto,
 	ExpiringProgramDto,
 } from "../api/dashboard.api";
+import { ACTIVITY_OPERATIONS } from "../constants";
 
 import type {
 	ActivityItem,
@@ -54,15 +55,29 @@ export function mapDashboardSummary(
 /**
  * Activity
  */
+export function mapActivityOperation(operation: string) {
+	const mapped =
+		ACTIVITY_OPERATIONS[operation as keyof typeof ACTIVITY_OPERATIONS];
+	return {
+		operation,
+		operationLabel: mapped?.label ?? operation.toLowerCase(),
+		color: mapped?.color,
+	};
+}
+
 export function mapActivityItem(dto: ActivityItemDto): ActivityItem {
+	const operation = mapActivityOperation(dto.operation);
 	return {
 		id: String(dto.id),
 
 		entityType: dto.entityType,
 		entityId: dto.entityId,
 
-		operation: dto.operation,
 		actor: dto.changedBy,
+
+		operation: operation.operation,
+		operationLabel: operation.operationLabel,
+		color: operation.color,
 
 		changedAt: dto.changedAt,
 

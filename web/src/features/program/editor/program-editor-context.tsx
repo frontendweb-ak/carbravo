@@ -3,26 +3,20 @@ import {
 	type ReactNode,
 	useCallback,
 	useContext,
+	useEffect,
 	useMemo,
 	useRef,
 	useState,
 } from "react";
 
-/* -------------------------------------------------------------------------- */
-/* Types                                                                      */
-/* -------------------------------------------------------------------------- */
-
 export type ProgramEditorMode = "new" | "edit";
-
 export type ProgramWorkflowStatus =
 	| "DRAFT"
 	| "SUBMITTED"
 	| "APPROVED"
 	| "ACTIVE"
 	| "EXPIRED";
-
 export type ProgramSectionStatus = "pending" | "warning" | "completed";
-
 export interface ProgramEditorSection {
 	id: string;
 	number: number;
@@ -30,7 +24,6 @@ export interface ProgramEditorSection {
 	status: ProgramSectionStatus;
 	requiredForSubmission: boolean;
 }
-
 export interface ProgramIdentity {
 	programId: number;
 	revisionId: number;
@@ -39,54 +32,28 @@ export interface ProgramIdentity {
 	revisionLabel?: string;
 }
 
-/* -------------------------------------------------------------------------- */
-/* Context                                                                    */
-/* -------------------------------------------------------------------------- */
-
 export interface ProgramEditorContextValue {
 	mode: ProgramEditorMode;
-
 	programId?: number;
 	revisionId?: number;
-
 	programIdentifier?: string;
 	programName?: string;
 	revisionLabel?: string;
-
 	setProgramIdentity: (identity: ProgramIdentity) => void;
-
 	programStatus?: ProgramWorkflowStatus;
-
 	isSubmitted: boolean;
 	approved: boolean;
-
 	sections: ProgramEditorSection[];
-
 	completion: number;
-
 	activeSection: string;
-
 	setActiveSection: (sectionId: string) => void;
-
 	updateSectionStatus: (
 		sectionId: string,
 		status: ProgramSectionStatus,
 	) => void;
-
-	/* ---------------------------------------------------------------------- */
-	/* Saving                                                                 */
-	/* ---------------------------------------------------------------------- */
-
 	saveCurrentSection: () => Promise<void>;
-
 	registerSaveHandler: (handler: (() => Promise<void>) | null) => void;
-
 	isSaving: boolean;
-
-	/* ---------------------------------------------------------------------- */
-	/* Permissions                                                             */
-	/* ---------------------------------------------------------------------- */
-
 	isReadOnly: boolean;
 }
 
@@ -196,8 +163,24 @@ export interface ProgramEditorProviderProps {
 	programName?: string;
 	revisionLabel?: string;
 
+	/**
+	 * Workflow status of the revision currently being edited.
+	 *
+	 * IMPORTANT:
+	 * This is revision status, not the parent program status.
+	 *
+	 * Example:
+	 *
+	 * Program:
+	 *   ACTIVE
+	 *
+	 * Draft revision:
+	 *   DRAFT
+	 *
+	 * The editor must remain editable because the DRAFT revision
+	 * is the working copy.
+	 */
 	programStatus?: ProgramWorkflowStatus;
-
 	initialSections?: ProgramEditorSection[];
 }
 
@@ -213,21 +196,16 @@ export function ProgramEditorProvider({
 	programIdentifier: initialProgramIdentifier,
 	programName: initialProgramName,
 	revisionLabel: initialRevisionLabel,
-	programStatus,
+	programStatus: initialProgramStatus,
 	initialSections,
 }: ProgramEditorProviderProps) {
-	/* ---------------------------------------------------------------------- */
-	/* Identity                                                               */
-	/* ---------------------------------------------------------------------- */
-
+	// Identity
 	const [programId, setProgramId] = useState<number | undefined>(
 		initialProgramId,
 	);
-
 	const [revisionId, setRevisionId] = useState<number | undefined>(
 		initialRevisionId,
 	);
-
 	const [programIdentifier, setProgramIdentifier] = useState<
 		string | undefined
 	>(initialProgramIdentifier);
@@ -239,17 +217,33 @@ export function ProgramEditorProvider({
 	const [revisionLabel, setRevisionLabel] = useState<string | undefined>(
 		initialRevisionLabel,
 	);
+	const [programStatus, setProgramStatus] = useState<
+		ProgramWorkflowStatus | undefined
+	>(initialProgramStatus);
+
+	useEffect(() => {
+		setProgramId(initialProgramId);
+		setRevisionId(initialRevisionId);
+		setProgramIdentifier(initialProgramIdentifier);
+		setProgramName(initialProgramName);
+		setRevisionLabel(initialRevisionLabel);
+		setProgramStatus(initialProgramStatus);
+	}, [
+		initialProgramId,
+		initialRevisionId,
+		initialProgramIdentifier,
+		initialProgramName,
+		initialRevisionLabel,
+		initialProgramStatus,
+	]);
 
 	/* ---------------------------------------------------------------------- */
 	/* Active section                                                         */
 	/* ---------------------------------------------------------------------- */
-
 	const [activeSection, setActiveSectionState] = useState("setup");
-
 	/* ---------------------------------------------------------------------- */
 	/* Section state                                                          */
 	/* ---------------------------------------------------------------------- */
-
 	const [sections, setSections] = useState<ProgramEditorSection[]>(
 		() => initialSections ?? createInitialSections(),
 	);
@@ -257,9 +251,7 @@ export function ProgramEditorProvider({
 	/* ---------------------------------------------------------------------- */
 	/* Saving                                                                 */
 	/* ---------------------------------------------------------------------- */
-
 	const [isSaving, setIsSaving] = useState(false);
-
 	const saveHandlerRef = useRef<(() => Promise<void>) | null>(null);
 
 	/* ---------------------------------------------------------------------- */
@@ -290,11 +282,7 @@ export function ProgramEditorProvider({
 	const setActiveSection = useCallback(
 		(sectionId: string) => {
 			const exists = sections.some((section) => section.id === sectionId);
-
-			if (!exists) {
-				return;
-			}
-
+			if (!exists) return;
 			setActiveSectionState(sectionId);
 		},
 		[sections],
@@ -372,17 +360,11 @@ export function ProgramEditorProvider({
 		programStatus === "ACTIVE" ||
 		programStatus === "EXPIRED";
 
-	/* ---------------------------------------------------------------------- */
-	/* Read-only                                                              */
-	/* ---------------------------------------------------------------------- */
-
+	// Raad only
 	const isReadOnly =
 		mode === "edit" && programStatus !== undefined && programStatus !== "DRAFT";
 
-	/* ---------------------------------------------------------------------- */
-	/* Context value                                                          */
-	/* ---------------------------------------------------------------------- */
-
+	// Context value
 	const value = useMemo<ProgramEditorContextValue>(
 		() => ({
 			/* Identity */

@@ -1,6 +1,7 @@
-import { Card, CardContent, StatusBadge } from "@/components/ui";
+import { Card, CardContent, StatusBadge, StatusDot } from "@/components/ui";
 import { cn } from "@/utils";
 
+import { Link } from "react-router-dom";
 import type { DashboardProgramStatus } from "../model/dashboard.types";
 
 export interface ProgramStatusCardProps {
@@ -9,6 +10,7 @@ export interface ProgramStatusCardProps {
 	status: DashboardProgramStatus;
 	loading?: boolean;
 	className?: string;
+	onClick?: () => void;
 }
 
 function ProgramStatusCard({
@@ -19,25 +21,27 @@ function ProgramStatusCard({
 	className,
 }: ProgramStatusCardProps) {
 	return (
-		<Card className={cn("min-h-[108px]", className)}>
-			<CardContent className="flex flex-col justify-between gap-3 p-4">
-				<div className="flex items-center justify-between gap-2">
-					<span className="text-sm font-semibold text-muted-foreground">
-						{label}
-					</span>
+		<Link to={`/programs?status=${status}`}>
+			<Card className={cn("min-h-27", className)}>
+				<CardContent className="flex flex-col justify-between gap-3 p-4">
+					<div className="flex items-center justify-between gap-2">
+						<span className="flex items-center gap-2">
+							<StatusDot status={status} />
+							<span className="text-md font-semibold">{label}</span>
+						</span>
+						<StatusBadge status={status} />
+					</div>
 
-					<StatusBadge status={status} />
-				</div>
-
-				{loading ? (
-					<div className="h-8 w-12 animate-pulse rounded-md bg-muted" />
-				) : (
-					<span className="text-2xl font-bold tracking-tight text-foreground">
-						{value}
-					</span>
-				)}
-			</CardContent>
-		</Card>
+					{loading ? (
+						<div className="h-8 w-12 animate-pulse rounded-md bg-muted" />
+					) : (
+						<span className="text-2xl font-bold tracking-tight text-foreground">
+							{value}
+						</span>
+					)}
+				</CardContent>
+			</Card>
+		</Link>
 	);
 }
 

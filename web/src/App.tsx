@@ -3,8 +3,6 @@ import { RouterProvider } from "react-router-dom";
 
 import { AppProviders } from "@/providers/AppProviders";
 
-import "./App.css";
-
 import { setupMockAuth } from "./features/auth/session/mock-auth";
 import { router } from "./router/routes";
 

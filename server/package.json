@@ -1,5 +1,5 @@
 {
-  "name": "carbravo-incentives-mock-api",
+  "name": "carbravo-server",
   "version": "1.0.0",
   "private": true,
   "type": "module",
@@ -19,6 +19,7 @@
     "hono": "^4.6.14"
   },
   "devDependencies": {
+    "@stoplight/prism-cli": "^5.16.0",
     "@types/node": "^22.20.1",
     "concurrently": "^10.0.4",
     "tsx": "^4.19.2",

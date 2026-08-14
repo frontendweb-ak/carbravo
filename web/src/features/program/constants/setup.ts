@@ -12,16 +12,16 @@ export const setupDefaultValues: SetupFormValues = {
 	firstVisibleTime: "",
 
 	programType: "CUSTOMER_CASH",
-	purchaseType: "NEW",
+	purchaseType: "CASH",
 
 	mileageMaximum: 59999,
 
-	conditionTier: "ANY",
+	conditionTier: "CARBRAVO_CERTIFIED",
 
 	creditTiers: [],
 
 	contact: "",
-
+	financeTerms: [],
 	flags: {
 		vinException: false,
 		topOfDeal: false,
@@ -35,26 +35,32 @@ export const PROGRAM_TYPE_OPTIONS = [
 	{ value: "BONUS_CASH", label: "Bonus Cash" },
 ];
 export const PURCHASE_TYPE_OPTIONS = [
-	{ value: "NEW", label: "New" },
-	{ value: "USED", label: "Used" },
+	{ value: "CASH", label: "Cash" },
+	{ value: "FINANCE", label: "Finance" },
 ];
-
 export const CONDITION_TIER_OPTIONS = [
-	{ value: "ANY", label: "Any" },
-	{ value: "NEW", label: "New" },
-	{ value: "USED", label: "Used" },
+	{ value: "CARBRAVO_CERTIFIED", label: "CarBravo Certified" },
+	{ value: "MANUFACTURER_CERTIFIED", label: "Manufacturer Certified" },
+	{ value: "USED_INSPECTED", label: "Used — Inspected" },
+	{ value: "USED_AS_IS", label: "Used — As-Is" },
 ];
-
 export const CREDIT_TIER_OPTIONS = [
-	{ value: "ANY", label: "Any" },
-	{ value: "A", label: "A" },
-	{ value: "B", label: "B" },
-	{ value: "C", label: "C" },
-	{ value: "D", label: "D" },
-	{ value: "E", label: "E" },
+	{ value: "A_PLUS", label: "✓ A+ — Excellent Credit" },
+	{ value: "A1", label: "✓ A1 — Very Good Credit" },
+	{ value: "A2", label: "✓ A2 — Good Credit" },
+	{ value: "B", label: "B — Fair Credit" },
 ];
 
 export const COUNTRY_OPTIONS = [
 	{ value: "US", label: "United States" },
 	{ value: "CA", label: "Canada" },
-]; 
+];
+
+export const FINANCE_TERM_OPTIONS = [
+	{ value: 24, label: "24" },
+	{ value: 36, label: "36" },
+	{ value: 48, label: "48" },
+	{ value: 60, label: "60" },
+	{ value: 72, label: "72" },
+	{ value: 84, label: "84" },
+];

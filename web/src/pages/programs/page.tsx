@@ -6,29 +6,21 @@ import {
 	Input,
 	PageState,
 } from "@/components/ui";
-import { usePrograms } from "@/features/program";
-import type {
-	ListProgramsParams,
-	ProgramStatusDto,
-} from "@/features/program/api/programs.api";
+import { useProgramFilters, usePrograms } from "@/features/program";
+import type { ProgramStatusDto } from "@/features/program/api/programs.api";
 import { ProgramPagination } from "@/features/program/components";
 import { ProgramList } from "@/features/program/components/program-list";
 import { Search } from "lucide-react";
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 type ProgramStatusTab = "all" | ProgramStatusDto;
 export default function ProgramsPage() {
 	const navigate = useNavigate();
-
-	const [filters, setFilters] = useState<ListProgramsParams>({
-		page: 0,
-		size: 20,
-	});
+	const { filters, setStatus, setSearch, setPage } = useProgramFilters();
 
 	const { data, isLoading, isFetching, isError, refetch } =
 		usePrograms(filters);
-
+	console.log("data", JSON.stringify(data, null, 2));
 	const programs = data?.items ?? [];
 	const pagination = data?.pagination;
 	const statusCounts = data?.statusCounts;
@@ -41,66 +33,6 @@ export default function ProgramsPage() {
 		Boolean(filters.dateTo) ||
 		filters.pendingApproval === true;
 
-	const handlePageChange = (page: number) => {
-		setFilters((current) => ({ ...current, page }));
-	};
-
-	const handleSearch = (search: string) => {
-		setFilters((current) => ({
-			...current,
-			search: search.trim() || undefined,
-			page: 0,
-		}));
-	};
-
-	const handleStatusChange = (status?: ListProgramsParams["status"]) => {
-		setFilters((current) => ({
-			...current,
-			status,
-			page: 0,
-		}));
-	};
-
-	const handleProgramTypeChange = (
-		programType?: ListProgramsParams["programType"],
-	) => {
-		setFilters((current) => ({
-			...current,
-			programType,
-			page: 0,
-		}));
-	};
-
-	const handleDateFromChange = (dateFrom?: string) => {
-		setFilters((current) => ({
-			...current,
-			dateFrom,
-			page: 0,
-		}));
-	};
-
-	const handleDateToChange = (dateTo?: string) => {
-		setFilters((current) => ({
-			...current,
-			dateTo,
-			page: 0,
-		}));
-	};
-
-	const handlePendingApprovalChange = (pendingApproval?: boolean) => {
-		setFilters((current) => ({
-			...current,
-			pendingApproval,
-			page: 0,
-		}));
-	};
-
-	const handleClearFilters = () => {
-		setFilters((current) => ({
-			page: 0,
-			size: current.size ?? 20,
-		}));
-	};
 	const handleCreate = () => {
 		navigate("/programs/new/setup");
 	};
@@ -116,6 +48,7 @@ export default function ProgramsPage() {
 			label: "Draft",
 			count: statusCounts?.draft ?? 0,
 		},
+
 		{
 			value: "ACTIVE",
 			label: "Active",
@@ -137,7 +70,7 @@ export default function ProgramsPage() {
 						<Input
 							value={filters.search ?? ""}
 							leftIcon={<Search />}
-							onChange={(event) => handleSearch(event.target.value)}
+							onChange={(event) => setSearch(event.target.value)}
 							placeholder="Search programs, codes, vehicles..."
 							aria-label="Search programs, codes, vehicles"
 							className="h-9 pl-8 bg-white"
@@ -150,32 +83,11 @@ export default function ProgramsPage() {
 					<FilterTabs
 						items={statusTabs}
 						value={filters.status ?? "all"}
-						onValueChange={(value) => {
-							setFilters((current) => ({
-								...current,
-								status: value === "all" ? undefined : value,
-								page: 0,
-							}));
-						}}
+						onValueChange={(value) =>
+							setStatus(value === "all" ? undefined : value)
+						}
 					/>
 				</div>
-
-				{/* Filters */}
-				{/* <div className="mt-4">
-					<ProgramFilters
-						search={filters.search ?? ""}
-						programType={filters.programType}
-						dateFrom={filters.dateFrom}
-						dateTo={filters.dateTo}
-						pendingApproval={filters.pendingApproval}
-						onSearchChange={handleSearch}
-						onProgramTypeChange={handleProgramTypeChange}
-						onDateFromChange={handleDateFromChange}
-						onDateToChange={handleDateToChange}
-						onPendingApprovalChange={handlePendingApprovalChange}
-						onClear={handleClearFilters}
-					/>
-				</div> */}
 
 				{/* Content */}
 				<div className="mt-5">
@@ -214,7 +126,7 @@ export default function ProgramsPage() {
 								totalElements={pagination?.totalElements ?? 0}
 								totalPages={pagination?.totalPages ?? 0}
 								disabled={isFetching}
-								onPageChange={handlePageChange}
+								onPageChange={setPage}
 							/>
 						</div>
 					</PageState>

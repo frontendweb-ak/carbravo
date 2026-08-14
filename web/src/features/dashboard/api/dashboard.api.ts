@@ -76,7 +76,7 @@ export const dashboardApi = {
 	async getSummary(): Promise<DashboardSummary> {
 		const response = await http.get<DashboardSummaryDto>("/dashboard/summary");
 
-		console.log("DataSmmary", response.data);
+
 		return mapDashboardSummary(response.data);
 	},
 

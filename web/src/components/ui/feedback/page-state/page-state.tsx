@@ -8,7 +8,6 @@ export type PageStateStatus = "loading" | "error" | "empty" | "ready";
 
 export interface PageStateProps {
 	status: PageStateStatus;
-
 	children?: ReactNode;
 
 	loadingMessage?: string;
@@ -22,48 +21,40 @@ export interface PageStateProps {
 	emptyAction?: ReactNode;
 }
 
-function PageState({
+export function PageState({
 	status,
 	children,
-
 	loadingMessage = "Loading...",
-
 	errorTitle = "Unable to load data",
 	errorDescription = "Something went wrong while loading this information.",
 	onRetry,
-
 	emptyTitle = "Nothing here yet",
 	emptyDescription,
 	emptyAction,
 }: PageStateProps) {
-	switch (status) {
-		case "loading":
-			return <PageLoader message={loadingMessage} />;
-
-		case "error":
-			return (
-				<ErrorState
-					title={errorTitle}
-					description={errorDescription}
-					onRetry={onRetry}
-				/>
-			);
-
-		case "empty":
-			return (
-				<EmptyState
-					title={emptyTitle}
-					description={emptyDescription}
-					action={emptyAction}
-				/>
-			);
-
-		case "ready":
-			return <>{children}</>;
-
-		default:
-			return null;
+	if (status === "loading") {
+		return <PageLoader message={loadingMessage} />;
 	}
-}
 
-export { PageState };
+	if (status === "error") {
+		return (
+			<ErrorState
+				title={errorTitle}
+				description={errorDescription}
+				onRetry={onRetry}
+			/>
+		);
+	}
+
+	if (status === "empty") {
+		return (
+			<EmptyState
+				title={emptyTitle}
+				description={emptyDescription}
+				action={emptyAction}
+			/>
+		);
+	}
+
+	return <>{children}</>;
+}

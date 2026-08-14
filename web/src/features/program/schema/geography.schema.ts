@@ -19,10 +19,10 @@ export const geographyFormSchema = z
 		included: z.array(geographyRuleSchema),
 		excluded: z.array(geographyRuleSchema),
 	})
-	.refine((values) => values.included.length > 0, {
-		path: ["included"],
-		message: "At least one include rule is required.",
-	});
+	// .refine((values) => values.included.length > 0, {
+	// 	path: ["included"],
+	// 	message: "At least one include rule is required.",
+	// });
 
 export type GeographyLevel = z.infer<typeof geographyLevelSchema>;
 export type GeographyRule = z.infer<typeof geographyRuleSchema>;

@@ -1,0 +1,24 @@
+{
+  "name": "carbravo-workspace",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "pnpm -r --parallel dev",
+    "dev:tunnel": "concurrently -k \"pnpm --filter carbravo-server dev:tunnel\" \"pnpm --filter carbravo dev\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "11.9.0",
+      "onFail": "download"
+    }
+  },
+  "type": "module",
+  "devDependencies": {
+    "concurrently": "^10.0.4"
+  }
+}
