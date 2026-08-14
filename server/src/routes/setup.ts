@@ -5,25 +5,28 @@ import { Hono } from "hono";
 import { currentUser, requireRole } from "../lib/auth.js";
 import { badRequest, conflict, notFound } from "../lib/errors.js";
 import { getProgramOrThrow } from "../lib/programs.js";
-import { getNextId, type MockRevision, readDb, writeDb } from "../store.js";
+import {
+  ConditionCode,
+  CreditTier,
+  getNextId,
+  type MockRevision,
+  ProgramTypeCode,
+  PurchaseType,
+  readDb,
+  writeDb,
+} from "../store.js";
 
 export const setup = new Hono();
 
-/**
- * ============================================================
- * OpenAPI-aligned API types
- * ============================================================
- *
- * These types intentionally represent the HTTP contract.
- *
- * The persistence model in store.ts may contain the same fields,
- * but these types are the API boundary.
- */
+/* -------------------------------------------------------------------------- */
+/* OpenAPI contract types                                                     */
+/* -------------------------------------------------------------------------- */
 
 /**
- * OpenAPI:
+ * This mirrors components.schemas.SetupInput
+ * from openapi.yaml.
  *
- * SetupInput.required:
+ * Required:
  * - programName
  * - programTypeCode
  * - purchaseType
@@ -34,36 +37,45 @@ export const setup = new Hono();
  */
 type SetupInput = {
   programName: string;
-  programTypeCode: "CUSTOMER_CASH" | "APR" | "BONUS_CASH";
-  purchaseType: "CASH" | "FINANCE";
+
+  programTypeCode: ProgramTypeCode;
+  purchaseType: PurchaseType;
+
   customerTypeCodes: string[];
+
   contactName?: string | null;
   contactEmail?: string | null;
   contactPhone?: string | null;
+
   financialProviderCode?: string | null;
-  conditionCode:
-    | "CARBRAVO"
-    | "MANUFACTURER_CERTIFIED"
-    | "USED_INSPECTED"
-    | "USED_AS_IS";
+
+  conditionCode: ConditionCode;
+
   mileageCeiling?: number | null;
+
   topOfDeal?: boolean;
   vinException?: boolean;
+
   mfpnText?: string | null;
   disclosureText?: string | null;
+
   localeCode?: string;
+
   deliveryStartDate: string;
   deliveryEndDate: string;
+
   effectiveStartDate?: string | null;
   effectiveEndDate?: string | null;
+
   financeTerms?: number[];
-  creditTiers?: Array<"A_PLUS" | "A1" | "A2" | "B">;
+
+  creditTiers?: CreditTier[];
 };
 
 /**
- * OpenAPI Setup response.
+ * This mirrors components.schemas.Setup
  *
- * Setup = revision/program metadata + SetupInput.
+ * Setup = revision metadata + SetupInput.
  */
 type SetupResponse = {
   programId: number;
@@ -77,9 +89,8 @@ type SetupResponse = {
 
   programName: string;
 
-  programTypeCode: "CUSTOMER_CASH" | "APR" | "BONUS_CASH";
-
-  purchaseType: "CASH" | "FINANCE";
+  programTypeCode: ProgramTypeCode;
+  purchaseType: PurchaseType;
 
   customerTypeCodes: string[];
 
@@ -89,11 +100,7 @@ type SetupResponse = {
 
   financialProviderCode: string | null;
 
-  conditionCode:
-    | "CARBRAVO"
-    | "MANUFACTURER_CERTIFIED"
-    | "USED_INSPECTED"
-    | "USED_AS_IS";
+  conditionCode: ConditionCode;
 
   mileageCeiling: number | null;
 
@@ -107,33 +114,60 @@ type SetupResponse = {
 
   deliveryStartDate: string;
   deliveryEndDate: string;
+
   effectiveStartDate: string | null;
   effectiveEndDate: string | null;
+
   financeTerms: number[];
-  creditTiers: Array<"A_PLUS" | "A1" | "A2" | "B">;
+  creditTiers: CreditTier[];
 };
 
-/**
- * ============================================================
- * Constants matching OpenAPI enums
- * ============================================================
- */
+/* -------------------------------------------------------------------------- */
+/* Contract constants                                                         */
+/* -------------------------------------------------------------------------- */
 
 const PROGRAM_TYPE_CODES = ["CUSTOMER_CASH", "APR", "BONUS_CASH"] as const;
+
 const PURCHASE_TYPES = ["CASH", "FINANCE"] as const;
+
 const CONDITION_CODES = [
   "CARBRAVO",
   "MANUFACTURER_CERTIFIED",
   "USED_INSPECTED",
   "USED_AS_IS",
 ] as const;
+
 const CREDIT_TIER_CODES = ["A_PLUS", "A1", "A2", "B"] as const;
 
-/**
- * ============================================================
- * Route parameter validation
- * ============================================================
- */
+/* -------------------------------------------------------------------------- */
+/* Helpers                                                                    */
+/* -------------------------------------------------------------------------- */
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
+function isValidDate(value: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return false;
+  }
+
+  const date = new Date(`${value}T00:00:00Z`);
+
+  if (Number.isNaN(date.getTime())) {
+    return false;
+  }
+
+  return date.toISOString().slice(0, 10) === value;
+}
+
+function isValidEmail(value: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+}
+
+/* -------------------------------------------------------------------------- */
+/* Route params                                                               */
+/* -------------------------------------------------------------------------- */
 
 function getIds(c: {
   req: {
@@ -161,11 +195,9 @@ function getIds(c: {
   };
 }
 
-/**
- * ============================================================
- * Revision lookup
- * ============================================================
- */
+/* -------------------------------------------------------------------------- */
+/* Revision lookup                                                            */
+/* -------------------------------------------------------------------------- */
 
 function getRevision(
   db: Awaited<ReturnType<typeof readDb>>,
@@ -183,59 +215,18 @@ function getRevision(
   return revision;
 }
 
-/**
- * ============================================================
- * Generic validation helpers
- * ============================================================
- */
-
-function isPlainObject(value: unknown): value is Record<string, unknown> {
-  return value !== null && typeof value === "object" && !Array.isArray(value);
-}
-
-function isValidDate(value: string): boolean {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
-    return false;
-  }
-
-  const date = new Date(`${value}T00:00:00Z`);
-
-  if (Number.isNaN(date.getTime())) {
-    return false;
-  }
-
-  return date.toISOString().slice(0, 10) === value;
-}
-
-function isValidEmail(value: string): boolean {
-  /**
-   * Basic API-boundary email validation.
-   *
-   * The OpenAPI contract declares format: email.
-   * This intentionally does not attempt to implement
-   * the entire RFC 5322 grammar.
-   */
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
-}
-
-/**
- * ============================================================
- * Setup validation
- * ============================================================
- *
- * Validation follows SetupInput from openapi.yaml.
- */
+/* -------------------------------------------------------------------------- */
+/* Setup validation                                                           */
+/* -------------------------------------------------------------------------- */
 
 function validateSetup(body: unknown): asserts body is SetupInput {
   if (!isPlainObject(body)) {
     throw badRequest("VALIDATION_ERROR", "Request body must be an object");
   }
 
-  /**
-   * ----------------------------------------------------------
-   * Required fields
-   * ----------------------------------------------------------
-   */
+  /* ---------------------------------------------------------------------- */
+  /* Required fields                                                        */
+  /* ---------------------------------------------------------------------- */
 
   if (typeof body.programName !== "string" || !body.programName.trim()) {
     throw badRequest("VALIDATION_ERROR", "programName is required");
@@ -250,21 +241,17 @@ function validateSetup(body: unknown): asserts body is SetupInput {
 
   if (
     typeof body.programTypeCode !== "string" ||
-    !PROGRAM_TYPE_CODES.includes(
-      body.programTypeCode as (typeof PROGRAM_TYPE_CODES)[number],
-    )
+    !PROGRAM_TYPE_CODES.includes(body.programTypeCode as ProgramTypeCode)
   ) {
     throw badRequest("VALIDATION_ERROR", "Invalid programTypeCode");
   }
 
-  if (
-    typeof body.purchaseType !== "string" ||
-    !PURCHASE_TYPES.includes(
-      body.purchaseType as (typeof PURCHASE_TYPES)[number],
-    )
-  ) {
-    throw badRequest("VALIDATION_ERROR", "Invalid purchaseType");
-  }
+  // if (
+  //   typeof body.purchaseType !== "string" ||
+  //   !PURCHASE_TYPES.includes(body.purchaseType as PurchaseType)
+  // ) {
+  //   throw badRequest("VALIDATION_ERROR", "Invalid purchaseType");
+  // }
 
   if (!Array.isArray(body.customerTypeCodes)) {
     throw badRequest("VALIDATION_ERROR", "customerTypeCodes must be an array");
@@ -288,14 +275,16 @@ function validateSetup(body: unknown): asserts body is SetupInput {
     );
   }
 
-  if (
-    typeof body.conditionCode !== "string" ||
-    !CONDITION_CODES.includes(
-      body.conditionCode as (typeof CONDITION_CODES)[number],
-    )
-  ) {
-    throw badRequest("VALIDATION_ERROR", "Invalid conditionCode");
-  }
+  // if (
+  //   typeof body.conditionCode !== "string" ||
+  //   !CONDITION_CODES.includes(body.conditionCode as ConditionCode)
+  // ) {
+  //   throw badRequest("VALIDATION_ERROR", "Invalid conditionCode");
+  // }
+
+  /* ---------------------------------------------------------------------- */
+  /* Dates                                                                  */
+  /* ---------------------------------------------------------------------- */
 
   if (
     typeof body.deliveryStartDate !== "string" ||
@@ -307,110 +296,19 @@ function validateSetup(body: unknown): asserts body is SetupInput {
     );
   }
 
-  /**
-   * ----------------------------------------------------------
-   * Dates
-   * ----------------------------------------------------------
-   */
-
   if (!isValidDate(body.deliveryStartDate)) {
     throw badRequest(
       "VALIDATION_ERROR",
-      "deliveryStartDate must be a valid date in YYYY-MM-DD format",
+      "deliveryStartDate must be a valid YYYY-MM-DD date",
     );
   }
 
   if (!isValidDate(body.deliveryEndDate)) {
     throw badRequest(
       "VALIDATION_ERROR",
-      "deliveryEndDate must be a valid date in YYYY-MM-DD format",
+      "deliveryEndDate must be a valid YYYY-MM-DD date",
     );
   }
-
-  if (body.deliveryStartDate > body.deliveryEndDate) {
-    throw badRequest(
-      "VALIDATION_ERROR",
-      "deliveryStartDate cannot be after deliveryEndDate",
-    );
-  }
-
-  /**
-   * ----------------------------------------------------------
-   * Nullable string fields
-   * ----------------------------------------------------------
-   */
-
-  if (body.contactName !== undefined && body.contactName !== null) {
-    if (typeof body.contactName !== "string" || body.contactName.length > 255) {
-      throw badRequest(
-        "VALIDATION_ERROR",
-        "contactName must be a string of 255 characters or fewer",
-      );
-    }
-  }
-
-  if (body.contactEmail !== undefined && body.contactEmail !== null) {
-    if (
-      typeof body.contactEmail !== "string" ||
-      !isValidEmail(body.contactEmail)
-    ) {
-      throw badRequest(
-        "VALIDATION_ERROR",
-        "contactEmail must be a valid email address",
-      );
-    }
-  }
-
-  if (
-    body.contactPhone !== undefined &&
-    body.contactPhone !== null &&
-    typeof body.contactPhone !== "string"
-  ) {
-    throw badRequest(
-      "VALIDATION_ERROR",
-      "contactPhone must be a string or null",
-    );
-  }
-
-  if (
-    body.financialProviderCode !== undefined &&
-    body.financialProviderCode !== null &&
-    typeof body.financialProviderCode !== "string"
-  ) {
-    throw badRequest(
-      "VALIDATION_ERROR",
-      "financialProviderCode must be a string or null",
-    );
-  }
-
-  if (
-    body.mfpnText !== undefined &&
-    body.mfpnText !== null &&
-    typeof body.mfpnText !== "string"
-  ) {
-    throw badRequest("VALIDATION_ERROR", "mfpnText must be a string or null");
-  }
-
-  if (
-    body.disclosureText !== undefined &&
-    body.disclosureText !== null &&
-    typeof body.disclosureText !== "string"
-  ) {
-    throw badRequest(
-      "VALIDATION_ERROR",
-      "disclosureText must be a string or null",
-    );
-  }
-
-  if (body.localeCode !== undefined && typeof body.localeCode !== "string") {
-    throw badRequest("VALIDATION_ERROR", "localeCode must be a string");
-  }
-
-  /**
-   * ----------------------------------------------------------
-   * Optional dates
-   * ----------------------------------------------------------
-   */
 
   if (
     body.effectiveStartDate !== undefined &&
@@ -422,7 +320,7 @@ function validateSetup(body: unknown): asserts body is SetupInput {
     ) {
       throw badRequest(
         "VALIDATION_ERROR",
-        "effectiveStartDate must be a valid date or null",
+        "effectiveStartDate must be a valid YYYY-MM-DD date or null",
       );
     }
   }
@@ -434,28 +332,62 @@ function validateSetup(body: unknown): asserts body is SetupInput {
     ) {
       throw badRequest(
         "VALIDATION_ERROR",
-        "effectiveEndDate must be a valid date or null",
+        "effectiveEndDate must be a valid YYYY-MM-DD date or null",
       );
     }
   }
 
+  /* ---------------------------------------------------------------------- */
+  /* Optional strings                                                        */
+  /* ---------------------------------------------------------------------- */
+
   if (
-    body.effectiveStartDate &&
-    body.effectiveEndDate &&
-    body.effectiveStartDate > body.effectiveEndDate
+    body.contactName !== undefined &&
+    body.contactName !== null &&
+    typeof body.contactName !== "string"
   ) {
     throw badRequest(
       "VALIDATION_ERROR",
-      "effectiveStartDate cannot be after effectiveEndDate",
+      "contactName must be a string or null",
     );
   }
 
-  /**
-   * ----------------------------------------------------------
-   * mileageCeiling
-   * OpenAPI: integer | null
-   * ----------------------------------------------------------
-   */
+  if (typeof body.contactName === "string" && body.contactName.length > 255) {
+    throw badRequest(
+      "VALIDATION_ERROR",
+      "contactName must be 255 characters or fewer",
+    );
+  }
+
+  if (body.contactEmail !== undefined && body.contactEmail !== null) {
+    if (
+      typeof body.contactEmail !== "string" ||
+      !isValidEmail(body.contactEmail)
+    ) {
+      throw badRequest(
+        "VALIDATION_ERROR",
+        "contactEmail must be a valid email address or null",
+      );
+    }
+  }
+
+  for (const field of [
+    "contactPhone",
+    "financialProviderCode",
+    "mfpnText",
+    "disclosureText",
+    "localeCode",
+  ] as const) {
+    const value = body[field];
+
+    if (value !== undefined && value !== null && typeof value !== "string") {
+      throw badRequest("VALIDATION_ERROR", `${field} must be a string or null`);
+    }
+  }
+
+  /* ---------------------------------------------------------------------- */
+  /* Mileage                                                                */
+  /* ---------------------------------------------------------------------- */
 
   if (body.mileageCeiling !== undefined && body.mileageCeiling !== null) {
     if (
@@ -469,11 +401,9 @@ function validateSetup(body: unknown): asserts body is SetupInput {
     }
   }
 
-  /**
-   * ----------------------------------------------------------
-   * Boolean fields
-   * ----------------------------------------------------------
-   */
+  /* ---------------------------------------------------------------------- */
+  /* Boolean fields                                                          */
+  /* ---------------------------------------------------------------------- */
 
   if (body.topOfDeal !== undefined && typeof body.topOfDeal !== "boolean") {
     throw badRequest("VALIDATION_ERROR", "topOfDeal must be a boolean");
@@ -486,65 +416,51 @@ function validateSetup(body: unknown): asserts body is SetupInput {
     throw badRequest("VALIDATION_ERROR", "vinException must be a boolean");
   }
 
-  /**
-   * ----------------------------------------------------------
-   * Finance terms
-   * OpenAPI: integer[]
-   * ----------------------------------------------------------
-   */
+  /* ---------------------------------------------------------------------- */
+  /* Finance terms                                                           */
+  /* ---------------------------------------------------------------------- */
 
-  if (body.financeTerms !== undefined) {
-    if (
-      !Array.isArray(body.financeTerms) ||
-      body.financeTerms.some(
-        (value) => typeof value !== "number" || !Number.isInteger(value),
-      )
-    ) {
-      throw badRequest(
-        "VALIDATION_ERROR",
-        "financeTerms must contain integer values",
-      );
-    }
-  }
+  // if (body.financeTerms !== undefined) {
+  //   if (!Array.isArray(body.financeTerms)) {
+  //     throw badRequest("VALIDATION_ERROR", "financeTerms must be an array");
+  //   }
 
-  /**
-   * ----------------------------------------------------------
-   * Credit tiers
-   * OpenAPI enum:
-   * A_PLUS | A1 | A2 | B
-   * ----------------------------------------------------------
-   */
+  //   if (
+  //     body.financeTerms.some(
+  //       (value) => typeof value !== "number" || !Number.isInteger(value),
+  //     )
+  //   ) {
+  //     throw badRequest(
+  //       "VALIDATION_ERROR",
+  //       "financeTerms must contain integer values",
+  //     );
+  //   }
+  // }
 
-  if (body.creditTiers !== undefined) {
-    if (!Array.isArray(body.creditTiers)) {
-      throw badRequest("VALIDATION_ERROR", "creditTiers must be an array");
-    }
+  /* ---------------------------------------------------------------------- */
+  /* Credit tiers                                                            */
+  /* ---------------------------------------------------------------------- */
 
-    if (
-      body.creditTiers.some(
-        (value) =>
-          typeof value !== "string" ||
-          !CREDIT_TIER_CODES.includes(
-            value as (typeof CREDIT_TIER_CODES)[number],
-          ),
-      )
-    ) {
-      throw badRequest("VALIDATION_ERROR", "Invalid creditTiers value");
-    }
-  }
+  // if (body.creditTiers !== undefined) {
+  //   if (!Array.isArray(body.creditTiers)) {
+  //     throw badRequest("VALIDATION_ERROR", "creditTiers must be an array");
+  //   }
+
+  //   if (
+  //     body.creditTiers.some(
+  //       (value) =>
+  //         typeof value !== "string" ||
+  //         !CREDIT_TIER_CODES.includes(value as CreditTier),
+  //     )
+  //   ) {
+  //     throw badRequest("VALIDATION_ERROR", "Invalid creditTiers value");
+  //   }
+  // }
 }
 
-/**
- * ============================================================
- * API response mapper
- * ============================================================
- *
- * IMPORTANT:
- * Do not spread revision.setup directly into the response.
- *
- * The API response is an explicit DTO.
- * This prevents internal DB fields from leaking into HTTP.
- */
+/* -------------------------------------------------------------------------- */
+/* Response mapper                                                            */
+/* -------------------------------------------------------------------------- */
 
 function setupResponse(
   program: Awaited<ReturnType<typeof readDb>>["programs"][number],
@@ -564,19 +480,20 @@ function setupResponse(
 
     programName: setup.programName ?? program.name,
 
-    programTypeCode: setup.programTypeCode as SetupResponse["programTypeCode"],
+    programTypeCode: setup.programTypeCode as ProgramTypeCode,
+    purchaseType: setup.purchaseType as PurchaseType,
 
-    purchaseType: setup.purchaseType as SetupResponse["purchaseType"],
-
-    customerTypeCodes: [...setup.customerTypeCodes],
+    customerTypeCodes: [...(setup.customerTypeCodes ?? [])],
 
     contactName: setup.contactName ?? null,
+
     contactEmail: setup.contactEmail ?? null,
+
     contactPhone: setup.contactPhone ?? null,
 
     financialProviderCode: setup.financialProviderCode ?? null,
 
-    conditionCode: setup.conditionCode as SetupResponse["conditionCode"],
+    conditionCode: setup.conditionCode as ConditionCode,
 
     mileageCeiling: setup.mileageCeiling ?? null,
 
@@ -600,19 +517,13 @@ function setupResponse(
 
     financeTerms: [...(setup.financeTerms ?? [])],
 
-    creditTiers: (setup.creditTiers ?? []) as SetupResponse["creditTiers"],
+    creditTiers: (setup.creditTiers ?? []) as CreditTier[],
   };
 }
 
-/**
- * ============================================================
- * GET /api/programs/:programId/revisions/:revisionId/setup
- * ============================================================
- *
- * OpenAPI operationId: getSetup
- *
- * Response: Setup
- */
+/* -------------------------------------------------------------------------- */
+/* GET /programs/:programId/revisions/:revisionId/setup                       */
+/* -------------------------------------------------------------------------- */
 
 setup.get("/programs/:programId/revisions/:revisionId/setup", async (c) => {
   currentUser(c);
@@ -625,26 +536,12 @@ setup.get("/programs/:programId/revisions/:revisionId/setup", async (c) => {
 
   const revision = getRevision(db, program.id, revisionId);
 
-  return c.json(setupResponse(program, revision));
+  return c.json(setupResponse(program, revision), 200);
 });
 
-/**
- * ============================================================
- * PUT /api/programs/:programId/revisions/:revisionId/setup
- * ============================================================
- *
- * OpenAPI operationId: saveSetup
- *
- * Roles:
- * AUTHOR, ADMIN
- *
- * Guard:
- * revision.status === DRAFT
- *
- * Side effect:
- * Major revision => reset approval.
- * Minor revision => preserve approval.
- */
+/* -------------------------------------------------------------------------- */
+/* PUT /programs/:programId/revisions/:revisionId/setup                      */
+/* -------------------------------------------------------------------------- */
 
 setup.put("/programs/:programId/revisions/:revisionId/setup", async (c) => {
   const user = requireRole(c, "AUTHOR", "ADMIN");
@@ -657,6 +554,12 @@ setup.put("/programs/:programId/revisions/:revisionId/setup", async (c) => {
     throw badRequest("VALIDATION_ERROR", "Request body must be valid JSON");
   }
 
+  /**
+   * IMPORTANT:
+   *
+   * This is a complete SetupInput request.
+   * It is NOT Partial<SetupInput>.
+   */
   validateSetup(body);
 
   const db = await readDb();
@@ -665,10 +568,10 @@ setup.put("/programs/:programId/revisions/:revisionId/setup", async (c) => {
 
   const revision = getRevision(db, program.id, revisionId);
 
-  /**
-   * OpenAPI guard:
-   * setup can only be saved for DRAFT revision.
-   */
+  /* -------------------------------------------------------------- */
+  /* OpenAPI workflow guard                                         */
+  /* -------------------------------------------------------------- */
+
   if (revision.status !== "DRAFT") {
     throw conflict(
       "REVISION_NOT_EDITABLE",
@@ -678,87 +581,73 @@ setup.put("/programs/:programId/revisions/:revisionId/setup", async (c) => {
 
   const now = new Date().toISOString();
 
-  /**
-   * Store the complete SetupInput snapshot.
-   *
-   * Defaults here correspond to the mock persistence model.
-   * They do not alter the HTTP contract.
-   */
+  /* -------------------------------------------------------------- */
+  /* Replace complete setup snapshot                                */
+  /* -------------------------------------------------------------- */
+
   revision.setup = {
     ...revision.setup,
 
     programName: body.programName.trim(),
-
     programTypeCode: body.programTypeCode,
-
     purchaseType: body.purchaseType,
-
     customerTypeCodes: [...body.customerTypeCodes],
-
     contactName: body.contactName ?? null,
-
     contactEmail: body.contactEmail ?? null,
-
     contactPhone: body.contactPhone ?? null,
-
     financialProviderCode: body.financialProviderCode ?? null,
-
     conditionCode: body.conditionCode,
-
     mileageCeiling: body.mileageCeiling ?? null,
-
     topOfDeal: body.topOfDeal ?? false,
-
     vinException: body.vinException ?? false,
-
     mfpnText: body.mfpnText ?? null,
-
     disclosureText: body.disclosureText ?? null,
-
     localeCode: body.localeCode ?? "en-US",
-
     deliveryStartDate: body.deliveryStartDate,
-
     deliveryEndDate: body.deliveryEndDate,
-
     effectiveStartDate: body.effectiveStartDate ?? null,
-
     effectiveEndDate: body.effectiveEndDate ?? null,
-
     financeTerms: [...(body.financeTerms ?? [])],
-
     creditTiers: [...(body.creditTiers ?? [])],
   };
 
-  /**
-   * Program-level fields are a projection of setup.
-   *
-   * This keeps GET /programs and GET /setup consistent.
-   */
-  program.name = revision.setup.programName ?? program.name;
+  /* -------------------------------------------------------------- */
+  /* Keep Program projection synchronized                           */
+  /* -------------------------------------------------------------- */
 
-  program.programType = revision.setup.programTypeCode ?? program.programType;
+  program.name = body.programName.trim();
 
-  program.deliveryStartDate = revision.setup.deliveryStartDate;
+  program.programType = body.programTypeCode;
 
-  program.deliveryEndDate = revision.setup.deliveryEndDate;
+  program.deliveryStartDate = body.deliveryStartDate;
+
+  program.deliveryEndDate = body.deliveryEndDate;
 
   program.updatedAt = now;
 
-  /**
-   * OpenAPI:
-   *
-   * Major revision:
-   * approval is reset.
-   *
-   * Minor revision:
-   * approval remains untouched.
-   */
-  resetApprovalIfNeeded(revision);
+  /* -------------------------------------------------------------- */
+  /* Approval side effect                                            */
+  /* -------------------------------------------------------------- */
 
-  /**
-   * Audit activity.
-   */
+  if (!revision.isMinorRevision) {
+    revision.approval.isSubmitted = false;
+    revision.approval.submittedAt = null;
+    revision.approval.submittedBy = null;
+
+    revision.approval.approved = false;
+    revision.approval.approvedAt = null;
+    revision.approval.approvedBy = null;
+    revision.approval.approvalComment = null;
+
+    revision.approval.rejectedAt = null;
+    revision.approval.rejectedBy = null;
+    revision.approval.rejectionReason = null;
+  }
+
+  /* -------------------------------------------------------------- */
+  /* Audit                                                           */
+  /* -------------------------------------------------------------- */
+
   db.activity.unshift({
     id: getNextId(db.activity),
 
@@ -779,36 +668,9 @@ setup.put("/programs/:programId/revisions/:revisionId/setup", async (c) => {
 
   await writeDb(db);
 
-  /**
-   * HTTP response MUST be Setup.
-   */
-  return c.json(setupResponse(program, revision));
+  /* -------------------------------------------------------------- */
+  /* OpenAPI response = Setup                                        */
+  /* -------------------------------------------------------------- */
+
+  return c.json(setupResponse(program, revision), 200);
 });
-
-/**
- * ============================================================
- * Approval reset helper
- * ============================================================
- */
-
-function resetApprovalIfNeeded(revision: MockRevision): void {
-  /**
-   * OpenAPI explicitly exempts minor revisions.
-   */
-  if (revision.isMinorRevision) {
-    return;
-  }
-
-  revision.approval.isSubmitted = false;
-  revision.approval.submittedAt = null;
-  revision.approval.submittedBy = null;
-
-  revision.approval.approved = false;
-  revision.approval.approvedAt = null;
-  revision.approval.approvedBy = null;
-  revision.approval.approvalComment = null;
-
-  revision.approval.rejectedAt = null;
-  revision.approval.rejectedBy = null;
-  revision.approval.rejectionReason = null;
-}

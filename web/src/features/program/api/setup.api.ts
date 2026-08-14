@@ -97,11 +97,13 @@ export const setupApi = {
 		revisionId: number,
 		payload: ProgramSetupDto,
 	): Promise<SaveProgramSetupResponseDto> {
+		console.log("UPDATE", programId, revisionId, payload);
 		const response = await http.put<SaveProgramSetupResponseDto>(
 			`/programs/${programId}/revisions/${revisionId}/setup`,
 			payload,
 		);
 
+		console.log("RES", response);
 		return response.data;
 	},
 };

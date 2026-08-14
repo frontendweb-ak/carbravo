@@ -328,6 +328,17 @@ export function SetupForm({
 						revisionId: currentRevisionId,
 						payload,
 					});
+					/*
+					 * The values that were just persisted are now the
+					 * clean form baseline.
+					 *
+					 * Do this only after the API succeeds.
+					 */
+					if (mountedRef.current && !pendingSaveRef.current) {
+						form.reset(form.getValues(), {
+							keepValues: true,
+						});
+					}
 				}
 
 				if (mountedRef.current) {
@@ -369,36 +380,23 @@ export function SetupForm({
 		}
 
 		/*
-		 * Read the current form state without triggering
-		 * React Hook Form validation UI.
+		 * Autosave must not validate the complete UI form.
+		 *
+		 * The UI contains fields that are not part of the
+		 * OpenAPI Setup DTO.
+		 *
+		 * Example:
+		 * - programNumber
+		 * - incentiveCodes
+		 * - country
+		 * - firstVisibleDate
+		 *
+		 * Those fields can legitimately be empty while the
+		 * OpenAPI setup payload is still saveable.
 		 */
 		const values = form.getValues();
-
-		/*
-		 * IMPORTANT:
-		 *
-		 * Do NOT use:
-		 *
-		 * form.trigger()
-		 * form.handleSubmit()
-		 *
-		 * here.
-		 *
-		 * Those APIs update visible validation state.
-		 */
-		const result = setupFormSchema.safeParse(values);
-
-		/*
-		 * Incomplete form is expected while the user is typing.
-		 *
-		 * Do not show validation errors.
-		 * Do not make an API request.
-		 */
-		if (!result.success) {
-			return;
-		}
-
-		await persistSetup(result.data);
+		await persistSetup(values as SetupFormOutput);
+		//
 	}, [canEdit, form, persistSetup]);
 
 	/* ---------------------------------------------------------------------- */
