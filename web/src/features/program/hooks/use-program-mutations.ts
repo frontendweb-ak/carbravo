@@ -26,22 +26,7 @@ export function useCreateProgram() {
 /* -------------------------------------------------------------------------- */
 /* Update Setup                                                               */
 /* -------------------------------------------------------------------------- */
-export function useCreateProgramSetup() {
-	const queryClient = useQueryClient();
 
-	return useAppMutation({
-		mutationFn: (payload: Parameters<typeof setupApi.create>[0]) =>
-			setupApi.create(payload),
-		showSuccess: false,
-		onSuccess: (data) => {
-			if (data.programId != null) {
-				queryClient.invalidateQueries({
-					queryKey: queryKeys.programs.detail(data.programId),
-				});
-			}
-		},
-	});
-}
 export function useUpdateProgramSetup() {
 	const queryClient = useQueryClient();
 

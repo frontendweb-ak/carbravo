@@ -73,19 +73,6 @@ export const setupApi = {
 		return response.data;
 	},
 
-	/**
-	 * Create/save setup for a new program.
-	 *
-	 * POST /programs/setup
-	 */
-	async create(payload: ProgramSetupDto): Promise<SaveProgramSetupResponseDto> {
-		const response = await http.post<SaveProgramSetupResponseDto>(
-			"/programs/setup",
-			payload,
-		);
-
-		return response.data;
-	},
 
 	/**
 	 * Update setup for an existing draft revision.

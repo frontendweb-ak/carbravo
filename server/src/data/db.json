@@ -83,6 +83,20 @@
       "createdAt": "2026-05-28T09:00:00.000Z",
       "updatedAt": "2026-08-13T13:01:48.063Z",
       "deletedAt": null
+    },
+    {
+      "id": 7,
+      "identifier": "PROG-2026-0007",
+      "name": "demo app",
+      "status": "DRAFT",
+      "programType": "",
+      "activeRevisionId": null,
+      "draftRevisionId": 108,
+      "deliveryStartDate": null,
+      "deliveryEndDate": null,
+      "createdAt": "2026-08-14T16:43:23.820Z",
+      "updatedAt": "2026-08-14T16:43:23.820Z",
+      "deletedAt": null
     }
   ],
   "revisions": [
@@ -777,6 +791,62 @@
       },
       "summary": {},
       "copiedFromRevisionId": 106
+    },
+    {
+      "id": 108,
+      "programId": 7,
+      "majorRevision": 1,
+      "minorRevision": 0,
+      "status": "DRAFT",
+      "isMinorRevision": false,
+      "createdAt": "2026-08-14T16:43:23.820Z",
+      "createdBy": "demo.user",
+      "postedAt": null,
+      "postedBy": null,
+      "approval": {
+        "revisionId": 108,
+        "isSubmitted": false,
+        "submittedAt": null,
+        "submittedBy": null,
+        "approved": false,
+        "approvedAt": null,
+        "approvedBy": null,
+        "approvalComment": null,
+        "rejectedAt": null,
+        "rejectedBy": null,
+        "rejectionReason": null
+      },
+      "setup": {
+        "programName": "demo app",
+        "programTypeCode": null,
+        "purchaseType": null,
+        "customerTypeCodes": [],
+        "contactName": null,
+        "contactEmail": null,
+        "contactPhone": null,
+        "financialProviderCode": null,
+        "conditionCode": null,
+        "mileageCeiling": null,
+        "topOfDeal": false,
+        "vinException": false,
+        "mfpnText": null,
+        "disclosureText": null,
+        "localeCode": "en-US",
+        "deliveryStartDate": null,
+        "deliveryEndDate": null,
+        "effectiveStartDate": null,
+        "effectiveEndDate": null,
+        "financeTerms": [],
+        "creditTiers": []
+      },
+      "vehicles": [],
+      "geography": [],
+      "values": {
+        "financeTerms": [],
+        "components": []
+      },
+      "summary": {},
+      "copiedFromRevisionId": null
     }
   ],
   "vehicles": [
@@ -1323,6 +1393,16 @@
     ]
   },
   "activity": [
+    {
+      "id": 113,
+      "entityType": "INCENTIVE_PROGRAM",
+      "entityId": 7,
+      "operation": "CREATE",
+      "changedBy": "demo.user",
+      "changedAt": "2026-08-14T16:43:23.820Z",
+      "programName": "demo app",
+      "programIdentifier": "PROG-2026-0007"
+    },
     {
       "id": 112,
       "entityType": "INCENTIVE_REVISION",

@@ -23,7 +23,7 @@ import {
 } from "../constants";
 import { useProgramEditor } from "../editor/program-editor-context";
 import {
-	useCreateProgramSetup,
+	useCreateProgram,
 	useProgram,
 	useProgramSetup,
 	useUpdateProgramSetup,
@@ -91,15 +91,21 @@ export function SetupForm({
 		programId: number;
 		revisionId: number;
 	} | null>(null);
-
-	/*
-	 * IDs actually used for persistence.
-	 */
-	const effectiveProgramId = createdRevisionRef.current?.programId ?? programId;
-
-	const effectiveRevisionId =
-		createdRevisionRef.current?.revisionId ?? revisionId;
-
+	const persistenceRef = useRef<{
+		programId?: number;
+		revisionId?: number;
+	}>({
+		programId,
+		revisionId,
+	});
+	useEffect(() => {
+		if (mode === "edit") {
+			persistenceRef.current = {
+				programId,
+				revisionId,
+			};
+		}
+	}, [mode, programId, revisionId]);
 	/* ---------------------------------------------------------------------- */
 	/* API                                                                     */
 	/* ---------------------------------------------------------------------- */
@@ -113,9 +119,8 @@ export function SetupForm({
 
 	const program = useProgram(programId);
 	console.log("program", program.data);
-	const createSetup = useCreateProgramSetup();
-	const updateSetup = useUpdateProgramSetup();
-
+	const { mutateAsync: createProgramAsync } = useCreateProgram();
+	const { mutateAsync: updateSetupAsync } = useUpdateProgramSetup();
 	/* ---------------------------------------------------------------------- */
 	/* Form                                                                    */
 	/* ---------------------------------------------------------------------- */
@@ -125,10 +130,6 @@ export function SetupForm({
 		defaultValues: setupDefaultValues,
 		mode: "onBlur",
 		reValidateMode: "onBlur",
-	});
-
-	const formValues = useWatch({
-		control: form.control,
 	});
 
 	const purchaseType = useWatch({
@@ -233,48 +234,30 @@ export function SetupForm({
 
 	const persistSetup = useCallback(
 		async (values: SetupFormOutput) => {
-			if (!canEdit) {
+			if (!canEdit || !mountedRef.current) {
 				return;
 			}
 
-			if (!mountedRef.current) {
-				return;
-			}
-
-			/*
-			 * Always keep the latest values.
-			 */
 			pendingSaveRef.current = values;
 
-			/*
-			 * Another request is already processing.
-			 *
-			 * It will pick up pendingSaveRef when it finishes.
-			 */
 			if (savingRef.current) {
 				return;
 			}
 
 			savingRef.current = true;
 
-			updateSectionStatus("setup", "completed");
-
 			try {
 				while (pendingSaveRef.current && mountedRef.current) {
 					const latestValues = pendingSaveRef.current;
-
 					pendingSaveRef.current = null;
 
 					const payload = mapSetupFormToDto(latestValues);
 
-					/* -------------------------------------------------- */
-					/* NEW PROGRAM                                      */
-					/* -------------------------------------------------- */
+					/* ------------------------------------------------------ */
+					/* NEW PROGRAM                                           */
+					/* ------------------------------------------------------ */
 
-					if (mode === "new" && createdRevisionRef.current == null) {
-						/*
-						 * Never create twice.
-						 */
+					if (mode === "new" && !persistenceRef.current.programId) {
 						if (createInFlightRef.current) {
 							pendingSaveRef.current = latestValues;
 							break;
@@ -283,19 +266,22 @@ export function SetupForm({
 						createInFlightRef.current = true;
 
 						try {
-							const result = await createSetup.mutateAsync(payload);
+							const result = await createProgramAsync(payload);
 
 							if (result.programId == null || result.revisionId == null) {
 								throw new Error(
-									"Setup create response did not contain programId and revisionId.",
+									"Create program response did not contain programId/revisionId.",
 								);
 							}
 
-							createdRevisionRef.current = {
+							persistenceRef.current = {
 								programId: result.programId,
 								revisionId: result.revisionId,
 							};
 
+							/*
+							 * Tell the editor that the new program now exists.
+							 */
 							onCreated?.({
 								programId: result.programId,
 								revisionId: result.revisionId,
@@ -304,18 +290,23 @@ export function SetupForm({
 							createInFlightRef.current = false;
 						}
 
-						continue;
+						/*
+						 * IMPORTANT:
+						 *
+						 * POST /programs creates the program/revision.
+						 * It does NOT save the complete setup DTO.
+						 *
+						 * Therefore continue and PUT the setup.
+						 */
 					}
 
-					/* -------------------------------------------------- */
-					/* EXISTING DRAFT / CREATED PROGRAM                  */
-					/* -------------------------------------------------- */
+					/* ------------------------------------------------------ */
+					/* SETUP UPDATE                                           */
+					/* ------------------------------------------------------ */
 
-					const currentProgramId =
-						createdRevisionRef.current?.programId ?? effectiveProgramId;
+					const currentProgramId = persistenceRef.current.programId;
 
-					const currentRevisionId =
-						createdRevisionRef.current?.revisionId ?? effectiveRevisionId;
+					const currentRevisionId = persistenceRef.current.revisionId;
 
 					if (currentProgramId == null || currentRevisionId == null) {
 						throw new Error(
@@ -323,22 +314,11 @@ export function SetupForm({
 						);
 					}
 
-					await updateSetup.mutateAsync({
+					await updateSetupAsync({
 						programId: currentProgramId,
 						revisionId: currentRevisionId,
 						payload,
 					});
-					/*
-					 * The values that were just persisted are now the
-					 * clean form baseline.
-					 *
-					 * Do this only after the API succeeds.
-					 */
-					if (mountedRef.current && !pendingSaveRef.current) {
-						form.reset(form.getValues(), {
-							keepValues: true,
-						});
-					}
 				}
 
 				if (mountedRef.current) {
@@ -349,7 +329,7 @@ export function SetupForm({
 					updateSectionStatus("setup", "warning");
 				}
 
-				throw error;
+				console.error("Program setup autosave failed", error);
 			} finally {
 				savingRef.current = false;
 			}
@@ -357,12 +337,10 @@ export function SetupForm({
 		[
 			canEdit,
 			mode,
-			effectiveProgramId,
-			effectiveRevisionId,
-			createSetup,
-			updateSetup,
-			updateSectionStatus,
+			createProgramAsync,
+			updateSetupAsync,
 			onCreated,
+			updateSectionStatus,
 		],
 	);
 
@@ -402,44 +380,45 @@ export function SetupForm({
 	/* ---------------------------------------------------------------------- */
 	/* Auto-save debounce                                                      */
 	/* ---------------------------------------------------------------------- */
-
+	const latestValuesRef = useRef<SetupFormOutput | null>(null);
 	useEffect(() => {
 		if (!canEdit) {
 			return;
 		}
 
-		if (!hydratedRef.current) {
-			return;
-		}
+		const subscription = form.watch((values) => {
+			if (!hydratedRef.current) {
+				return;
+			}
 
-		if (!form.formState.isDirty) {
-			return;
-		}
+			latestValuesRef.current = values as SetupFormOutput;
 
-		/*
-		 * Cancel previous timer.
-		 */
-		if (saveTimerRef.current !== null) {
-			window.clearTimeout(saveTimerRef.current);
-		}
-
-		/*
-		 * Wait until the user stops changing fields.
-		 */
-		saveTimerRef.current = window.setTimeout(() => {
-			saveTimerRef.current = null;
-
-			void autoSaveSetup();
-		}, AUTO_SAVE_DELAY);
-
-		return () => {
 			if (saveTimerRef.current !== null) {
 				window.clearTimeout(saveTimerRef.current);
+			}
 
+			saveTimerRef.current = window.setTimeout(() => {
+				saveTimerRef.current = null;
+
+				const latest = latestValuesRef.current;
+
+				if (!latest) {
+					return;
+				}
+
+				void persistSetup(latest);
+			}, AUTO_SAVE_DELAY);
+		});
+
+		return () => {
+			subscription.unsubscribe();
+
+			if (saveTimerRef.current !== null) {
+				window.clearTimeout(saveTimerRef.current);
 				saveTimerRef.current = null;
 			}
 		};
-	}, [formValues, canEdit, form.formState.isDirty, autoSaveSetup]);
+	}, [canEdit, form, persistSetup]);
 
 	/* ---------------------------------------------------------------------- */
 	/* Dirty status                                                            */
