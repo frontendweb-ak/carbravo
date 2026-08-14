@@ -11,6 +11,7 @@ export function usePrograms(params?: ListProgramsParams) {
 		queryKey: queryKeys.programs.list(params),
 		queryFn: async () => {
 			const response = await programsApi.getList(params);
+			console.log("RE", response);
 			return mapProgramsList(response);
 		},
 		placeholderData: (previousData) => previousData,

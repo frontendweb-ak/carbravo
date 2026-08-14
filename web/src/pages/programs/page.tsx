@@ -20,7 +20,7 @@ export default function ProgramsPage() {
 
 	const { data, isLoading, isFetching, isError, refetch } =
 		usePrograms(filters);
-	console.log("data", JSON.stringify(data, null, 2));
+
 	const programs = data?.items ?? [];
 	const pagination = data?.pagination;
 	const statusCounts = data?.statusCounts;
@@ -48,7 +48,6 @@ export default function ProgramsPage() {
 			label: "Draft",
 			count: statusCounts?.draft ?? 0,
 		},
-
 		{
 			value: "ACTIVE",
 			label: "Active",

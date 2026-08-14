@@ -124,6 +124,7 @@ programs.get("/programs", async (c) => {
       totalElements,
       totalPages,
     },
+    statusCounts,
   });
 });
 

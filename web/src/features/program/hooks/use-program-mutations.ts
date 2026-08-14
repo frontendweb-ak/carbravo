@@ -13,16 +13,26 @@ import { setupApi } from "../api/setup.api";
 
 export function useCreateProgram() {
 	const queryClient = useQueryClient();
+
 	return useAppMutation({
 		mutationFn: (payload: CreateProgramRequestDto) =>
 			programsApi.create(payload),
+
 		successMessage: "Program created successfully.",
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: queryKeys.programs.all });
+
+		onSuccess: (data) => {
+			queryClient.invalidateQueries({
+				queryKey: queryKeys.programs.all,
+			});
+
+			if (data.programId != null) {
+				queryClient.invalidateQueries({
+					queryKey: queryKeys.programs.detail(data.programId),
+				});
+			}
 		},
 	});
 }
-
 /* -------------------------------------------------------------------------- */
 /* Update Setup                                                               */
 /* -------------------------------------------------------------------------- */
@@ -46,6 +56,13 @@ export function useUpdateProgramSetup() {
 		onSuccess: (_, variables) => {
 			queryClient.invalidateQueries({
 				queryKey: queryKeys.programs.detail(variables.programId),
+			});
+
+			queryClient.invalidateQueries({
+				queryKey: queryKeys.setup.byRevision(
+					variables.programId,
+					variables.revisionId,
+				),
 			});
 		},
 	});

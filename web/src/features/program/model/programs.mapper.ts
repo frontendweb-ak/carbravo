@@ -52,9 +52,9 @@ export function mapProgram(dto: ProgramListItemDto): Program {
 		);
 	}
 
-	if (!dto.programType) {
-		throw new Error(`Program ${dto.programId} response is missing programType`);
-	}
+	// if (!dto.programType) {
+	// 	throw new Error(`Program ${dto.programId} response is missing programType`);
+	// }
 
 	return {
 		id: dto.programId,
@@ -63,7 +63,7 @@ export function mapProgram(dto: ProgramListItemDto): Program {
 		name: dto.programName ?? "Untitled program",
 
 		status: dto.programStatus,
-		type: dto.programType,
+		type: dto.programType ?? null,
 
 		revision: mapRevision(dto.currentRevision),
 
@@ -94,6 +94,8 @@ export function mapProgramsStatusCounts(
 	return {
 		all: dto?.all ?? 0,
 		draft: dto?.draft ?? 0,
+		review: dto?.review ?? 0,
+		approved: dto?.approved ?? 0,
 		active: dto?.active ?? 0,
 		expired: dto?.expired ?? 0,
 	};

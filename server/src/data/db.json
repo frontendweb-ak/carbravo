@@ -97,6 +97,20 @@
       "createdAt": "2026-08-14T16:43:23.820Z",
       "updatedAt": "2026-08-14T16:43:23.820Z",
       "deletedAt": null
+    },
+    {
+      "id": 8,
+      "identifier": "PROG-2026-0008",
+      "name": "pradeep kumar",
+      "status": "DRAFT",
+      "programType": "",
+      "activeRevisionId": null,
+      "draftRevisionId": 109,
+      "deliveryStartDate": null,
+      "deliveryEndDate": null,
+      "createdAt": "2026-08-14T16:50:21.402Z",
+      "updatedAt": "2026-08-14T16:50:21.402Z",
+      "deletedAt": null
     }
   ],
   "revisions": [
@@ -847,6 +861,62 @@
       },
       "summary": {},
       "copiedFromRevisionId": null
+    },
+    {
+      "id": 109,
+      "programId": 8,
+      "majorRevision": 1,
+      "minorRevision": 0,
+      "status": "DRAFT",
+      "isMinorRevision": false,
+      "createdAt": "2026-08-14T16:50:21.402Z",
+      "createdBy": "demo.user",
+      "postedAt": null,
+      "postedBy": null,
+      "approval": {
+        "revisionId": 109,
+        "isSubmitted": false,
+        "submittedAt": null,
+        "submittedBy": null,
+        "approved": false,
+        "approvedAt": null,
+        "approvedBy": null,
+        "approvalComment": null,
+        "rejectedAt": null,
+        "rejectedBy": null,
+        "rejectionReason": null
+      },
+      "setup": {
+        "programName": "pradeep kumar",
+        "programTypeCode": null,
+        "purchaseType": null,
+        "customerTypeCodes": [],
+        "contactName": null,
+        "contactEmail": null,
+        "contactPhone": null,
+        "financialProviderCode": null,
+        "conditionCode": null,
+        "mileageCeiling": null,
+        "topOfDeal": false,
+        "vinException": false,
+        "mfpnText": null,
+        "disclosureText": null,
+        "localeCode": "en-US",
+        "deliveryStartDate": null,
+        "deliveryEndDate": null,
+        "effectiveStartDate": null,
+        "effectiveEndDate": null,
+        "financeTerms": [],
+        "creditTiers": []
+      },
+      "vehicles": [],
+      "geography": [],
+      "values": {
+        "financeTerms": [],
+        "components": []
+      },
+      "summary": {},
+      "copiedFromRevisionId": null
     }
   ],
   "vehicles": [
@@ -1393,6 +1463,16 @@
     ]
   },
   "activity": [
+    {
+      "id": 114,
+      "entityType": "INCENTIVE_PROGRAM",
+      "entityId": 8,
+      "operation": "CREATE",
+      "changedBy": "demo.user",
+      "changedAt": "2026-08-14T16:50:21.402Z",
+      "programName": "pradeep kumar",
+      "programIdentifier": "PROG-2026-0008"
+    },
     {
       "id": 113,
       "entityType": "INCENTIVE_PROGRAM",

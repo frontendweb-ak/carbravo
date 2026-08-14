@@ -30,7 +30,7 @@ export interface Program {
 	name: string;
 
 	status: ProgramStatus;
-	type: ProgramType;
+	type: ProgramType | null;
 
 	revision: ProgramRevision | null;
 
@@ -49,6 +49,8 @@ export interface ProgramDetail extends Program {
 export interface ProgramsStatusCounts {
 	all: number;
 	draft: number;
+	review: number;
+	approved: number;
 	active: number;
 	expired: number;
 }

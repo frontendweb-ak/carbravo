@@ -24,7 +24,6 @@ import {
 import { useProgramEditor } from "../editor/program-editor-context";
 import {
 	useCreateProgram,
-	useProgram,
 	useProgramSetup,
 	useUpdateProgramSetup,
 } from "../hooks";
@@ -83,29 +82,6 @@ export function SetupForm({
 
 	const canEdit = mode === "new" || (isExistingRevision && !readOnly);
 
-	/*
-	 * New programs do not have IDs until the first successful
-	 * POST /programs/setup.
-	 */
-	const createdRevisionRef = useRef<{
-		programId: number;
-		revisionId: number;
-	} | null>(null);
-	const persistenceRef = useRef<{
-		programId?: number;
-		revisionId?: number;
-	}>({
-		programId,
-		revisionId,
-	});
-	useEffect(() => {
-		if (mode === "edit") {
-			persistenceRef.current = {
-				programId,
-				revisionId,
-			};
-		}
-	}, [mode, programId, revisionId]);
 	/* ---------------------------------------------------------------------- */
 	/* API                                                                     */
 	/* ---------------------------------------------------------------------- */
@@ -117,10 +93,9 @@ export function SetupForm({
 		refetch: refetchSetup,
 	} = useProgramSetup(programId, revisionId);
 
-	const program = useProgram(programId);
-	console.log("program", program.data);
 	const { mutateAsync: createProgramAsync } = useCreateProgram();
 	const { mutateAsync: updateSetupAsync } = useUpdateProgramSetup();
+
 	/* ---------------------------------------------------------------------- */
 	/* Form                                                                    */
 	/* ---------------------------------------------------------------------- */
@@ -128,6 +103,12 @@ export function SetupForm({
 	const form = useForm<SetupFormInput, unknown, SetupFormOutput>({
 		resolver: zodResolver(setupFormSchema),
 		defaultValues: setupDefaultValues,
+
+		/*
+		 * Manual Save Draft validates.
+		 *
+		 * Autosave does NOT call trigger() / handleSubmit().
+		 */
 		mode: "onBlur",
 		reValidateMode: "onBlur",
 	});
@@ -138,86 +119,115 @@ export function SetupForm({
 	});
 
 	/* ---------------------------------------------------------------------- */
-	/* Lifecycle refs                                                          */
+	/* Persistence state                                                       */
 	/* ---------------------------------------------------------------------- */
 
-	/*
-	 * Prevent API hydration from triggering auto-save.
+	/**
+	 * The IDs used by persistence.
+	 *
+	 * EDIT:
+	 *   initialized with programId/revisionId.
+	 *
+	 * NEW:
+	 *   initially empty.
+	 *   populated after POST /programs succeeds.
 	 */
-	const hydratedRef = useRef(false);
+	const persistenceRef = useRef<{
+		programId: number | undefined;
+		revisionId: number | undefined;
+	}>({
+		programId,
+		revisionId,
+	});
 
-	/*
-	 * Prevent saves after unmount.
+	/**
+	 * Keep edit IDs synchronized with route/context.
 	 */
-	const mountedRef = useRef(true);
+	useEffect(() => {
+		if (mode !== "edit") {
+			return;
+		}
 
-	/*
-	 * Debounce timer.
-	 */
-	const saveTimerRef = useRef<number | null>(null);
-
-	/*
-	 * Only one network request at a time.
-	 */
-	const savingRef = useRef(false);
-
-	/*
-	 * If the user changes another field while a request is
-	 * running, keep the newest values here.
-	 */
-	const pendingSaveRef = useRef<SetupFormOutput | null>(null);
-
-	/*
-	 * Prevent duplicate create calls for a new program.
-	 */
-	const createInFlightRef = useRef(false);
+		persistenceRef.current = {
+			programId,
+			revisionId,
+		};
+	}, [mode, programId, revisionId]);
 
 	/* ---------------------------------------------------------------------- */
-	/* Mount / unmount                                                         */
+	/* Lifecycle                                                               */
 	/* ---------------------------------------------------------------------- */
+
+	const mountedRef = useRef(false);
 
 	useEffect(() => {
 		mountedRef.current = true;
 
 		return () => {
 			mountedRef.current = false;
-
-			if (saveTimerRef.current !== null) {
-				window.clearTimeout(saveTimerRef.current);
-				saveTimerRef.current = null;
-			}
-
-			pendingSaveRef.current = null;
 		};
 	}, []);
 
 	/* ---------------------------------------------------------------------- */
-	/* Load existing revision                                                  */
+	/* Hydration                                                               */
 	/* ---------------------------------------------------------------------- */
 
+	const hydratedRef = useRef(false);
+
+	/**
+	 * Prevent the same revision from being hydrated repeatedly.
+	 *
+	 * This is important because React Query can update the `setup`
+	 * object without meaning that the user changed the form.
+	 */
+	const hydratedRevisionRef = useRef<string | null>(null);
+
 	useEffect(() => {
-		if (!isExistingRevision) {
+		if (!isExistingRevision || !setup) {
 			return;
 		}
 
-		if (!setup) {
+		const hydrationKey = `${programId}:${revisionId}`;
+
+		if (hydratedRevisionRef.current === hydrationKey) {
 			return;
 		}
+
+		hydratedRevisionRef.current = hydrationKey;
+
+		/*
+		 * Block autosave BEFORE reset().
+		 */
+		hydratedRef.current = false;
 
 		const values = mapSetupResponseToForm(setup);
 
-		/*
-		 * reset() is hydration, not a user edit.
-		 */
 		form.reset(values);
 
+		/*
+		 * Hydration is complete.
+		 *
+		 * reset() has finished and the form is now safe to watch.
+		 */
 		hydratedRef.current = true;
 
+		/*
+		 * This happens once for the loaded revision.
+		 *
+		 * It is NOT inside a dirty-state effect.
+		 */
 		updateSectionStatus("setup", "completed");
-	}, [isExistingRevision, setup, form, updateSectionStatus]);
+	}, [
+		isExistingRevision,
+		setup,
+		programId,
+		revisionId,
+		form,
+		updateSectionStatus,
+	]);
 
 	/* ---------------------------------------------------------------------- */
-	/* New program initialization                                              */
+	/* New program hydration                                                   */
 	/* ---------------------------------------------------------------------- */
 
 	useEffect(() => {
@@ -225,11 +235,69 @@ export function SetupForm({
 			return;
 		}
 
+		/*
+		 * New form starts with setupDefaultValues.
+		 *
+		 * There is no API hydration.
+		 */
 		hydratedRef.current = true;
+		hydratedRevisionRef.current = "new";
 	}, [mode]);
 
 	/* ---------------------------------------------------------------------- */
-	/* Persist                                                                  */
+	/* Autosave state                                                          */
+	/* ---------------------------------------------------------------------- */
+
+	const saveTimerRef = useRef<number | null>(null);
+
+	const savingRef = useRef(false);
+
+	const pendingSaveRef = useRef<SetupFormOutput | null>(null);
+
+	const createInFlightRef = useRef(false);
+
+	/**
+	 * Incremented every time the user changes a field.
+	 *
+	 * Used to determine whether another edit happened while an
+	 * API request was running.
+	 */
+	const changeVersionRef = useRef(0);
+
+	/**
+	 * Latest form values.
+	 */
+	const latestValuesRef = useRef<SetupFormOutput | null>(null);
+
+	/* ---------------------------------------------------------------------- */
+	/* Section status                                                          */
+	/* ---------------------------------------------------------------------- */
+
+	/**
+	 * Keep the last status locally so we don't repeatedly call
+	 * updateSectionStatus() with the same value.
+	 */
+	const sectionStatusRef = useRef<string | null>(null);
+
+	const setSetupStatus = useCallback(
+		(status: "completed" | "warning") => {
+			if (!mountedRef.current) {
+				return;
+			}
+
+			if (sectionStatusRef.current === status) {
+				return;
+			}
+
+			sectionStatusRef.current = status;
+
+			updateSectionStatus("setup", status);
+		},
+		[updateSectionStatus],
+	);
+
+	/* ---------------------------------------------------------------------- */
+	/* Persistence                                                             */
 	/* ---------------------------------------------------------------------- */
 
 	const persistSetup = useCallback(
@@ -238,8 +306,19 @@ export function SetupForm({
 				return;
 			}
 
+			/*
+			 * Always replace pending values with the newest values.
+			 */
 			pendingSaveRef.current = values;
 
+			/*
+			 * A save is already running.
+			 *
+			 * Do NOT start another request.
+			 *
+			 * The current request will loop and consume
+			 * pendingSaveRef when it finishes.
+			 */
 			if (savingRef.current) {
 				return;
 			}
@@ -247,17 +326,23 @@ export function SetupForm({
 			savingRef.current = true;
 
 			try {
-				while (pendingSaveRef.current && mountedRef.current) {
+				while (mountedRef.current && pendingSaveRef.current != null) {
 					const latestValues = pendingSaveRef.current;
+
 					pendingSaveRef.current = null;
+
+					const versionAtStart = changeVersionRef.current;
 
 					const payload = mapSetupFormToDto(latestValues);
 
-					/* ------------------------------------------------------ */
-					/* NEW PROGRAM                                           */
-					/* ------------------------------------------------------ */
+					/* ====================================================== */
+					/* CREATE NEW PROGRAM                                     */
+					/* ====================================================== */
 
-					if (mode === "new" && !persistenceRef.current.programId) {
+					if (mode === "new" && persistenceRef.current.programId == null) {
+						/*
+						 * Prevent duplicate POST /programs.
+						 */
 						if (createInFlightRef.current) {
 							pendingSaveRef.current = latestValues;
 							break;
@@ -266,43 +351,42 @@ export function SetupForm({
 						createInFlightRef.current = true;
 
 						try {
-							const result = await createProgramAsync(payload);
+							/*
+							 * IMPORTANT:
+							 *
+							 * POST /programs is NOT the setup endpoint.
+							 *
+							 * Hono:
+							 *
+							 * POST /api/programs
+							 *
+							 * expects the program creation DTO.
+							 */
+							const created = await createProgramAsync({
+								programName: latestValues.programName,
+							});
 
-							if (result.programId == null || result.revisionId == null) {
+							if (created.programId == null || created.revisionId == null) {
 								throw new Error(
-									"Create program response did not contain programId/revisionId.",
+									"Create program response did not contain programId and revisionId.",
 								);
 							}
 
-							persistenceRef.current = {
-								programId: result.programId,
-								revisionId: result.revisionId,
-							};
-
 							/*
-							 * Tell the editor that the new program now exists.
+							 * Store IDs BEFORE doing the setup PUT.
 							 */
-							onCreated?.({
-								programId: result.programId,
-								revisionId: result.revisionId,
-							});
+							persistenceRef.current = {
+								programId: created.programId,
+								revisionId: created.revisionId,
+							};
 						} finally {
 							createInFlightRef.current = false;
 						}
-
-						/*
-						 * IMPORTANT:
-						 *
-						 * POST /programs creates the program/revision.
-						 * It does NOT save the complete setup DTO.
-						 *
-						 * Therefore continue and PUT the setup.
-						 */
 					}
 
-					/* ------------------------------------------------------ */
-					/* SETUP UPDATE                                           */
-					/* ------------------------------------------------------ */
+					/* ====================================================== */
+					/* UPDATE SETUP                                           */
+					/* ====================================================== */
 
 					const currentProgramId = persistenceRef.current.programId;
 
@@ -314,24 +398,88 @@ export function SetupForm({
 						);
 					}
 
+					/*
+					 * This is the actual setup persistence endpoint:
+					 *
+					 * PUT /api/programs/:programId/revisions/:revisionId/setup
+					 */
 					await updateSetupAsync({
 						programId: currentProgramId,
 						revisionId: currentRevisionId,
 						payload,
 					});
+
+					/*
+					 * Only after BOTH:
+					 *
+					 * POST /programs
+					 * AND
+					 * PUT /programs/:id/revisions/:revisionId/setup
+					 *
+					 * succeeded do we tell the editor that the new
+					 * program exists.
+					 *
+					 * This prevents navigation/unmount before setup
+					 * has been persisted.
+					 */
+					if (mode === "new" && versionAtStart === changeVersionRef.current) {
+						const createdProgramId = persistenceRef.current.programId;
+
+						const createdRevisionId = persistenceRef.current.revisionId;
+
+						if (createdProgramId != null && createdRevisionId != null) {
+							onCreated?.({
+								programId: createdProgramId,
+								revisionId: createdRevisionId,
+							});
+						}
+					}
+
+					/*
+					 * If the user changed something while the request
+					 * was running, don't consider this the final save.
+					 *
+					 * The watch subscription will have placed the
+					 * newest values into pendingSaveRef.
+					 */
+					if (
+						changeVersionRef.current !== versionAtStart &&
+						latestValuesRef.current != null &&
+						pendingSaveRef.current == null
+					) {
+						pendingSaveRef.current = latestValuesRef.current;
+					}
 				}
 
 				if (mountedRef.current) {
-					updateSectionStatus("setup", "completed");
+					setSetupStatus("completed");
 				}
 			} catch (error) {
-				if (mountedRef.current) {
-					updateSectionStatus("setup", "warning");
-				}
+				console.error("[SetupForm] autosave failed", error);
 
-				console.error("Program setup autosave failed", error);
+				if (mountedRef.current) {
+					setSetupStatus("warning");
+				}
 			} finally {
 				savingRef.current = false;
+
+				/*
+				 * Race protection:
+				 *
+				 * If a change arrived after the while-loop checked
+				 * pendingSaveRef, schedule one more save.
+				 */
+				if (
+					mountedRef.current &&
+					pendingSaveRef.current != null &&
+					!savingRef.current
+				) {
+					queueMicrotask(() => {
+						if (mountedRef.current && pendingSaveRef.current != null) {
+							void persistSetup(pendingSaveRef.current);
+						}
+					});
+				}
 			}
 		},
 		[
@@ -340,59 +488,69 @@ export function SetupForm({
 			createProgramAsync,
 			updateSetupAsync,
 			onCreated,
-			updateSectionStatus,
+			setSetupStatus,
 		],
 	);
 
 	/* ---------------------------------------------------------------------- */
-	/* Silent auto-save                                                        */
+	/* Keep persistence function in a ref                                      */
 	/* ---------------------------------------------------------------------- */
 
-	const autoSaveSetup = useCallback(async () => {
-		if (!canEdit) {
-			return;
-		}
+	/**
+	 * The watch subscription should NOT be recreated whenever
+	 * persistSetup changes identity.
+	 *
+	 * This is one of the important protections against the
+	 * autosave render loop.
+	 */
+	const persistSetupRef = useRef<typeof persistSetup>(persistSetup);
 
-		if (!hydratedRef.current) {
-			return;
-		}
-
-		/*
-		 * Autosave must not validate the complete UI form.
-		 *
-		 * The UI contains fields that are not part of the
-		 * OpenAPI Setup DTO.
-		 *
-		 * Example:
-		 * - programNumber
-		 * - incentiveCodes
-		 * - country
-		 * - firstVisibleDate
-		 *
-		 * Those fields can legitimately be empty while the
-		 * OpenAPI setup payload is still saveable.
-		 */
-		const values = form.getValues();
-		await persistSetup(values as SetupFormOutput);
-		//
-	}, [canEdit, form, persistSetup]);
+	useEffect(() => {
+		persistSetupRef.current = persistSetup;
+	}, [persistSetup]);
 
 	/* ---------------------------------------------------------------------- */
-	/* Auto-save debounce                                                      */
+	/* Auto-save subscription                                                  */
 	/* ---------------------------------------------------------------------- */
-	const latestValuesRef = useRef<SetupFormOutput | null>(null);
+
 	useEffect(() => {
 		if (!canEdit) {
 			return;
 		}
 
+		/*
+		 * Subscribe once for the current editable form.
+		 *
+		 * We intentionally do NOT use:
+		 *
+		 *   [formValues, isDirty, persistSetup]
+		 *
+		 * because those dependencies can recreate the subscription
+		 * and timer repeatedly.
+		 */
 		const subscription = form.watch((values) => {
 			if (!hydratedRef.current) {
 				return;
 			}
 
-			latestValuesRef.current = values as SetupFormOutput;
+			if (!mountedRef.current) {
+				return;
+			}
 
+			const nextValues = values as SetupFormOutput;
+
+			latestValuesRef.current = nextValues;
+
+			changeVersionRef.current += 1;
+
+			/*
+			 * User changed something.
+			 */
+			setSetupStatus("warning");
+
+			/*
+			 * Debounce.
+			 */
 			if (saveTimerRef.current !== null) {
 				window.clearTimeout(saveTimerRef.current);
 			}
@@ -400,13 +558,17 @@ export function SetupForm({
 			saveTimerRef.current = window.setTimeout(() => {
 				saveTimerRef.current = null;
 
+				if (!mountedRef.current) {
+					return;
+				}
+
 				const latest = latestValuesRef.current;
 
 				if (!latest) {
 					return;
 				}
 
-				void persistSetup(latest);
+				void persistSetupRef.current(latest);
 			}, AUTO_SAVE_DELAY);
 		});
 
@@ -415,33 +577,11 @@ export function SetupForm({
 
 			if (saveTimerRef.current !== null) {
 				window.clearTimeout(saveTimerRef.current);
+
 				saveTimerRef.current = null;
 			}
 		};
-	}, [canEdit, form, persistSetup]);
-
-	/* ---------------------------------------------------------------------- */
-	/* Dirty status                                                            */
-	/* ---------------------------------------------------------------------- */
-
-	useEffect(() => {
-		if (!canEdit) {
-			return;
-		}
-
-		if (!hydratedRef.current || !form.formState.isDirty) {
-			return;
-		}
-
-		/*
-		 * Don't overwrite "saving".
-		 */
-		if (savingRef.current) {
-			return;
-		}
-
-		updateSectionStatus("setup", "warning");
-	}, [canEdit, form.formState.isDirty, formValues, updateSectionStatus]);
+	}, [canEdit, form, setSetupStatus]);
 
 	/* ---------------------------------------------------------------------- */
 	/* Conditional finance terms                                               */
@@ -459,10 +599,7 @@ export function SetupForm({
 		}
 
 		/*
-		 * Finance terms are not applicable to Cash.
-		 *
-		 * This should be considered a user-driven business
-		 * state change, so dirty state is intentional.
+		 * Cash programs do not have finance terms.
 		 */
 		form.setValue("financeTerms", [], {
 			shouldDirty: true,
@@ -475,27 +612,55 @@ export function SetupForm({
 	/* Manual Save Draft                                                       */
 	/* ---------------------------------------------------------------------- */
 
-	const saveSetup = useCallback(async () => {
+	const saveSetupRef = useRef<(() => Promise<void>) | null>(null);
+
+	saveSetupRef.current = async () => {
 		if (!canEdit) {
 			return;
 		}
 
 		/*
-		 * Manual save DOES show validation errors.
+		 * Manual save intentionally validates the complete form.
 		 */
 		await form.handleSubmit(
 			async (values) => {
-				await persistSetup(values);
+				/*
+				 * Cancel a pending debounce timer because the user
+				 * explicitly clicked Save Draft.
+				 */
+				if (saveTimerRef.current !== null) {
+					window.clearTimeout(saveTimerRef.current);
+
+					saveTimerRef.current = null;
+				}
+
+				latestValuesRef.current = values;
+
+				changeVersionRef.current += 1;
+
+				await persistSetupRef.current(values);
 			},
 			() => {
-				updateSectionStatus("setup", "warning");
+				setSetupStatus("warning");
 			},
 		)();
-	}, [canEdit, form, persistSetup, updateSectionStatus]);
+	};
 
 	/* ---------------------------------------------------------------------- */
 	/* Register Save Draft                                                     */
 	/* ---------------------------------------------------------------------- */
+
+	/**
+	 * Stable wrapper.
+	 *
+	 * IMPORTANT:
+	 *
+	 * Do NOT register `saveSetup` directly because its identity can
+	 * change on every render.
+	 */
+	const stableSaveHandlerRef = useRef(async () => {
+		await saveSetupRef.current?.();
+	});
 
 	useEffect(() => {
 		if (!canEdit) {
@@ -503,12 +668,12 @@ export function SetupForm({
 			return;
 		}
 
-		registerSaveHandler(saveSetup);
+		registerSaveHandler(stableSaveHandlerRef.current);
 
 		return () => {
 			registerSaveHandler(null);
 		};
-	}, [canEdit, registerSaveHandler, saveSetup]);
+	}, [canEdit, registerSaveHandler]);
 
 	/* ---------------------------------------------------------------------- */
 	/* Loading                                                                  */

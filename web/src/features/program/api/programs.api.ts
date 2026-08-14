@@ -78,14 +78,15 @@ export interface PaginationDto {
 export interface ProgramStatusCountsDto {
 	all?: number;
 	draft?: number;
+	review?: number;
+	approved?: number;
 	active?: number;
 	expired?: number;
 }
-
 export interface ListProgramsResponseDto {
 	content?: ProgramListItemDto[];
 	pagination?: PaginationDto;
-	statusCounts?: ProgramStatusCountsDto;
+
 }
 
 /* -------------------------------------------------------------------------- */

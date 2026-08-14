@@ -3,22 +3,22 @@ import { useSearchParams } from "react-router-dom";
 
 import type { ListProgramsParams, ProgramStatusDto } from "../api/programs.api";
 
+function parseStatus(value: string | null): ProgramStatusDto | undefined {
+	const status = value?.toUpperCase();
+
+	return status === "DRAFT" || status === "ACTIVE" || status === "EXPIRED"
+		? status
+		: undefined;
+}
+
 export function useProgramFilters() {
 	const [searchParams, setSearchParams] = useSearchParams();
 
-	const statusParam = searchParams.get("status")?.toUpperCase();
-	const initialStatus: ProgramStatusDto | undefined =
-		statusParam === "DRAFT" ||
-		statusParam === "ACTIVE" ||
-		statusParam === "EXPIRED"
-			? statusParam
-			: undefined;
-
-	const [filters, setFilters] = useState<ListProgramsParams>({
+	const [filters, setFilters] = useState<ListProgramsParams>(() => ({
 		page: 0,
 		size: 20,
-		status: initialStatus,
-	});
+		status: parseStatus(searchParams.get("status")),
+	}));
 
 	const setStatus = (status?: ProgramStatusDto) => {
 		setFilters((current) => ({
@@ -27,11 +27,15 @@ export function useProgramFilters() {
 			page: 0,
 		}));
 
-		if (status) {
-			setSearchParams({ status });
-		} else {
-			setSearchParams({});
-		}
+		setSearchParams((current) => {
+			if (status) {
+				current.set("status", status);
+			} else {
+				current.delete("status");
+			}
+
+			return current;
+		});
 	};
 
 	const setSearch = (search: string) => {
@@ -43,7 +47,10 @@ export function useProgramFilters() {
 	};
 
 	const setPage = (page: number) => {
-		setFilters((current) => ({ ...current, page }));
+		setFilters((current) => ({
+			...current,
+			page,
+		}));
 	};
 
 	return {
