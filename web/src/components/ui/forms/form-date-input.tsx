@@ -1,23 +1,25 @@
+import type { ReactNode } from "react";
 import {
 	type Control,
 	Controller,
 	type FieldValues,
 	type Path,
 } from "react-hook-form";
+
 import { DateInput, type DateInputProps } from "../primitives";
 import { FormField } from "./form-field";
 
 export type FormDateInputProps<T extends FieldValues> = Omit<
 	DateInputProps,
-	"name" | "value" | "defaultValue" | "onChange" | "onBlur"
+	"value" | "onChange"
 > & {
 	control: Control<T>;
 	name: Path<T>;
 
-	label?: React.ReactNode;
+	label?: ReactNode;
 	required?: boolean;
-	description?: React.ReactNode;
-	rightElement?: React.ReactNode;
+	description?: ReactNode;
+	rightElement?: ReactNode;
 };
 
 function FormDateInput<T extends FieldValues>({
@@ -34,30 +36,25 @@ function FormDateInput<T extends FieldValues>({
 			control={control}
 			name={name}
 			render={({ field, fieldState }) => (
-				console.log(name, field.value),
-				(
-					<FormField
-						label={label}
-						required={required}
-						description={description}
-						error={fieldState.error?.message}
-						disabled={props.disabled}
-						rightElement={rightElement}
-					>
-						<DateInput
-							{...props}
-							{...field}
-							className="bg-white"
-							value={field.value ?? ""}
-							error={!!fieldState.error}
-							aria-invalid={fieldState.error ? true : undefined}
-						/>
-					</FormField>
-				)
+				<FormField
+					label={label}
+					required={required}
+					description={description}
+					error={fieldState.error?.message}
+					disabled={props.disabled}
+					rightElement={rightElement}
+				>
+					<DateInput
+						{...props}
+						value={field.value ?? ""}
+						onChange={field.onChange}
+						error={!!fieldState.error}
+						helperText={fieldState.error?.message}
+					/>
+				</FormField>
 			)}
 		/>
 	);
 }
 
 export { FormDateInput };
-

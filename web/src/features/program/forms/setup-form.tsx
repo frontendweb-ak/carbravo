@@ -7,6 +7,13 @@ import {
 	FormTimeInput,
 } from "@/components/ui";
 import { zodResolver } from "@hookform/resolvers/zod";
+import {
+	Alert,
+	Box,
+	Button,
+	Stack,
+	Typography,
+} from "@mui/material";
 import { useCallback, useEffect, useRef } from "react";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
@@ -39,7 +46,17 @@ interface FlagCardProps {
 
 function FlagCard({ children }: FlagCardProps) {
 	return (
-		<div className="rounded-xl border border-border px-4 py-3">{children}</div>
+		<Box
+			sx={{
+				border: 1,
+				borderColor: "divider",
+				borderRadius: 3,
+				px: 2,
+				py: 1.5,
+			}}
+		>
+			{children}
+		</Box>
 	);
 }
 
@@ -56,7 +73,10 @@ interface SetupFormProps {
 	 * The editor should normally update its route/context
 	 * with these IDs.
 	 */
-	onCreated?: (result: { programId: number; revisionId: number }) => void;
+	onCreated?: (result: {
+		programId: number;
+		revisionId: number;
+	}) => void;
 }
 
 type SetupFormInput = z.input<typeof setupFormSchema>;
@@ -71,16 +91,23 @@ export function SetupForm({
 	readOnly = false,
 	onCreated,
 }: SetupFormProps) {
-	const { registerSaveHandler, updateSectionStatus } = useProgramEditor();
+	const {
+		registerSaveHandler,
+		updateSectionStatus,
+	} = useProgramEditor();
 
 	/* ---------------------------------------------------------------------- */
 	/* Mode / permissions                                                     */
 	/* ---------------------------------------------------------------------- */
 
 	const isExistingRevision =
-		mode === "edit" && programId != null && revisionId != null;
+		mode === "edit" &&
+		programId != null &&
+		revisionId != null;
 
-	const canEdit = mode === "new" || (isExistingRevision && !readOnly);
+	const canEdit =
+		mode === "new" ||
+		(isExistingRevision && !readOnly);
 
 	/* ---------------------------------------------------------------------- */
 	/* API                                                                     */
@@ -93,22 +120,25 @@ export function SetupForm({
 		refetch: refetchSetup,
 	} = useProgramSetup(programId, revisionId);
 
-	const { mutateAsync: createProgramAsync } = useCreateProgram();
-	const { mutateAsync: updateSetupAsync } = useUpdateProgramSetup();
+	const {
+		mutateAsync: createProgramAsync,
+	} = useCreateProgram();
+
+	const {
+		mutateAsync: updateSetupAsync,
+	} = useUpdateProgramSetup();
 
 	/* ---------------------------------------------------------------------- */
 	/* Form                                                                    */
 	/* ---------------------------------------------------------------------- */
 
-	const form = useForm<SetupFormInput, unknown, SetupFormOutput>({
+	const form = useForm<
+		SetupFormInput,
+		unknown,
+		SetupFormOutput
+	>({
 		resolver: zodResolver(setupFormSchema),
 		defaultValues: setupDefaultValues,
-
-		/*
-		 * Manual Save Draft validates.
-		 *
-		 * Autosave does NOT call trigger() / handleSubmit().
-		 */
 		mode: "onBlur",
 		reValidateMode: "onBlur",
 	});
@@ -122,16 +152,6 @@ export function SetupForm({
 	/* Persistence state                                                       */
 	/* ---------------------------------------------------------------------- */
 
-	/**
-	 * The IDs used by persistence.
-	 *
-	 * EDIT:
-	 *   initialized with programId/revisionId.
-	 *
-	 * NEW:
-	 *   initially empty.
-	 *   populated after POST /programs succeeds.
-	 */
 	const persistenceRef = useRef<{
 		programId: number | undefined;
 		revisionId: number | undefined;
@@ -140,9 +160,6 @@ export function SetupForm({
 		revisionId,
 	});
 
-	/**
-	 * Keep edit IDs synchronized with route/context.
-	 */
 	useEffect(() => {
 		if (mode !== "edit") {
 			return;
@@ -174,13 +191,9 @@ export function SetupForm({
 
 	const hydratedRef = useRef(false);
 
-	/**
-	 * Prevent the same revision from being hydrated repeatedly.
-	 *
-	 * This is important because React Query can update the `setup`
-	 * object without meaning that the user changed the form.
-	 */
-	const hydratedRevisionRef = useRef<string | null>(null);
+	const hydratedRevisionRef = useRef<string | null>(
+		null,
+	);
 
 	useEffect(() => {
 		if (!isExistingRevision || !setup) {
@@ -189,34 +202,28 @@ export function SetupForm({
 
 		const hydrationKey = `${programId}:${revisionId}`;
 
-		if (hydratedRevisionRef.current === hydrationKey) {
+		if (
+			hydratedRevisionRef.current ===
+			hydrationKey
+		) {
 			return;
 		}
 
 		hydratedRevisionRef.current = hydrationKey;
 
-		/*
-		 * Block autosave BEFORE reset().
-		 */
 		hydratedRef.current = false;
 
-		const values = mapSetupResponseToForm(setup);
+		const values =
+			mapSetupResponseToForm(setup);
 
 		form.reset(values);
 
-		/*
-		 * Hydration is complete.
-		 *
-		 * reset() has finished and the form is now safe to watch.
-		 */
 		hydratedRef.current = true;
 
-		/*
-		 * This happens once for the loaded revision.
-		 *
-		 * It is NOT inside a dirty-state effect.
-		 */
-		updateSectionStatus("setup", "completed");
+		updateSectionStatus(
+			"setup",
+			"completed",
+		);
 	}, [
 		isExistingRevision,
 		setup,
@@ -235,11 +242,6 @@ export function SetupForm({
 			return;
 		}
 
-		/*
-		 * New form starts with setupDefaultValues.
-		 *
-		 * There is no API hydration.
-		 */
 		hydratedRef.current = true;
 		hydratedRevisionRef.current = "new";
 	}, [mode]);
@@ -248,36 +250,28 @@ export function SetupForm({
 	/* Autosave state                                                          */
 	/* ---------------------------------------------------------------------- */
 
-	const saveTimerRef = useRef<number | null>(null);
+	const saveTimerRef = useRef<number | null>(
+		null,
+	);
 
 	const savingRef = useRef(false);
 
-	const pendingSaveRef = useRef<SetupFormOutput | null>(null);
+	const pendingSaveRef =
+		useRef<SetupFormOutput | null>(null);
 
 	const createInFlightRef = useRef(false);
 
-	/**
-	 * Incremented every time the user changes a field.
-	 *
-	 * Used to determine whether another edit happened while an
-	 * API request was running.
-	 */
 	const changeVersionRef = useRef(0);
 
-	/**
-	 * Latest form values.
-	 */
-	const latestValuesRef = useRef<SetupFormOutput | null>(null);
+	const latestValuesRef =
+		useRef<SetupFormOutput | null>(null);
 
 	/* ---------------------------------------------------------------------- */
 	/* Section status                                                          */
 	/* ---------------------------------------------------------------------- */
 
-	/**
-	 * Keep the last status locally so we don't repeatedly call
-	 * updateSectionStatus() with the same value.
-	 */
-	const sectionStatusRef = useRef<string | null>(null);
+	const sectionStatusRef =
+		useRef<string | null>(null);
 
 	const setSetupStatus = useCallback(
 		(status: "completed" | "warning") => {
@@ -285,13 +279,19 @@ export function SetupForm({
 				return;
 			}
 
-			if (sectionStatusRef.current === status) {
+			if (
+				sectionStatusRef.current ===
+				status
+			) {
 				return;
 			}
 
 			sectionStatusRef.current = status;
 
-			updateSectionStatus("setup", status);
+			updateSectionStatus(
+				"setup",
+				status,
+			);
 		},
 		[updateSectionStatus],
 	);
@@ -302,23 +302,15 @@ export function SetupForm({
 
 	const persistSetup = useCallback(
 		async (values: SetupFormOutput) => {
-			if (!canEdit || !mountedRef.current) {
+			if (
+				!canEdit ||
+				!mountedRef.current
+			) {
 				return;
 			}
 
-			/*
-			 * Always replace pending values with the newest values.
-			 */
 			pendingSaveRef.current = values;
 
-			/*
-			 * A save is already running.
-			 *
-			 * Do NOT start another request.
-			 *
-			 * The current request will loop and consume
-			 * pendingSaveRef when it finishes.
-			 */
 			if (savingRef.current) {
 				return;
 			}
@@ -326,61 +318,75 @@ export function SetupForm({
 			savingRef.current = true;
 
 			try {
-				while (mountedRef.current && pendingSaveRef.current != null) {
-					const latestValues = pendingSaveRef.current;
+				while (
+					mountedRef.current &&
+					pendingSaveRef.current != null
+				) {
+					const latestValues =
+						pendingSaveRef.current;
 
-					pendingSaveRef.current = null;
+					pendingSaveRef.current =
+						null;
 
-					const versionAtStart = changeVersionRef.current;
+					const versionAtStart =
+						changeVersionRef.current;
 
-					const payload = mapSetupFormToDto(latestValues);
+					const payload =
+						mapSetupFormToDto(
+							latestValues,
+						);
 
 					/* ====================================================== */
 					/* CREATE NEW PROGRAM                                     */
 					/* ====================================================== */
 
-					if (mode === "new" && persistenceRef.current.programId == null) {
-						/*
-						 * Prevent duplicate POST /programs.
-						 */
-						if (createInFlightRef.current) {
-							pendingSaveRef.current = latestValues;
+					if (
+						mode === "new" &&
+						persistenceRef.current
+							.programId == null
+					) {
+						if (
+							createInFlightRef.current
+						) {
+							pendingSaveRef.current =
+								latestValues;
+
 							break;
 						}
 
-						createInFlightRef.current = true;
+						createInFlightRef.current =
+							true;
 
 						try {
-							/*
-							 * IMPORTANT:
-							 *
-							 * POST /programs is NOT the setup endpoint.
-							 *
-							 * Hono:
-							 *
-							 * POST /api/programs
-							 *
-							 * expects the program creation DTO.
-							 */
-							const created = await createProgramAsync({
-								programName: latestValues.programName,
-							});
+							const created =
+								await createProgramAsync(
+									{
+										programName:
+											latestValues.programName,
+									},
+								);
 
-							if (created.programId == null || created.revisionId == null) {
+							if (
+								created.programId ==
+									null ||
+								created.revisionId ==
+									null
+							) {
 								throw new Error(
 									"Create program response did not contain programId and revisionId.",
 								);
 							}
 
-							/*
-							 * Store IDs BEFORE doing the setup PUT.
-							 */
-							persistenceRef.current = {
-								programId: created.programId,
-								revisionId: created.revisionId,
-							};
+							persistenceRef.current =
+								{
+									programId:
+										created.programId,
+									revisionId:
+										created.revisionId,
+								};
 						} finally {
-							createInFlightRef.current = false;
+							createInFlightRef.current =
+								false;
 						}
 					}
 
@@ -388,95 +394,114 @@ export function SetupForm({
 					/* UPDATE SETUP                                           */
 					/* ====================================================== */
 
-					const currentProgramId = persistenceRef.current.programId;
+					const currentProgramId =
+						persistenceRef.current
+							.programId;
 
-					const currentRevisionId = persistenceRef.current.revisionId;
+					const currentRevisionId =
+						persistenceRef.current
+							.revisionId;
 
-					if (currentProgramId == null || currentRevisionId == null) {
+					if (
+						currentProgramId == null ||
+						currentRevisionId == null
+					) {
 						throw new Error(
 							"Cannot save setup without programId and revisionId.",
 						);
 					}
 
-					/*
-					 * This is the actual setup persistence endpoint:
-					 *
-					 * PUT /api/programs/:programId/revisions/:revisionId/setup
-					 */
 					await updateSetupAsync({
-						programId: currentProgramId,
-						revisionId: currentRevisionId,
+						programId:
+							currentProgramId,
+						revisionId:
+							currentRevisionId,
 						payload,
 					});
 
-					/*
-					 * Only after BOTH:
-					 *
-					 * POST /programs
-					 * AND
-					 * PUT /programs/:id/revisions/:revisionId/setup
-					 *
-					 * succeeded do we tell the editor that the new
-					 * program exists.
-					 *
-					 * This prevents navigation/unmount before setup
-					 * has been persisted.
-					 */
-					if (mode === "new" && versionAtStart === changeVersionRef.current) {
-						const createdProgramId = persistenceRef.current.programId;
+					/* ====================================================== */
+					/* NEW PROGRAM CREATED                                    */
+					/* ====================================================== */
 
-						const createdRevisionId = persistenceRef.current.revisionId;
+					if (
+						mode === "new" &&
+						versionAtStart ===
+							changeVersionRef.current
+					) {
+						const createdProgramId =
+							persistenceRef.current
+								.programId;
 
-						if (createdProgramId != null && createdRevisionId != null) {
+						const createdRevisionId =
+							persistenceRef.current
+								.revisionId;
+
+						if (
+							createdProgramId !=
+								null &&
+							createdRevisionId !=
+								null
+						) {
 							onCreated?.({
-								programId: createdProgramId,
-								revisionId: createdRevisionId,
+								programId:
+									createdProgramId,
+								revisionId:
+									createdRevisionId,
 							});
 						}
 					}
 
-					/*
-					 * If the user changed something while the request
-					 * was running, don't consider this the final save.
-					 *
-					 * The watch subscription will have placed the
-					 * newest values into pendingSaveRef.
-					 */
+					/* ====================================================== */
+					/* CHANGES DURING REQUEST                                */
+					/* ====================================================== */
+
 					if (
-						changeVersionRef.current !== versionAtStart &&
-						latestValuesRef.current != null &&
-						pendingSaveRef.current == null
+						changeVersionRef.current !==
+							versionAtStart &&
+						latestValuesRef.current !=
+							null &&
+						pendingSaveRef.current ==
+							null
 					) {
-						pendingSaveRef.current = latestValuesRef.current;
+						pendingSaveRef.current =
+							latestValuesRef.current;
 					}
 				}
 
 				if (mountedRef.current) {
-					setSetupStatus("completed");
+					setSetupStatus(
+						"completed",
+					);
 				}
 			} catch (error) {
-				console.error("[SetupForm] autosave failed", error);
+				console.error(
+					"[SetupForm] autosave failed",
+					error,
+				);
 
 				if (mountedRef.current) {
-					setSetupStatus("warning");
+					setSetupStatus(
+						"warning",
+					);
 				}
 			} finally {
 				savingRef.current = false;
 
-				/*
-				 * Race protection:
-				 *
-				 * If a change arrived after the while-loop checked
-				 * pendingSaveRef, schedule one more save.
-				 */
 				if (
 					mountedRef.current &&
-					pendingSaveRef.current != null &&
+					pendingSaveRef.current !=
+						null &&
 					!savingRef.current
 				) {
 					queueMicrotask(() => {
-						if (mountedRef.current && pendingSaveRef.current != null) {
-							void persistSetup(pendingSaveRef.current);
+						if (
+							mountedRef.current &&
+							pendingSaveRef.current !=
+								null
+						) {
+							void persistSetup(
+								pendingSaveRef.current,
+							);
 						}
 					});
 				}
@@ -493,20 +518,17 @@ export function SetupForm({
 	);
 
 	/* ---------------------------------------------------------------------- */
-	/* Keep persistence function in a ref                                      */
+	/* Persistence ref                                                         */
 	/* ---------------------------------------------------------------------- */
 
-	/**
-	 * The watch subscription should NOT be recreated whenever
-	 * persistSetup changes identity.
-	 *
-	 * This is one of the important protections against the
-	 * autosave render loop.
-	 */
-	const persistSetupRef = useRef<typeof persistSetup>(persistSetup);
+	const persistSetupRef =
+		useRef<typeof persistSetup>(
+			persistSetup,
+		);
 
 	useEffect(() => {
-		persistSetupRef.current = persistSetup;
+		persistSetupRef.current =
+			persistSetup;
 	}, [persistSetup]);
 
 	/* ---------------------------------------------------------------------- */
@@ -518,70 +540,76 @@ export function SetupForm({
 			return;
 		}
 
-		/*
-		 * Subscribe once for the current editable form.
-		 *
-		 * We intentionally do NOT use:
-		 *
-		 *   [formValues, isDirty, persistSetup]
-		 *
-		 * because those dependencies can recreate the subscription
-		 * and timer repeatedly.
-		 */
-		const subscription = form.watch((values) => {
-			if (!hydratedRef.current) {
-				return;
-			}
-
-			if (!mountedRef.current) {
-				return;
-			}
-
-			const nextValues = values as SetupFormOutput;
-
-			latestValuesRef.current = nextValues;
-
-			changeVersionRef.current += 1;
-
-			/*
-			 * User changed something.
-			 */
-			setSetupStatus("warning");
-
-			/*
-			 * Debounce.
-			 */
-			if (saveTimerRef.current !== null) {
-				window.clearTimeout(saveTimerRef.current);
-			}
-
-			saveTimerRef.current = window.setTimeout(() => {
-				saveTimerRef.current = null;
+		const subscription =
+			form.watch((values) => {
+				if (!hydratedRef.current) {
+					return;
+				}
 
 				if (!mountedRef.current) {
 					return;
 				}
 
-				const latest = latestValuesRef.current;
+				const nextValues =
+					values as SetupFormOutput;
 
-				if (!latest) {
-					return;
+				latestValuesRef.current =
+					nextValues;
+
+				changeVersionRef.current += 1;
+
+				setSetupStatus("warning");
+
+				if (
+					saveTimerRef.current !== null
+				) {
+					window.clearTimeout(
+						saveTimerRef.current,
+					);
 				}
 
-				void persistSetupRef.current(latest);
-			}, AUTO_SAVE_DELAY);
-		});
+				saveTimerRef.current =
+					window.setTimeout(() => {
+						saveTimerRef.current =
+							null;
+
+						if (
+							!mountedRef.current
+						) {
+							return;
+						}
+
+						const latest =
+							latestValuesRef.current;
+
+						if (!latest) {
+							return;
+						}
+
+						void persistSetupRef.current(
+							latest,
+						);
+					}, AUTO_SAVE_DELAY);
+			});
 
 		return () => {
 			subscription.unsubscribe();
 
-			if (saveTimerRef.current !== null) {
-				window.clearTimeout(saveTimerRef.current);
+			if (
+				saveTimerRef.current !== null
+			) {
+				window.clearTimeout(
+					saveTimerRef.current,
+				);
 
 				saveTimerRef.current = null;
 			}
 		};
-	}, [canEdit, form, setSetupStatus]);
+	}, [
+		canEdit,
+		form,
+		setSetupStatus,
+	]);
 
 	/* ---------------------------------------------------------------------- */
 	/* Conditional finance terms                                               */
@@ -592,53 +620,61 @@ export function SetupForm({
 			return;
 		}
 
-		const currentTerms = form.getValues("financeTerms");
+		const currentTerms =
+			form.getValues(
+				"financeTerms",
+			);
 
 		if (currentTerms.length === 0) {
 			return;
 		}
 
-		/*
-		 * Cash programs do not have finance terms.
-		 */
-		form.setValue("financeTerms", [], {
-			shouldDirty: true,
-			shouldTouch: false,
-			shouldValidate: false,
-		});
+		form.setValue(
+			"financeTerms",
+			[],
+			{
+				shouldDirty: true,
+				shouldTouch: false,
+				shouldValidate: false,
+			},
+		);
 	}, [purchaseType, form]);
 
 	/* ---------------------------------------------------------------------- */
 	/* Manual Save Draft                                                       */
 	/* ---------------------------------------------------------------------- */
 
-	const saveSetupRef = useRef<(() => Promise<void>) | null>(null);
+	const saveSetupRef =
+		useRef<(() => Promise<void>) | null>(
+			null,
+		);
 
 	saveSetupRef.current = async () => {
 		if (!canEdit) {
 			return;
 		}
 
-		/*
-		 * Manual save intentionally validates the complete form.
-		 */
 		await form.handleSubmit(
 			async (values) => {
-				/*
-				 * Cancel a pending debounce timer because the user
-				 * explicitly clicked Save Draft.
-				 */
-				if (saveTimerRef.current !== null) {
-					window.clearTimeout(saveTimerRef.current);
+				if (
+					saveTimerRef.current !==
+					null
+				) {
+					window.clearTimeout(
+						saveTimerRef.current,
+					);
 
 					saveTimerRef.current = null;
 				}
 
-				latestValuesRef.current = values;
+				latestValuesRef.current =
+					values;
 
 				changeVersionRef.current += 1;
 
-				await persistSetupRef.current(values);
+				await persistSetupRef.current(
+					values,
+				);
 			},
 			() => {
 				setSetupStatus("warning");
@@ -650,17 +686,10 @@ export function SetupForm({
 	/* Register Save Draft                                                     */
 	/* ---------------------------------------------------------------------- */
 
-	/**
-	 * Stable wrapper.
-	 *
-	 * IMPORTANT:
-	 *
-	 * Do NOT register `saveSetup` directly because its identity can
-	 * change on every render.
-	 */
-	const stableSaveHandlerRef = useRef(async () => {
-		await saveSetupRef.current?.();
-	});
+	const stableSaveHandlerRef =
+		useRef(async () => {
+			await saveSetupRef.current?.();
+		});
 
 	useEffect(() => {
 		if (!canEdit) {
@@ -668,22 +697,44 @@ export function SetupForm({
 			return;
 		}
 
-		registerSaveHandler(stableSaveHandlerRef.current);
+		registerSaveHandler(
+			stableSaveHandlerRef.current,
+		);
 
 		return () => {
 			registerSaveHandler(null);
 		};
-	}, [canEdit, registerSaveHandler]);
+	}, [
+		canEdit,
+		registerSaveHandler,
+	]);
 
 	/* ---------------------------------------------------------------------- */
 	/* Loading                                                                  */
 	/* ---------------------------------------------------------------------- */
 
-	if (isExistingRevision && isSetupLoading) {
+	if (
+		isExistingRevision &&
+		isSetupLoading
+	) {
 		return (
-			<div className="rounded-xl border bg-card p-6">
-				<p className="text-sm text-muted-foreground">Loading setup...</p>
-			</div>
+			<Box
+				sx={{
+					border: 1,
+					borderColor: "divider",
+					borderRadius: 3,
+					bgcolor:
+						"background.paper",
+					p: 3,
+				}}
+			>
+				<Typography
+					variant="body2"
+					color="text.secondary"
+				>
+					Loading setup...
+				</Typography>
+			</Box>
 		);
 	}
 
@@ -691,31 +742,44 @@ export function SetupForm({
 	/* Error                                                                    */
 	/* ---------------------------------------------------------------------- */
 
-	if (isExistingRevision && isSetupError) {
+	if (
+		isExistingRevision &&
+		isSetupError
+	) {
 		return (
-			<div className="rounded-xl border border-destructive/30 bg-card p-6">
-				<div className="flex items-center justify-between gap-4">
-					<div>
-						<p className="text-sm font-semibold text-destructive">
-							Failed to load setup
-						</p>
-
-						<p className="mt-1 text-sm text-muted-foreground">
-							We couldn't load this revision's setup data.
-						</p>
-					</div>
-
-					<button
-						type="button"
-						className="rounded-md border px-3 py-2 text-sm"
+			<Alert
+				severity="error"
+				variant="outlined"
+				action={
+					<Button
+						size="small"
+						color="inherit"
 						onClick={() => {
 							void refetchSetup();
 						}}
 					>
 						Retry
-					</button>
-				</div>
-			</div>
+					</Button>
+				}
+				sx={{
+					alignItems: "center",
+				}}
+			>
+				<Stack spacing={0.5}>
+					<Typography
+						variant="body2"
+						sx={{fontWeight:600}}
+						
+					>
+						Failed to load setup
+					</Typography>
+
+					<Typography variant="body2">
+						We couldn't load this
+						revision's setup data.
+					</Typography>
+				</Stack>
+			</Alert>
 		);
 	}
 
@@ -725,8 +789,9 @@ export function SetupForm({
 
 	return (
 		<FormProvider {...form}>
-			<form
-				className="space-y-5"
+			<Stack
+				component="form"
+				spacing={2.5}
 				onSubmit={(event) => {
 					event.preventDefault();
 				}}
@@ -740,46 +805,73 @@ export function SetupForm({
 					title="Program details"
 					description="Core metadata identifying this incentive program."
 				>
-					<div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+					<Box
+						sx={{
+							display: "grid",
+							gridTemplateColumns:
+								{
+									xs: "1fr",
+									lg: "repeat(2, minmax(0, 1fr))",
+								},
+							gap: 2.5,
+						}}
+					>
 						<FormInput
-							control={form.control}
+							control={
+								form.control
+							}
 							name="programName"
 							label="Program Name"
 							required
 							placeholder="e.g. Summer Finance Event"
-							disabled={!canEdit}
+							disabled={
+								!canEdit
+							}
 						/>
 
 						<FormInput
-							control={form.control}
+							control={
+								form.control
+							}
 							name="programNumber"
 							label="Program Number"
 							required
 							placeholder="4821"
-							disabled={!canEdit}
+							disabled={
+								!canEdit
+							}
 						/>
 
 						<FormInput
-							control={form.control}
+							control={
+								form.control
+							}
 							name="incentiveCodes"
 							label="Incentive Codes"
 							required
 							placeholder="GMF-APR-2027-06"
-							disabled={!canEdit}
+							disabled={
+								!canEdit
+							}
 						/>
 
 						<FormSelect
-							control={form.control}
+							control={
+								form.control
+							}
 							name="country"
 							label="Country"
 							required
-							valueType="id"
-							options={COUNTRY_OPTIONS}
-							getValue={(option) => option.value}
-							getLabel={(option) => option.label}
-							disabled={!canEdit}
+						
+							options={
+								COUNTRY_OPTIONS
+							}
+							
+							disabled={
+								!canEdit
+							}
 						/>
-					</div>
+					</Box>
 				</ProgramSection>
 
 				{/* ============================================================ */}
@@ -790,150 +882,313 @@ export function SetupForm({
 					title="Controlling dates"
 					description="Delivery window and the moment values become visible downstream."
 				>
-					<div className="grid grid-cols-1 gap-x-5 gap-y-5 lg:grid-cols-3">
+					<Box
+						sx={{
+							display: "grid",
+							gridTemplateColumns:
+								{
+									xs: "1fr",
+									lg: "repeat(3, minmax(0, 1fr))",
+								},
+							columnGap: 2.5,
+							rowGap: 2.5,
+						}}
+					>
 						<FormDateInput
-							control={form.control}
+							control={
+								form.control
+							}
 							name="deliveryStart"
 							label="Delivery Start"
 							required
-							disabled={!canEdit}
+							disabled={
+								!canEdit
+							}
 						/>
 
 						<FormDateInput
-							control={form.control}
+							control={
+								form.control
+							}
 							name="deliveryEnd"
 							label="Delivery End"
 							required
-							disabled={!canEdit}
+							disabled={
+								!canEdit
+							}
 						/>
 
-						<div />
+						<Box />
 
 						<FormDateInput
-							control={form.control}
+							control={
+								form.control
+							}
 							name="firstVisibleDate"
 							label="First Visible — Date"
 							required
-							disabled={!canEdit}
+							disabled={
+								!canEdit
+							}
 						/>
 
 						<FormTimeInput
-							control={form.control}
+							control={
+								form.control
+							}
 							name="firstVisibleTime"
 							label="First Visible — Time"
-							disabled={!canEdit}
+							disabled={
+								!canEdit
+							}
 						/>
 
-						<div />
-					</div>
+						<Box />
+					</Box>
 
-					<div className="mt-4 rounded-lg bg-muted px-3 py-2.5 text-sm text-muted-foreground">
-						First-visible may precede delivery start — it controls when
-						downstream services expose the program, which can differ from when
-						it becomes active.
-					</div>
+					<Alert
+						severity="info"
+						variant="standard"
+						sx={{
+							mt: 2,
+							borderRadius: 2,
+						}}
+					>
+						First-visible may
+						precede delivery
+						start — it
+						controls when
+						downstream
+						services expose
+						the program, which
+						can differ from
+						when it becomes
+						active.
+					</Alert>
 				</ProgramSection>
 
 				{/* ============================================================ */}
 				{/* PROGRAM CONFIGURATION                                         */}
 				{/* ============================================================ */}
 
-				<ProgramSection title="Program configuration" description="">
-					<div className="grid grid-cols-1 gap-x-5 gap-y-4 lg:grid-cols-12">
-						<div className="lg:col-span-5">
+				<ProgramSection
+					title="Program configuration"
+				>
+					<Box
+						sx={{
+							display: "grid",
+							gridTemplateColumns:
+								{
+									xs: "1fr",
+									lg: "repeat(12, minmax(0, 1fr))",
+								},
+							columnGap: 2.5,
+							rowGap: 2,
+						}}
+					>
+						{/* Program Type */}
+
+						<Box
+							sx={{
+								gridColumn:
+									{
+										xs: "span 1",
+										lg: "span 5",
+									},
+							}}
+						>
 							<FormChoiceChipGroup
-								control={form.control}
+								control={
+									form.control
+								}
 								name="programType"
 								label="Program Type"
 								required
-								options={PROGRAM_TYPE_OPTIONS}
-								getValue={(option) => option.value}
-								getLabel={(option) => option.label}
-								disabled={!canEdit}
+								options={
+									PROGRAM_TYPE_OPTIONS
+								}
+								
+								disabled={
+									!canEdit
+								}
 							/>
-						</div>
+						</Box>
 
-						<div className="lg:col-span-3">
+						{/* Purchase Type */}
+
+						<Box
+							sx={{
+								gridColumn:
+									{
+										xs: "span 1",
+										lg: "span 3",
+									},
+							}}
+						>
 							<FormChoiceChipGroup
-								control={form.control}
+								control={
+									form.control
+								}
 								name="purchaseType"
 								label="Purchase Type"
 								required
-								options={PURCHASE_TYPE_OPTIONS}
-								getValue={(option) => option.value}
-								getLabel={(option) => option.label}
-								disabled={!canEdit}
+								options={
+									PURCHASE_TYPE_OPTIONS
+								}
+							
+								disabled={
+									!canEdit
+								}
 							/>
-						</div>
+						</Box>
 
-						<div className="lg:col-span-4">
+						{/* Mileage */}
+
+						<Box
+							sx={{
+								gridColumn:
+									{
+										xs: "span 1",
+										lg: "span 4",
+									},
+							}}
+						>
 							<FormInput
-								control={form.control}
+								control={
+									form.control
+								}
 								name="mileageMaximum"
 								label="Mileage Maximum"
 								type="number"
 								placeholder="59999"
 								rightElement={
-									<span className="text-xs text-muted-foreground">mi</span>
+									<Typography
+										variant="caption"
+										color="text.secondary"
+									>
+										mi
+									</Typography>
 								}
 								description="Vehicles above this odometer reading are excluded."
-								disabled={!canEdit}
+								disabled={
+									!canEdit
+								}
 							/>
-						</div>
+						</Box>
 
-						<div className="lg:col-span-12">
+						{/* Condition Tier */}
+
+						<Box
+							sx={{
+								gridColumn:
+									{
+										xs: "span 1",
+										lg: "span 12",
+									},
+							}}
+						>
 							<FormChoiceChipGroup
-								control={form.control}
+								control={
+									form.control
+								}
 								name="conditionTier"
 								label="Condition Tier"
 								required
-								options={CONDITION_TIER_OPTIONS}
-								getValue={(option) => option.value}
-								getLabel={(option) => option.label}
-								disabled={!canEdit}
+								options={
+									CONDITION_TIER_OPTIONS
+								}
+								
+								disabled={
+									!canEdit
+								}
 							/>
-						</div>
+						</Box>
 
-						<div className="lg:col-span-12">
+						{/* Credit Tiers */}
+
+						<Box
+							sx={{
+								gridColumn:
+									{
+										xs: "span 1",
+										lg: "span 12",
+									},
+							}}
+						>
 							<FormChoiceChipGroup
-								control={form.control}
+								control={
+									form.control
+								}
 								name="creditTiers"
 								label="Credit Tier"
 								selectionMode="multiple"
-								options={CREDIT_TIER_OPTIONS}
-								getValue={(option) => option.value}
-								getLabel={(option) => option.label}
+								options={
+									CREDIT_TIER_OPTIONS
+								}
+								
 								description="Credit qualifications this incentive applies to. Select one or more."
-								disabled={!canEdit}
+								disabled={
+									!canEdit
+								}
 							/>
-						</div>
+						</Box>
 
-						{purchaseType === "FINANCE" && (
-							<div className="lg:col-span-12">
+						{/* Finance Terms */}
+
+						{purchaseType ===
+							"FINANCE" && (
+							<Box
+								sx={{
+									gridColumn:
+										{
+											xs: "span 1",
+											lg: "span 12",
+										},
+								}}
+							>
 								<FormChoiceChipGroup
-									control={form.control}
+									control={
+										form.control
+									}
 									name="financeTerms"
 									label="Terms (Months)"
 									selectionMode="multiple"
-									options={FINANCE_TERM_OPTIONS}
-									getValue={(option) => option.value.toString()}
-									getLabel={(option) => option.label}
-									disabled={!canEdit}
+									options={
+										FINANCE_TERM_OPTIONS
+									}
+									
+									disabled={
+										!canEdit
+									}
 								/>
-							</div>
+							</Box>
 						)}
 
-						<div className="lg:col-span-12">
+						{/* Contact */}
+
+						<Box
+							sx={{
+								gridColumn:
+									{
+										xs: "span 1",
+										lg: "span 12",
+									},
+							}}
+						>
 							<FormInput
-								control={form.control}
+								control={
+									form.control
+								}
 								name="contact"
 								label="Contact"
 								required
 								placeholder="Program owner name"
-								disabled={!canEdit}
+								disabled={
+									!canEdit
+								}
 							/>
-						</div>
-					</div>
+						</Box>
+					</Box>
 				</ProgramSection>
 
 				{/* ============================================================ */}
@@ -944,39 +1199,61 @@ export function SetupForm({
 					title="Flags"
 					description="Conditional behaviors applied to this program."
 				>
-					<div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+					<Box
+						sx={{
+							display: "grid",
+							gridTemplateColumns:
+								{
+									xs: "1fr",
+									lg: "repeat(3, minmax(0, 1fr))",
+								},
+							gap: 2,
+						}}
+					>
 						<FlagCard>
 							<FormCheckbox
-								control={form.control}
+								control={
+									form.control
+								}
 								name="flags.vinException"
 								label="VIN Exception"
 								description="Conditional — appears below the line, not against net price."
-								disabled={!canEdit}
+								disabled={
+									!canEdit
+								}
 							/>
 						</FlagCard>
 
 						<FlagCard>
 							<FormCheckbox
-								control={form.control}
+								control={
+									form.control
+								}
 								name="flags.topOfDeal"
 								label="Top of Deal"
 								description="Program headlines the deal stack."
-								disabled={!canEdit}
+								disabled={
+									!canEdit
+								}
 							/>
 						</FlagCard>
 
 						<FlagCard>
 							<FormCheckbox
-								control={form.control}
+								control={
+									form.control
+								}
 								name="flags.noAddOns"
 								label="No add-ons"
 								description="Program cannot be combined with dealer add-ons."
-								disabled={!canEdit}
+								disabled={
+									!canEdit
+								}
 							/>
 						</FlagCard>
-					</div>
+					</Box>
 				</ProgramSection>
-			</form>
+			</Stack>
 		</FormProvider>
 	);
 }

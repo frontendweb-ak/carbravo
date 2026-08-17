@@ -1,5 +1,4 @@
-import { Label } from "@/components/ui/primitives/label/label";
-import { cn } from "@/utils";
+import { Box, Typography } from "@mui/material";
 import type { ReactNode } from "react";
 
 export interface FormFieldProps {
@@ -9,7 +8,6 @@ export interface FormFieldProps {
 	error?: string;
 	disabled?: boolean;
 	rightElement?: ReactNode;
-	className?: string;
 	children: ReactNode;
 }
 
@@ -20,60 +18,113 @@ function FormField({
 	error,
 	disabled = false,
 	rightElement,
-	className,
 	children,
 }: FormFieldProps) {
 	return (
-		<div
+		<Box
 			data-slot="form-field"
 			data-disabled={disabled || undefined}
-			className={cn("w-full space-y-2", className)}
+			sx={{
+				width: "100%",
+				display: "flex",
+				flexDirection: "column",
+				gap: 1,
+			}}
 		>
 			{(label || rightElement) && (
-				<div className="flex items-center justify-between gap-3">
+				<Box
+					sx={{
+						display: "flex",
+						alignItems: "center",
+						justifyContent: "space-between",
+						gap: 1.5,
+					}}
+				>
 					{label && (
-						<Label
-							className={cn(
-								"text-xs font-semibold uppercase tracking-wide",
-								disabled && "cursor-not-allowed opacity-50",
-							)}
+						<Box
+							sx={{
+								display: "flex",
+								alignItems: "center",
+								gap: 1,
+								minWidth: 0,
+							}}
 						>
-							{label}
+							<Typography
+								component="span"
+								variant="caption"
+								sx={{
+									fontSize: 12,
+									fontWeight: 600,
+									textTransform: "uppercase",
+									letterSpacing: "0.05em",
+									color: disabled ? "text.disabled" : "text.primary",
+								}}
+							>
+								{label}
+							</Typography>
 
 							{required && (
-								<span
+								<Typography
+									component="span"
 									aria-hidden="true"
-									className={cn(
-										"ml-2",
-										"inline-flex items-center",
-										"rounded-sm",
-										"px-1.5 py-0.5",
-										"text-[10px] font-bold",
-										"leading-none tracking-wide",
-										"bg-amber-100 text-amber-700",
-										"dark:bg-amber-950/40 dark:text-amber-400",
-									)}
+									sx={{
+										display: "inline-flex",
+										alignItems: "center",
+										borderRadius: 0.5,
+										px: 0.75,
+										py: 0.25,
+										fontSize: 10,
+										fontWeight: 700,
+										lineHeight: 1,
+										letterSpacing: "0.05em",
+										backgroundColor: "warning.light",
+										color: "warning.dark",
+									}}
 								>
 									REQUIRED
-								</span>
+								</Typography>
 							)}
-						</Label>
+						</Box>
 					)}
 
-					{rightElement}
-				</div>
+					{rightElement && (
+						<Box
+							sx={{
+								flexShrink: 0,
+							}}
+						>
+							{rightElement}
+						</Box>
+					)}
+				</Box>
 			)}
 
 			{children}
 
 			{error ? (
-				<p role="alert" className="text-xs font-medium text-destructive">
+				<Typography
+					role="alert"
+					variant="caption"
+					sx={{
+						fontSize: 12,
+						fontWeight: 500,
+						color: "error.main",
+					}}
+				>
 					{error}
-				</p>
+				</Typography>
 			) : description ? (
-				<p className="text-xs text-muted-foreground">{description}</p>
+				<Typography
+					variant="caption"
+					color="text.secondary"
+					sx={{
+						fontSize: 12,
+					}}
+				>
+					{description}
+				</Typography>
 			) : null}
-		</div>
+		</Box>
 	);
 }
 

@@ -1,8 +1,11 @@
+// src/components/ui/providers/toast-provider.tsx
+
 import { Alert, Snackbar } from "@mui/material";
 import {
 	createContext,
 	useCallback,
 	useContext,
+	useEffect,
 	useMemo,
 	useState,
 	type ReactNode,
@@ -28,12 +31,40 @@ interface ToastContextValue {
 
 const ToastContext = createContext<ToastContextValue | null>(null);
 
+let toastApi: ToastContextValue | null = null;
+
+export const toast = {
+	show(options: ToastOptions) {
+		toastApi?.show(options);
+	},
+
+	success(options: Omit<ToastOptions, "type">) {
+		toastApi?.success(options);
+	},
+
+	info(options: Omit<ToastOptions, "type">) {
+		toastApi?.info(options);
+	},
+
+	warning(options: Omit<ToastOptions, "type">) {
+		toastApi?.warning(options);
+	},
+
+	error(options: Omit<ToastOptions, "type">) {
+		toastApi?.error(options);
+	},
+
+	loading(options: Omit<ToastOptions, "type">) {
+		toastApi?.loading(options);
+	},
+};
+
 export function ToastProvider({ children }: { children: ReactNode }) {
-	const [toast, setToast] = useState<ToastOptions | null>(null);
+	const [toastState, setToastState] = useState<ToastOptions | null>(null);
 	const [open, setOpen] = useState(false);
 
 	const show = useCallback((options: ToastOptions) => {
-		setToast(options);
+		setToastState(options);
 		setOpen(true);
 	}, []);
 
@@ -44,16 +75,50 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 	const value = useMemo<ToastContextValue>(
 		() => ({
 			show,
-			success: (options) => show({ ...options, type: "success" }),
-			info: (options) => show({ ...options, type: "info" }),
-			warning: (options) => show({ ...options, type: "warning" }),
-			error: (options) => show({ ...options, type: "error" }),
-			loading: (options) => show({ ...options, type: "loading" }),
+
+			success: (options) =>
+				show({
+					...options,
+					type: "success",
+				}),
+
+			info: (options) =>
+				show({
+					...options,
+					type: "info",
+				}),
+
+			warning: (options) =>
+				show({
+					...options,
+					type: "warning",
+				}),
+
+			error: (options) =>
+				show({
+					...options,
+					type: "error",
+				}),
+
+			loading: (options) =>
+				show({
+					...options,
+					type: "loading",
+				}),
 		}),
 		[show],
 	);
 
-	const severity = toast?.type === "loading" ? "info" : (toast?.type ?? "info");
+	useEffect(() => {
+		toastApi = value;
+
+		return () => {
+			toastApi = null;
+		};
+	}, [value]);
+
+	const severity =
+		toastState?.type === "loading" ? "info" : (toastState?.type ?? "info");
 
 	return (
 		<ToastContext.Provider value={value}>
@@ -61,18 +126,25 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 
 			<Snackbar
 				open={open}
-				autoHideDuration={toast?.duration ?? 4000}
+				autoHideDuration={toastState?.duration ?? 4000}
 				onClose={close}
-				anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+				anchorOrigin={{
+					vertical: "bottom",
+					horizontal: "center",
+				}}
 			>
 				<Alert
-					onClose={close}
 					severity={severity}
 					variant="filled"
-					sx={{ width: "100%", minWidth: 320 }}
+					onClose={close}
+					sx={{
+						width: "100%",
+						minWidth: 320,
+					}}
 				>
-					{toast?.title && <div>{toast.title}</div>}
-					{toast?.description && <div>{toast.description}</div>}
+					{toastState?.title}
+
+					{toastState?.description && <div>{toastState.description}</div>}
 				</Alert>
 			</Snackbar>
 		</ToastContext.Provider>

@@ -1,7 +1,14 @@
-import { Check } from "lucide-react";
+import CheckIcon from "@mui/icons-material/Check";
+import {
+	Box,
+	ButtonBase,
+	Divider,
+	LinearProgress,
+	Paper,
+	Stack,
+	Typography,
+} from "@mui/material";
 import type { ReactNode } from "react";
-
-import { cn } from "@/utils";
 
 export type ProgramSectionStatus = "pending" | "warning" | "completed";
 
@@ -21,7 +28,6 @@ export interface ProgramSectionSidebarProps {
 	completion?: number;
 	title?: ReactNode;
 	disabled?: boolean;
-	className?: string;
 }
 
 function ProgramSectionSidebar({
@@ -31,38 +37,37 @@ function ProgramSectionSidebar({
 	completion = 0,
 	title = "Sections · Edit in any order",
 	disabled = false,
-	className,
 }: ProgramSectionSidebarProps) {
 	const normalizedCompletion = Math.min(100, Math.max(0, completion));
 
 	return (
-		<aside
-			className={cn(
-				"w-full min-w-0",
-				"rounded-2xl border border-border",
-				"bg-card",
-				"p-3",
-				"shadow-sm",
-				className,
-			)}
+		<Paper
+			variant="outlined"
+			sx={{
+				width: "100%",
+				minWidth: 0,
+				borderRadius: 4,
+				p: 1.5,
+				boxShadow: 1,
+			}}
 		>
 			{/* Header */}
-			<div className="px-2 pb-3">
-				<h2
-					className={cn(
-						"text-[11px]",
-						"font-bold",
-						"uppercase",
-						"tracking-wide",
-						"text-muted-foreground",
-					)}
+			<Box sx={{ px: 1, pb: 1.5 }}>
+				<Typography
+					variant="overline"
+					color="text.secondary"
+					sx={{
+						fontSize: 11,
+						fontWeight: 700,
+						letterSpacing: "0.08em",
+					}}
 				>
 					{title}
-				</h2>
-			</div>
+				</Typography>
+			</Box>
 
 			{/* Sections */}
-			<nav aria-label="Program sections" className="space-y-1">
+			<Stack component="nav" aria-label="Program sections" spacing={0.5}>
 				{sections.map((section) => {
 					const isActive = activeSection === section.id;
 
@@ -72,141 +77,183 @@ function ProgramSectionSidebar({
 					const isWarning = section.status === "warning";
 
 					return (
-						<button
+						<ButtonBase
 							key={section.id}
-							type="button"
 							disabled={disabled}
 							onClick={() => onSectionChange?.(section.id)}
 							aria-current={isActive ? "step" : undefined}
-							className={cn(
-								"group",
-								"flex w-full",
-								"items-center",
-								"gap-2",
-								"rounded-lg",
-								"px-2",
-								"py-1.5",
-								"text-left",
-								"text-sm",
-								"font-semibold",
-								"transition-colors",
+							sx={{
+								width: "100%",
+								display: "flex",
+								alignItems: "center",
+								justifyContent: "flex-start",
+								gap: 1,
+								borderRadius: 2,
+								px: 1,
+								py: 0.75,
+								textAlign: "left",
+								color: "text.primary",
+								fontSize: "0.875rem",
+								fontWeight: 600,
+								transition: "background-color 150ms ease",
 
-								// Default
-								"text-foreground",
+								"&:hover": {
+									backgroundColor: "action.hover",
+								},
 
-								// Hover
-								"hover:bg-muted/70",
+								"&.Mui-disabled": {
+									opacity: 0.5,
+									cursor: "not-allowed",
+								},
 
-								// Active
-								isActive && [
-									"bg-primary/10",
-									"text-primary",
-									"ring-1",
-									"ring-primary/20",
-								],
+								...(isActive && {
+									backgroundColor: (theme) => theme.palette.action.selected,
+									color: "primary.main",
 
-								// Disabled
-								"disabled:pointer-events-none",
-								"disabled:cursor-not-allowed",
-								"disabled:opacity-50",
-							)}
+									outline: (theme) =>
+										`1px solid ${theme.palette.primary.main}33`,
+								}),
+							}}
 						>
-							{/* ------------------------------------------------ */}
-							{/* Section indicator                              */}
-							{/* ------------------------------------------------ */}
+							{/* Section indicator */}
+							<Box
+								sx={{
+									width: 24,
+									height: 24,
+									flexShrink: 0,
+									display: "flex",
+									alignItems: "center",
+									justifyContent: "center",
+									borderRadius: 1.5,
+									fontSize: 11,
+									fontWeight: 700,
 
-							<span
-								className={cn(
-									"flex size-6 shrink-0",
-									"items-center justify-center",
-									"rounded-md",
-									"text-[11px]",
-									"font-bold",
+									...(!isCompleted &&
+										!isWarning && {
+											backgroundColor: "action.hover",
+											color: "text.secondary",
+										}),
 
-									// Pending
-									!isCompleted &&
-										!isWarning && ["bg-muted", "text-muted-foreground"],
+									...(isWarning &&
+										!isCompleted && {
+											backgroundColor: (theme) =>
+												`${theme.palette.warning.main}1A`,
+											color: "warning.main",
+										}),
 
-									// Warning
-									isWarning &&
-										!isCompleted && ["bg-warning/10", "text-warning"],
+									...(isCompleted &&
+										!isActive && {
+											backgroundColor: (theme) =>
+												`${theme.palette.success.main}1A`,
+											color: "success.main",
+										}),
 
-									// Completed
-									isCompleted && !isActive && ["bg-success/10", "text-success"],
-
-									// Active
-									isActive && ["bg-primary", "text-primary-foreground"],
-								)}
+									...(isActive && {
+										backgroundColor: "primary.main",
+										color: "primary.contrastText",
+									}),
+								}}
 							>
 								{isCompleted && !isActive ? (
-									<Check aria-hidden="true" className="size-3.5 stroke-3" />
+									<CheckIcon
+										aria-hidden
+										sx={{
+											fontSize: 14,
+											strokeWidth: 3,
+										}}
+									/>
 								) : (
 									section.number
 								)}
-							</span>
+							</Box>
 
 							{/* Label */}
-							<span className="min-w-0 flex-1 truncate">{section.label}</span>
+							<Typography
+								variant="body2"
+								sx={{
+									minWidth: 0,
+									flex: 1,
+									fontWeight: 600,
+									overflow: "hidden",
+									textOverflow: "ellipsis",
+									whiteSpace: "nowrap",
+								}}
+							>
+								{section.label}
+							</Typography>
 
 							{/* Status dot */}
-							<span
-								aria-hidden="true"
-								className={cn(
-									"size-2 shrink-0",
-									"rounded-full",
+							<Box
+								aria-hidden
+								sx={{
+									width: 8,
+									height: 8,
+									flexShrink: 0,
+									borderRadius: "50%",
+									backgroundColor: "divider",
 
-									// Default / pending
-									"bg-border",
+									...(isWarning &&
+										!isCompleted && {
+											backgroundColor: "warning.main",
+										}),
 
-									// Warning
-									isWarning && !isCompleted && "bg-warning",
-
-									// Completed
-									isCompleted && "bg-success",
-								)}
+									...(isCompleted && {
+										backgroundColor: "success.main",
+									}),
+								}}
 							/>
-						</button>
+						</ButtonBase>
 					);
 				})}
-			</nav>
+			</Stack>
 
 			{/* Divider */}
-			<div className="my-3 border-t border-border" />
+			<Divider sx={{ my: 1.5 }} />
 
 			{/* Completion */}
-			<div className="px-2">
-				<div className="mb-1 flex items-center justify-between">
-					<span className="text-xs text-muted-foreground">Completeness</span>
-
-					<span className="text-xs font-bold text-foreground">
-						{normalizedCompletion}%
-					</span>
-				</div>
-
-				<div
-					className="h-1.5 w-full overflow-hidden rounded-full bg-muted"
-					role="progressbar"
-					aria-valuemin={0}
-					aria-valuemax={100}
-					aria-valuenow={normalizedCompletion}
-					aria-label="Program completeness"
+			<Box sx={{ px: 1 }}>
+				<Box
+					sx={{
+						display: "flex",
+						alignItems: "center",
+						justifyContent: "space-between",
+						mb: 0.5,
+					}}
 				>
-					<div
-						className={cn(
-							"h-full rounded-full",
-							"bg-primary",
-							"transition-[width]",
-							"duration-300",
-						)}
-						style={{
-							width: `${normalizedCompletion}%`,
+					<Typography variant="caption" color="text.secondary">
+						Completeness
+					</Typography>
+
+					<Typography
+						variant="caption"
+						sx={{
+							fontWeight: 700,
+							color: "text.primary",
 						}}
-					/>
-				</div>
-			</div>
-		</aside>
+					>
+						{normalizedCompletion}%
+					</Typography>
+				</Box>
+
+				<LinearProgress
+					variant="determinate"
+					value={normalizedCompletion}
+					aria-label="Program completeness"
+					sx={{
+						height: 6,
+						borderRadius: 999,
+						backgroundColor: "action.hover",
+
+						"& .MuiLinearProgress-bar": {
+							borderRadius: 999,
+							backgroundColor: "primary.main",
+							transition: "transform 300ms ease",
+						},
+					}}
+				/>
+			</Box>
+		</Paper>
 	);
 }
 
 export { ProgramSectionSidebar };
-

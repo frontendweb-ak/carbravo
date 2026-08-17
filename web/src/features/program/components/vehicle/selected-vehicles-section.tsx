@@ -1,3 +1,5 @@
+import { Box, Chip, Paper, Stack, Typography } from "@mui/material";
+
 import type { VehicleFilterRow } from "../../schema";
 import { ProgramSection } from "../program-section";
 import { SelectedVehicleRow } from "./selected-vehicle-row";
@@ -15,43 +17,68 @@ function SelectedVehiclesSection({
 }: SelectedVehiclesSectionProps) {
 	return (
 		<ProgramSection
-			title="Selected vehicles"
-			description={undefined}
+			title="Selected Vehicles"
 			headerAction={
-				<span className="rounded-full bg-muted px-3 py-1 text-xs font-semibold text-muted-foreground">
-					{rows.length} {rows.length === 1 ? "row" : "rows"}
-				</span>
+				<Chip
+					size="small"
+					label={`${rows.length} ${rows.length === 1 ? "row" : "rows"}`}
+				/>
 			}
 		>
-			<div className="space-y-4">
+			<Stack spacing={3}>
 				{rows.length === 0 ? (
-					<div className="flex min-h-20 items-center justify-center rounded-xl border border-border px-4 text-sm text-muted-foreground">
-						No vehicle rows yet. Build one above and click Add row.
-					</div>
+					<Paper
+						variant="outlined"
+						sx={{
+							minHeight: 80,
+							display: "flex",
+							alignItems: "center",
+							justifyContent: "center",
+							px: 2,
+						}}
+					>
+						<Typography variant="body2" color="text.secondary">
+							No vehicle rows yet. Build one above and click Add row.
+						</Typography>
+					</Paper>
 				) : (
-					<div className="space-y-2">
+					<Stack spacing={1}>
 						{rows.map((row, index) => (
 							<SelectedVehicleRow
-								key={JSON.stringify(index)}
+								key={`${index}-${row.makes.join("-")}`}
 								row={row}
 								index={index}
 								onEdit={onEdit ? () => onEdit(index) : undefined}
 								onRemove={onDelete ? () => onDelete(index) : undefined}
 							/>
 						))}
-					</div>
+					</Stack>
 				)}
 
-				{/* Downstream preview */}
-				<div>
-					<div className="mb-2 text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
-						Downstream filter preview
-					</div>
-					<div className="rounded-xl bg-muted px-3 py-3 text-sm text-muted-foreground">
-						{rows.length === 0 ? "—" : rows.map(formatPreviewRow).join(" OR ")}
-					</div>
-				</div>
-			</div>
+				<Box>
+					<Typography
+						variant="overline"
+						color="text.secondary"
+						sx={{ fontWeight: 700 }}
+					>
+						Downstream Filter Preview
+					</Typography>
+
+					<Paper
+						sx={{
+							mt: 1,
+							p: 2,
+							bgcolor: "action.hover",
+						}}
+					>
+						<Typography variant="body2" color="text.secondary">
+							{rows.length === 0
+								? "—"
+								: rows.map(formatPreviewRow).join(" OR ")}
+						</Typography>
+					</Paper>
+				</Box>
+			</Stack>
 		</ProgramSection>
 	);
 }

@@ -1,9 +1,9 @@
+import AddIcon from "@mui/icons-material/Add";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Container from "@mui/material/Container";
 import Divider from "@mui/material/Divider";
 import Typography from "@mui/material/Typography";
-import { Plus } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
 
 import { AppBar, Avatar } from "@mui/material";
@@ -83,7 +83,7 @@ function Header() {
 						<Button
 							type="button"
 							variant="contained"
-							startIcon={<Plus size={16} />}
+							startIcon={<AddIcon size={16} />}
 							onClick={() => navigate("/programs/new")}
 						>
 							New Program

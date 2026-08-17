@@ -1,41 +1,82 @@
-import { Card, CardContent, CardHeader, Skeleton } from "@/components/ui";
+import Box from "@mui/material/Box";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import Skeleton from "@mui/material/Skeleton";
 
 function ExpiringProgramsSkeleton() {
 	return (
 		<Card>
-			<CardHeader>
-				<Skeleton className="h-5 w-44" />
-				<Skeleton className="mt-1 h-4 w-72" />
-			</CardHeader>
+			<CardContent sx={{ p: 3 }}>
+				<Box sx={{ mb: 3 }}>
+					<Skeleton variant="text" width={220} height={32} />
 
-			<CardContent className="space-y-4">
-				{Array.from({ length: 3 }).map((_, index) => (
-					<div
-						key={JSON.stringify(index)}
-						className="rounded-lg border border-border p-4"
-					>
-						<div className="flex items-start justify-between gap-4">
-							<div className="min-w-0 flex-1 space-y-2">
-								<Skeleton className="h-4 w-40" />
-								<Skeleton className="h-3 w-56" />
-							</div>
+					<Skeleton variant="text" width={320} height={24} sx={{ mt: 0.5 }} />
+				</Box>
 
-							<Skeleton className="h-6 w-20 rounded-full" />
-						</div>
+				<Box
+					sx={{
+						display: "flex",
+						flexDirection: "column",
+						gap: 2,
+					}}
+				>
+					{Array.from({ length: 3 }).map((_, index) => (
+						<Box
+							key={index}
+							sx={{
+								p: 2,
+								border: 1,
+								borderColor: "divider",
+								borderRadius: 2,
+							}}
+						>
+							<Box
+								sx={{
+									display: "flex",
+									justifyContent: "space-between",
+									alignItems: "flex-start",
+									gap: 2,
+								}}
+							>
+								<Box
+									sx={{
+										flex: 1,
+										display: "flex",
+										flexDirection: "column",
+										gap: 1,
+									}}
+								>
+									<Skeleton variant="text" width={180} height={24} />
 
-						<div className="mt-4 grid grid-cols-2 gap-3">
-							<div className="space-y-1">
-								<Skeleton className="h-3 w-20" />
-								<Skeleton className="h-4 w-28" />
-							</div>
+									<Skeleton variant="text" width={260} height={20} />
+								</Box>
 
-							<div className="space-y-1">
-								<Skeleton className="h-3 w-20" />
-								<Skeleton className="h-4 w-28" />
-							</div>
-						</div>
-					</div>
-				))}
+								<Skeleton variant="rounded" width={80} height={28} />
+							</Box>
+
+							<Box
+								sx={{
+									mt: 3,
+									display: "grid",
+									gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+									gap: 2,
+								}}
+							>
+								<Box>
+									<Skeleton variant="text" width={80} height={18} />
+
+									<Skeleton variant="text" width={120} height={24} />
+								</Box>
+
+								<Box>
+									<Skeleton variant="text" width={80} height={18} />
+
+									<Skeleton variant="text" width={120} height={24} />
+								</Box>
+							</Box>
+						</Box>
+					))}
+				</Box>
 			</CardContent>
 		</Card>
 	);

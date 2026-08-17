@@ -1,88 +1,71 @@
 import type { ReactNode } from "react";
 import {
 	type Control,
-	Controller,
 	type FieldValues,
 	type Path,
+	Controller,
 } from "react-hook-form";
 
 import {
-	Field,
-	FieldContent,
-	FieldDescription,
-	FieldError,
-	FieldLabel,
+	FormControl,
+	FormControlLabel,
+	FormHelperText,
 	Radio,
-	type RadioProps,
-} from "../primitives";
+	Typography,
+} from "@mui/material";
 
-import { FieldRequired } from "../primitives/label";
-
-export type FormRadioProps<T extends FieldValues> = Omit<
-	RadioProps,
-	"checked"
-> & {
+export type FormRadioProps<T extends FieldValues> = {
 	control: Control<T>;
 	name: Path<T>;
+
+	value: string;
 
 	label?: ReactNode;
 	required?: boolean;
 	description?: ReactNode;
+	disabled?: boolean;
 };
 
 function FormRadio<T extends FieldValues>({
 	control,
 	name,
-	label,
-	required = false,
-	description,
-	disabled,
 	value,
-	...props
+	label,
+	description,
+	disabled = false,
 }: FormRadioProps<T>) {
 	return (
 		<Controller
 			control={control}
 			name={name}
-			render={({ field, fieldState }) => {
-				const id = `${String(name)}-${String(value)}`;
+			render={({ field, fieldState }) => (
+				<FormControl error={fieldState.invalid} disabled={disabled}>
+					<FormControlLabel
+						control={
+							<Radio
+								checked={field.value === value}
+								onChange={() => field.onChange(value)}
+								onBlur={field.onBlur}
+								value={value}
+							/>
+						}
+						label={label}
+					/>
 
-				return (
-					<Field
-						orientation="horizontal"
-						invalid={fieldState.invalid}
-						disabled={disabled}
-					>
-						<Radio
-							{...props}
-							id={id}
-							value={value}
-							disabled={disabled}
-							aria-invalid={fieldState.invalid || undefined}
-							ref={field.ref}
-						/>
+					{description && (
+						<Typography variant="caption" color="text.secondary" sx={{ ml: 4 }}>
+							{description}
+						</Typography>
+					)}
 
-						<FieldContent>
-							{label && (
-								<FieldLabel htmlFor={id}>
-									{label}
-									{required && <FieldRequired />}
-								</FieldLabel>
-							)}
-
-							{description && (
-								<FieldDescription>{description}</FieldDescription>
-							)}
-
-							{fieldState.error && (
-								<FieldError>{fieldState.error.message}</FieldError>
-							)}
-						</FieldContent>
-					</Field>
-				);
-			}}
+					{fieldState.error?.message && (
+						<FormHelperText>{fieldState.error.message}</FormHelperText>
+					)}
+				</FormControl>
+			)}
 		/>
 	);
 }
 
 export { FormRadio };
+

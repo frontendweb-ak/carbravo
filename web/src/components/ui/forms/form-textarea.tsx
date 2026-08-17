@@ -1,4 +1,3 @@
-import { cn } from "@/utils";
 import type { ReactNode } from "react";
 import {
 	type Control,
@@ -7,8 +6,15 @@ import {
 	type Path,
 } from "react-hook-form";
 
-import { Textarea, type TextareaProps } from "../primitives/textarea";
-import { FormField } from "./form-field";
+import {
+	Box,
+	FormControl,
+	FormHelperText,
+	InputLabel,
+	Typography,
+} from "@mui/material";
+
+import { Textarea, type TextareaProps } from "../primitives";
 
 export type FormTextareaProps<T extends FieldValues> = Omit<
 	TextareaProps,
@@ -20,22 +26,21 @@ export type FormTextareaProps<T extends FieldValues> = Omit<
 	label?: ReactNode;
 	required?: boolean;
 	description?: ReactNode;
-	rightElement?: ReactNode;
-
 	showCounter?: boolean;
 };
-
 function FormTextarea<T extends FieldValues>({
 	control,
 	name,
 	label,
 	required = false,
 	description,
-	rightElement,
 	showCounter = true,
 	maxLength,
+	disabled = false,
 	...props
 }: FormTextareaProps<T>) {
+	const id = `${String(name)}-textarea`;
+
 	return (
 		<Controller
 			control={control}
@@ -45,42 +50,59 @@ function FormTextarea<T extends FieldValues>({
 				const currentLength = value.length;
 
 				return (
-					<FormField
-						label={label}
-						required={required}
-						description={description}
-						error={fieldState.error?.message}
-						disabled={props.disabled}
-						rightElement={rightElement}
-					>
-						<div className="relative">
+					<FormControl fullWidth error={fieldState.invalid} disabled={disabled}>
+						{label && (
+							<InputLabel shrink htmlFor={id} required={required}>
+								{label}
+							</InputLabel>
+						)}
+
+						<Box sx={{ position: "relative" }}>
 							<Textarea
 								{...props}
-								{...field}
+								id={id}
 								value={value}
-								maxLength={maxLength}
-								error={!!fieldState.error}
-								aria-invalid={fieldState.error ? true : undefined}
-								className={cn(
-									maxLength !== undefined && "pb-7",
-									props.className,
-								)}
+								onChange={field.onChange}
+								onBlur={field.onBlur}
+								inputRef={field.ref}
+								disabled={disabled}
+								error={fieldState.invalid}
+								sx={{
+									...(maxLength && {
+										"& textarea": {
+											paddingBottom: "28px",
+										},
+									}),
+									...(props.sx || {}),
+								}}
 							/>
 
-							{showCounter && maxLength !== undefined && (
-								<span
-									aria-live="polite"
-									className={cn(
-										"pointer-events-none absolute bottom-2 right-3",
-										"text-xs text-muted-foreground",
-										currentLength >= maxLength && "text-destructive",
-									)}
+							{showCounter && maxLength != null && (
+								<Typography
+									variant="caption"
+									component="span"
+									sx={{
+										position: "absolute",
+										right: 12,
+										bottom: 8,
+										pointerEvents: "none",
+										color:
+											currentLength >= maxLength
+												? "error.main"
+												: "text.secondary",
+									}}
 								>
 									{currentLength}/{maxLength}
-								</span>
+								</Typography>
 							)}
-						</div>
-					</FormField>
+						</Box>
+
+						{(fieldState.error?.message || description) && (
+							<FormHelperText>
+								{fieldState.error?.message ?? description}
+							</FormHelperText>
+						)}
+					</FormControl>
 				);
 			}}
 		/>
@@ -88,3 +110,4 @@ function FormTextarea<T extends FieldValues>({
 }
 
 export { FormTextarea };
+

@@ -1,5 +1,14 @@
-import { Button, FormSelect } from "@/components/ui";
+import { FormSelect } from "@/components/ui";
+import {
+	Box,
+	Button,
+	Card,
+	CardContent,
+	Stack,
+	Typography,
+} from "@mui/material";
 import { type Control, type UseFormSetValue, useWatch } from "react-hook-form";
+
 import {
 	GEOGRAPHY_LEVEL_OPTIONS,
 	GEOGRAPHY_VALUE_OPTIONS,
@@ -9,7 +18,6 @@ import type { GeographyFormValues, GeographyLevel } from "../../schema";
 interface GeographyTargetingProps {
 	control: Control<GeographyFormValues>;
 	setValue: UseFormSetValue<GeographyFormValues>;
-
 	onAdd: (mode: "include" | "exclude") => void;
 }
 
@@ -19,56 +27,69 @@ export function GeographyTargeting({
 	onAdd,
 }: GeographyTargetingProps) {
 	return (
-		<section className="rounded-2xl border border-border bg-card p-6">
-			<div className="mb-5">
-				<h2 className="text-base font-bold text-foreground">
-					Geography targeting
-				</h2>
+		<Card variant="outlined">
+			<CardContent>
+				<Stack spacing={3}>
+					<Box>
+						<Typography variant="h6" sx={{ fontWeight: 700 }}>
+							Geography Targeting
+						</Typography>
 
-				<p className="mt-0.5 text-sm text-muted-foreground">
-					Combine include and exclude rules across the hierarchy — e.g. include
-					National, exclude Texas.
-				</p>
-			</div>
+						<Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+							Combine include and exclude rules across the hierarchy — for
+							example include National and exclude Texas.
+						</Typography>
+					</Box>
 
-			<div className="grid items-end gap-3 lg:grid-cols-[200px_minmax(0,1fr)_auto_auto]">
-				<FormSelect
-					control={control}
-					name="currentRule.level"
-					label="Level"
-					valueType="id"
-					options={GEOGRAPHY_LEVEL_OPTIONS}
-					getValue={(option) => option.value}
-					getLabel={(option) => option.label}
-				/>
+					<Box
+						sx={{
+							display: "grid",
+							gridTemplateColumns: {
+								xs: "1fr",
+								md: "200px 1fr auto auto",
+							},
+							gap: 2,
+							alignItems: "end",
+						}}
+					>
+						<FormSelect
+							control={control}
+							name="currentRule.level"
+							label="Level"
+							options={GEOGRAPHY_LEVEL_OPTIONS}
+						/>
 
-				<GeographyValueSelect control={control} setValue={setValue} />
+						<GeographyValueSelect control={control} setValue={setValue} />
 
-				<Button
-					type="button"
-					variant="outline"
-					onClick={() => onAdd("include")}
-					className="border-success/30 bg-success/5 text-success hover:bg-success/10"
-				>
-					+ Include
-				</Button>
+						<Button
+							type="button"
+							variant="outlined"
+							color="success"
+							onClick={() => onAdd("include")}
+						>
+							Include
+						</Button>
 
-				<Button
-					type="button"
-					variant="outline"
-					onClick={() => onAdd("exclude")}
-					className="border-destructive/30 bg-destructive/5 text-destructive hover:bg-destructive/10"
-				>
-					− Exclude
-				</Button>
-			</div>
-		</section>
+						<Button
+							type="button"
+							variant="outlined"
+							color="error"
+							onClick={() => onAdd("exclude")}
+						>
+							Exclude
+						</Button>
+					</Box>
+				</Stack>
+			</CardContent>
+		</Card>
 	);
 }
+
 interface GeographyValueSelectProps {
 	control: Control<GeographyFormValues>;
 	setValue: UseFormSetValue<GeographyFormValues>;
 }
+
 export function GeographyValueSelect({ control }: GeographyValueSelectProps) {
 	const level = useWatch({
 		control,
@@ -82,10 +103,7 @@ export function GeographyValueSelect({ control }: GeographyValueSelectProps) {
 			control={control}
 			name="currentRule.value"
 			label="Value"
-			valueType="id"
 			options={options}
-			getValue={(option) => option.value}
-			getLabel={(option) => option.label}
 		/>
 	);
 }

@@ -5,8 +5,6 @@
 	"type": "module",
 	"packageManager": "pnpm@11.9.0",
 	"scripts": {
-		"server": "prism mock ./server/openapi.yaml -p 8080",
-		"mock-api": "tsx ./server/mock-api/server.ts",
 		"dev": "vite",
 		"build": "tsc -b && vite build",
 		"preview": "vite preview",
@@ -29,26 +27,19 @@
 		"build-storybook": "storybook build"
 	},
 	"dependencies": {
-		"@base-ui/react": "^1.7.0",
 		"@emotion/react": "^11.14.0",
 		"@emotion/styled": "^11.14.1",
 		"@hookform/resolvers": "^5.7.1",
+		"@mui/icons-material": "^9.3.1",
 		"@mui/material": "^9.3.1",
 		"@mui/x-date-pickers": "^9.11.0",
-		"@radix-ui/react-slot": "^1.3.3",
-		"@tailwindcss/vite": "^4.3.3",
 		"@tanstack/react-query": "^5.101.4",
 		"axios": "^1.19.0",
-		"class-variance-authority": "^0.7.1",
-		"clsx": "^2.1.1",
 		"date-fns": "^4.4.0",
-		"lucide-react": "^1.31.0",
 		"react": "^19.2.8",
 		"react-dom": "^19.2.8",
 		"react-hook-form": "^7.85.0",
 		"react-router-dom": "^7.18.2",
-		"tailwind-merge": "^3.6.0",
-		"tailwindcss": "^4.3.3",
 		"zod": "^4.4.3"
 	},
 	"devDependencies": {

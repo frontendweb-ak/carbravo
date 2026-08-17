@@ -1,10 +1,11 @@
+import Plus from "@mui/icons-material/Add";
+import AssignmentTurnedInIcon from "@mui/icons-material/AssignmentTurnedIn";
+import Search from "@mui/icons-material/Search";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
-import { ClipboardCheck, Plus, Search } from "lucide-react";
-
 export interface QuickActionsProps {
 	onNewProgram?: () => void;
 	onBrowsePrograms?: () => void;
@@ -58,7 +59,7 @@ function QuickActions({
 				<Button
 					fullWidth
 					variant="contained"
-					startIcon={<Plus size={16} />}
+					startIcon={<Plus />}
 					onClick={onNewProgram}
 					sx={{
 						justifyContent: "flex-start",
@@ -70,7 +71,7 @@ function QuickActions({
 				<Button
 					fullWidth
 					variant="outlined"
-					startIcon={<Search size={16} />}
+					startIcon={<Search />}
 					onClick={onBrowsePrograms}
 					sx={{
 						justifyContent: "flex-start",
@@ -110,7 +111,7 @@ function QuickActions({
 							gap: 1,
 						}}
 					>
-						<ClipboardCheck size={16} />
+						<AssignmentTurnedInIcon />
 						Review queue
 					</Box>
 

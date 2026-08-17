@@ -6,12 +6,13 @@ import {
 	type Path,
 } from "react-hook-form";
 
+import { FormControl, FormHelperText, InputLabel } from "@mui/material";
+
 import { TimeInput, type TimeInputProps } from "../primitives";
-import { FormField } from "./form-field";
 
 export type FormTimeInputProps<T extends FieldValues> = Omit<
 	TimeInputProps,
-	"name" | "value" | "defaultValue" | "onChange" | "onBlur"
+	"value" | "onChange"
 > & {
 	control: Control<T>;
 	name: Path<T>;
@@ -19,7 +20,6 @@ export type FormTimeInputProps<T extends FieldValues> = Omit<
 	label?: ReactNode;
 	required?: boolean;
 	description?: ReactNode;
-	rightElement?: ReactNode;
 };
 
 function FormTimeInput<T extends FieldValues>({
@@ -28,30 +28,36 @@ function FormTimeInput<T extends FieldValues>({
 	label,
 	required = false,
 	description,
-	rightElement,
+	disabled = false,
 	...props
 }: FormTimeInputProps<T>) {
+	const id = `${String(name)}-time`;
+
 	return (
 		<Controller
 			control={control}
 			name={name}
 			render={({ field, fieldState }) => (
-				<FormField
-					label={label}
-					required={required}
-					description={description}
-					error={fieldState.error?.message}
-					disabled={props.disabled}
-					rightElement={rightElement}
-				>
+				<FormControl fullWidth error={fieldState.invalid} disabled={disabled}>
+					{label && (
+						<InputLabel shrink htmlFor={id} required={required}>
+							{label}
+						</InputLabel>
+					)}
+
 					<TimeInput
 						{...props}
-						{...field}
-						value={field.value ?? ""}
-						error={!!fieldState.error}
-						aria-invalid={fieldState.error ? true : undefined}
+						value={field.value ?? null}
+						onChange={field.onChange}
+						disabled={disabled}
+						error={fieldState.invalid}
+						helperText={fieldState.error?.message}
 					/>
-				</FormField>
+
+					{!fieldState.error?.message && description && (
+						<FormHelperText>{description}</FormHelperText>
+					)}
+				</FormControl>
 			)}
 		/>
 	);

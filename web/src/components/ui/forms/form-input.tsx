@@ -1,4 +1,9 @@
-import { type InputTransform, parseInputValue, transformValue } from "@/utils";
+import {
+	type InputParseMode,
+	type InputTransform,
+	parseInputValue,
+	transformValue,
+} from "@/utils";
 import type { ReactNode } from "react";
 import {
 	type Control,
@@ -6,15 +11,9 @@ import {
 	type FieldValues,
 	type Path,
 } from "react-hook-form";
-import {
-	Field,
-	FieldDescription,
-	FieldError,
-	FieldLabel,
-	Input,
-	type InputProps,
-} from "../primitives";
-import { FieldRequired } from "../primitives/label";
+
+import { Input, type InputProps } from "../primitives";
+import { FormField } from "./form-field";
 
 export type FormInputProps<T extends FieldValues> = Omit<
 	InputProps,
@@ -27,9 +26,10 @@ export type FormInputProps<T extends FieldValues> = Omit<
 	required?: boolean;
 	description?: ReactNode;
 	rightElement?: ReactNode;
-	transform?: InputTransform;
-};
 
+	transform?: InputTransform;
+	parseMode?: InputParseMode;
+};
 function FormInput<T extends FieldValues>({
 	control,
 	name,
@@ -46,17 +46,13 @@ function FormInput<T extends FieldValues>({
 			control={control}
 			name={name}
 			render={({ field, fieldState }) => {
-				const id = `${String(name)}-input`;
-
 				const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 					let value = event.target.value;
 
-					// First sanitize/parse the input.
 					if (parseMode) {
 						value = parseInputValue(value, parseMode);
 					}
 
-					// Then apply presentation/business transformation.
 					if (transform !== "none") {
 						value = transformValue(value, transform);
 					}
@@ -65,36 +61,22 @@ function FormInput<T extends FieldValues>({
 				};
 
 				return (
-					<Field invalid={fieldState.invalid} disabled={props.disabled}>
-						{(label || rightElement) && (
-							<div className="flex items-center justify-between gap-3">
-								{label && (
-									<FieldLabel htmlFor={id}>
-										{label}
-										{required && <FieldRequired />}
-									</FieldLabel>
-								)}
-
-								{rightElement}
-							</div>
-						)}
-
+					<FormField
+						label={label}
+						required={required}
+						description={description}
+						error={fieldState.error?.message}
+						disabled={props.disabled}
+						rightElement={rightElement}
+					>
 						<Input
 							{...props}
 							{...field}
-							id={id}
 							value={field.value ?? ""}
 							onChange={handleChange}
 							error={fieldState.invalid}
-							aria-invalid={fieldState.invalid || undefined}
 						/>
-
-						{description && <FieldDescription>{description}</FieldDescription>}
-
-						{fieldState.error && (
-							<FieldError>{fieldState.error.message}</FieldError>
-						)}
-					</Field>
+					</FormField>
 				);
 			}}
 		/>
@@ -102,3 +84,4 @@ function FormInput<T extends FieldValues>({
 }
 
 export { FormInput };
+

@@ -1,5 +1,5 @@
-import { Button, toast } from "@/components/ui";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Button, Stack } from "@mui/material";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 
 import {
@@ -26,24 +26,24 @@ export function GeographyForm() {
 		mode: "onBlur",
 	});
 
-	const included = useWatch({
-		control: form.control,
-		name: "included",
-	});
+	const included =
+		useWatch({
+			control: form.control,
+			name: "included",
+		}) ?? [];
 
-	const excluded = useWatch({
-		control: form.control,
-		name: "excluded",
-	});
+	const excluded =
+		useWatch({
+			control: form.control,
+			name: "excluded",
+		}) ?? [];
 
 	const addRule = (mode: "include" | "exclude") => {
 		const currentRule = form.getValues("currentRule");
 
 		if (!currentRule.value) {
-			toast.add({
-				title: "Pick a geography value to add.",
-			});
-
+			// Replace with your MUI toast/snackbar service.
+			console.warn("Pick a geography value to add.");
 			return;
 		}
 
@@ -65,7 +65,6 @@ export function GeographyForm() {
 			});
 		}
 
-		// Clear selected value after adding.
 		form.setValue("currentRule.value", "", {
 			shouldDirty: true,
 			shouldValidate: false,
@@ -90,26 +89,40 @@ export function GeographyForm() {
 		});
 	};
 
-return (
-	<FormProvider {...form}>
-		<form className="space-y-5">
-			<GeographyTargeting
-				control={form.control}
-				setValue={form.setValue}
-				onAdd={addRule}
-			/>
+	const onSubmit = (values: GeographyFormValues) => {
+		console.log("GEOGRAPHY SUBMIT", values);
+	};
 
-			<CoverageRules
-				included={included}
-				excluded={excluded}
-				onRemoveInclude={removeIncluded}
-				onRemoveExclude={removeExcluded}
-			/>
+	return (
+		<FormProvider {...form}>
+			<Stack
+				component="form"
+				onSubmit={form.handleSubmit(onSubmit)}
+				spacing={2.5}
+			>
+				<GeographyTargeting
+					control={form.control}
+					setValue={form.setValue}
+					onAdd={addRule}
+				/>
 
-			<div className="flex justify-end">
-				<Button type="submit">Save Geography</Button>
-			</div>
-		</form>
-	</FormProvider>
-);
+				<CoverageRules
+					included={included}
+					excluded={excluded}
+					onRemoveInclude={removeIncluded}
+					onRemoveExclude={removeExcluded}
+				/>
+
+				<Stack direction="row" sx={{ justifyContent: "flex-end" }}>
+					<Button
+						type="submit"
+						variant="contained"
+						disabled={form.formState.isSubmitting}
+					>
+						{form.formState.isSubmitting ? "Saving..." : "Save Geography"}
+					</Button>
+				</Stack>
+			</Stack>
+		</FormProvider>
+	);
 }

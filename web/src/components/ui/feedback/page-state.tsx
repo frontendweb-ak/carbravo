@@ -1,8 +1,9 @@
+import Box from "@mui/material/Box";
 import type { ReactNode } from "react";
 
-import { EmptyState } from "../empty-state";
-import { ErrorState } from "../error-state";
-import { PageLoader } from "../global";
+import { EmptyState } from "./empty-state";
+import { ErrorState } from "./error-state";
+import { PageLoader } from "./page-loader";
 
 export type PageStateStatus = "loading" | "error" | "empty" | "ready";
 
@@ -21,7 +22,7 @@ export interface PageStateProps {
 	emptyAction?: ReactNode;
 }
 
-export function PageState({
+function PageState({
 	status,
 	children,
 	loadingMessage = "Loading...",
@@ -32,29 +33,31 @@ export function PageState({
 	emptyDescription,
 	emptyAction,
 }: PageStateProps) {
-	if (status === "loading") {
-		return <PageLoader message={loadingMessage} />;
-	}
+	switch (status) {
+		case "loading":
+			return <PageLoader message={loadingMessage} />;
 
-	if (status === "error") {
-		return (
-			<ErrorState
-				title={errorTitle}
-				description={errorDescription}
-				onRetry={onRetry}
-			/>
-		);
-	}
+		case "error":
+			return (
+				<ErrorState
+					title={errorTitle}
+					description={errorDescription}
+					onRetry={onRetry}
+				/>
+			);
 
-	if (status === "empty") {
-		return (
-			<EmptyState
-				title={emptyTitle}
-				description={emptyDescription}
-				action={emptyAction}
-			/>
-		);
-	}
+		case "empty":
+			return (
+				<EmptyState
+					title={emptyTitle}
+					description={emptyDescription}
+					action={emptyAction}
+				/>
+			);
 
-	return <>{children}</>;
+		default:
+			return <Box>{children}</Box>;
+	}
 }
+
+export { PageState };

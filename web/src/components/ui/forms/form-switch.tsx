@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 
+import { FormControlLabel, FormHelperText, Switch } from "@mui/material";
 import {
 	type Control,
 	Controller,
@@ -7,27 +8,18 @@ import {
 	type Path,
 } from "react-hook-form";
 
-import {
-	Field,
-	FieldDescription,
-	FieldError,
-	FieldLabel,
-	FieldRequired,
-	Switch,
-	type SwitchProps,
-} from "../primitives";
-
-export type FormSwitchProps<T extends FieldValues> = Omit<
-	SwitchProps,
-	"checked" | "defaultChecked" | "onCheckedChange"
-> & {
+export interface FormSwitchProps<T extends FieldValues> {
 	control: Control<T>;
 	name: Path<T>;
 
 	label?: ReactNode;
 	required?: boolean;
 	description?: ReactNode;
-};
+	disabled?: boolean;
+
+	size?: "small" | "medium";
+}
+
 function FormSwitch<T extends FieldValues>({
 	control,
 	name,
@@ -35,7 +27,7 @@ function FormSwitch<T extends FieldValues>({
 	required = false,
 	description,
 	disabled,
-	...props
+	size = "small",
 }: FormSwitchProps<T>) {
 	return (
 		<Controller
@@ -44,48 +36,77 @@ function FormSwitch<T extends FieldValues>({
 			render={({ field, fieldState }) => {
 				const id = `${String(name)}-switch`;
 				const descriptionId = description ? `${id}-description` : undefined;
+				const errorId = fieldState.error ? `${id}-error` : undefined;
 
 				return (
-					<Field
-						orientation="horizontal"
-						invalid={fieldState.invalid}
-						disabled={disabled}
-					>
-						<Switch
-							{...props}
-							id={id}
-							checked={Boolean(field.value)}
-							disabled={disabled}
-							onCheckedChange={(checked) => {
-								field.onChange(checked);
+					<div>
+						<FormControlLabel
+							control={
+								<Switch
+									id={id}
+									size={size}
+									checked={Boolean(field.value)}
+									disabled={disabled}
+									onChange={(event) => {
+										field.onChange(event.target.checked);
+									}}
+									onBlur={field.onBlur}
+								/>
+							}
+							label={
+								label ? (
+									<>
+										{label}
+
+										{required && (
+											<span
+												style={{
+													marginLeft: 6,
+													color: "var(--mui-palette-error-main)",
+												}}
+											>
+												*
+											</span>
+										)}
+									</>
+								) : undefined
+							}
+							sx={{
+								margin: 0,
+								alignItems: "center",
+
+								"& .MuiFormControlLabel-label": {
+									fontSize: 14,
+									fontWeight: 500,
+								},
 							}}
-							onBlur={field.onBlur}
-							ref={field.ref}
-							aria-invalid={fieldState.invalid || undefined}
-							aria-describedby={descriptionId}
 						/>
 
-						{(label || description || fieldState.error) && (
-							<div className="flex flex-col gap-0.5">
-								{label && (
-									<FieldLabel htmlFor={id}>
-										{label}
-										{required && <FieldRequired />}
-									</FieldLabel>
-								)}
-
-								{description && (
-									<FieldDescription id={descriptionId}>
-										{description}
-									</FieldDescription>
-								)}
-
-								{fieldState.error && (
-									<FieldError>{fieldState.error.message}</FieldError>
-								)}
-							</div>
+						{description && !fieldState.error && (
+							<FormHelperText
+								id={descriptionId}
+								sx={{
+									marginLeft: 6,
+									marginTop: 0.5,
+								}}
+							>
+								{description}
+							</FormHelperText>
 						)}
-					</Field>
+
+						{fieldState.error && (
+							<FormHelperText
+								id={errorId}
+								error
+								sx={{
+									marginLeft: 6,
+									marginTop: 0.5,
+								}}
+							>
+								{fieldState.error.message}
+							</FormHelperText>
+						)}
+					</div>
 				);
 			}}
 		/>
@@ -93,3 +114,4 @@ function FormSwitch<T extends FieldValues>({
 }
 
 export { FormSwitch };
+

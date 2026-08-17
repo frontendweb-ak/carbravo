@@ -1,15 +1,18 @@
-import { Search } from "lucide-react";
+import SearchIcon from "@mui/icons-material/Search";
+import {
+	Box,
+	Button,
+	Checkbox,
+	FormControl,
+	FormControlLabel,
+	InputAdornment,
+	MenuItem,
+	Select,
+	Stack,
+	TextField,
+} from "@mui/material";
 import type { ChangeEvent } from "react";
 
-import {
-	Button,
-	Input,
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui";
 import type { ListProgramsParams } from "../api/programs.api";
 
 export interface ProgramFiltersProps {
@@ -55,95 +58,116 @@ function ProgramFilters({
 	};
 
 	return (
-		<div className="rounded-lg border border-border bg-card p-4">
-			<div className="flex flex-col gap-3 xl:flex-row xl:items-center">
-				{/* Search */}
-				<div className="relative min-w-0 flex-1">
-					<Search
-						aria-hidden="true"
-						className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-					/>
-
-					<Input
-						value={search}
-						onChange={handleSearchChange}
-						placeholder="Search programs..."
-						aria-label="Search programs"
-						className="pl-9"
-					/>
-				</div>
-
-				{/* Program type */}
-				<Select
-					value={programType ?? "all"}
-					onValueChange={(value) => {
-						onProgramTypeChange(
-							value === "all"
-								? undefined
-								: (value as ListProgramsParams["programType"]),
-						);
+		<Box
+			sx={{
+				border: 1,
+				borderColor: "divider",
+				borderRadius: 2,
+				p: 2,
+				bgcolor: "background.paper",
+			}}
+		>
+			<Stack
+				direction={{
+					xs: "column",
+					xl: "row",
+				}}
+				spacing={2}
+				sx={{
+					alignItems: {
+						xl: "center",
+					},
+				}}
+			>
+				<TextField
+					fullWidth
+					value={search}
+					onChange={handleSearchChange}
+					placeholder="Search programs..."
+					size="small"
+					slotProps={{
+						input: {
+							startAdornment: (
+								<InputAdornment position="start">
+									<SearchIcon fontSize="small" />
+								</InputAdornment>
+							),
+						},
 					}}
-				>
-					<SelectTrigger className="w-full xl:w-48">
-						<SelectValue placeholder="Program type" />
-					</SelectTrigger>
+				/>
+				<FormControl size="small" sx={{ minWidth: { xl: 190 } }}>
+					<Select
+						value={programType ?? "all"}
+						onChange={(event) => {
+							const value = event.target.value;
 
-					<SelectContent>
-						<SelectItem value="all">All types</SelectItem>
-						<SelectItem value="CUSTOMER_CASH">Customer Cash</SelectItem>
-						<SelectItem value="APR">APR</SelectItem>
-						<SelectItem value="BONUS_CASH">Bonus Cash</SelectItem>
-					</SelectContent>
-				</Select>
+							onProgramTypeChange(
+								value === "all"
+									? undefined
+									: (value as ListProgramsParams["programType"]),
+							);
+						}}
+					>
+						<MenuItem value="all">All types</MenuItem>
 
-				{/* Date from */}
-				<Input
+						<MenuItem value="CUSTOMER_CASH">Customer Cash</MenuItem>
+
+						<MenuItem value="APR">APR</MenuItem>
+
+						<MenuItem value="BONUS_CASH">Bonus Cash</MenuItem>
+					</Select>
+				</FormControl>
+
+				<TextField
 					type="date"
+					size="small"
 					value={dateFrom ?? ""}
 					onChange={(event) =>
 						onDateFromChange(event.target.value || undefined)
 					}
-					aria-label="Delivery start date"
-					className="w-full xl:w-40"
+					slotProps={{
+						inputLabel: {
+							shrink: true,
+						},
+					}}
 				/>
 
-				{/* Date to */}
-				<Input
+				<TextField
 					type="date"
+					size="small"
 					value={dateTo ?? ""}
 					onChange={(event) => onDateToChange(event.target.value || undefined)}
-					aria-label="Delivery end date"
-					className="w-full xl:w-40"
+					slotProps={{
+						inputLabel: {
+							shrink: true,
+						},
+					}}
+				/>
+				<FormControlLabel
+					control={
+						<Checkbox
+							checked={pendingApproval === true}
+							onChange={(event) =>
+								onPendingApprovalChange(event.target.checked ? true : undefined)
+							}
+						/>
+					}
+					label="Pending approval"
+					sx={{
+						whiteSpace: "nowrap",
+						m: 0,
+					}}
 				/>
 
-				{/* Pending approval */}
-				<label className="flex h-9 shrink-0 items-center gap-2 text-sm">
-					<input
-						type="checkbox"
-						checked={pendingApproval === true}
-						onChange={(event) =>
-							onPendingApprovalChange(event.target.checked ? true : undefined)
-						}
-						className="size-4 rounded border-input accent-primary"
-					/>
-
-					<span className="whitespace-nowrap">Pending approval</span>
-				</label>
-
-				{/* Clear */}
 				{hasFilters && (
-					<Button
-						type="button"
-						variant="ghost"
-						onClick={onClear}
-						className="shrink-0"
-					>
+					<Button variant="text" onClick={onClear}>
 						Clear
 					</Button>
 				)}
-			</div>
-		</div>
+			</Stack>
+		</Box>
 	);
 }
 
 export { ProgramFilters };
+

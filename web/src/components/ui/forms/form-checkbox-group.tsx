@@ -6,39 +6,43 @@ import {
 	type Path,
 } from "react-hook-form";
 
-import {
-	CheckboxGroup,
-	type CheckboxGroupProps,
-	Field,
-	FieldDescription,
-	FieldError,
-	FieldLabel,
-} from "../primitives";
+import Checkbox from "@mui/material/Checkbox";
+import FormControl from "@mui/material/FormControl";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import FormGroup from "@mui/material/FormGroup";
+import FormHelperText from "@mui/material/FormHelperText";
+import FormLabel from "@mui/material/FormLabel";
+import Typography from "@mui/material/Typography";
 
-import { FieldRequired } from "../primitives/label";
+export interface CheckboxOption<O> {
+	label: ReactNode;
+	value: O;
+	disabled?: boolean;
+}
 
-export type FormCheckboxGroupProps<T extends FieldValues, O> = Omit<
-	CheckboxGroupProps<O>,
-	"value" | "onValueChange" | "disabled"
-> & {
+export interface FormCheckboxGroupProps<
+	T extends FieldValues,
+	O extends string,
+> {
 	control: Control<T>;
 	name: Path<T>;
+
+	options: CheckboxOption<O>[];
 
 	label?: ReactNode;
 	required?: boolean;
 	description?: ReactNode;
 	disabled?: boolean;
-};
+}
 
-function FormCheckboxGroup<T extends FieldValues, O>({
+function FormCheckboxGroup<T extends FieldValues, O extends string>({
 	control,
 	name,
 	label,
 	required = false,
 	description,
-	disabled,
+	disabled = false,
 	options,
-	...props
 }: FormCheckboxGroupProps<T, O>) {
 	return (
 		<Controller
@@ -49,29 +53,56 @@ function FormCheckboxGroup<T extends FieldValues, O>({
 					? field.value.map(String)
 					: [];
 
+				const handleChange = (optionValue: string, checked: boolean) => {
+					const nextValue = checked
+						? [...value, optionValue]
+						: value.filter((v) => v !== optionValue);
+
+					field.onChange(nextValue);
+				};
+
 				return (
-					<Field invalid={fieldState.invalid} disabled={disabled}>
+					<FormControl error={fieldState.invalid} disabled={disabled} fullWidth>
 						{label && (
-							<FieldLabel>
+							<FormLabel sx={{ mb: 1 }}>
 								{label}
-								{required && <FieldRequired />}
-							</FieldLabel>
+
+								{required && (
+									<Typography component="span" color="error" sx={{ ml: 0.5 }}>
+										*
+									</Typography>
+								)}
+							</FormLabel>
 						)}
 
-						<CheckboxGroup<O>
-							{...props}
-							options={options}
-							value={value}
-							disabled={disabled}
-							onValueChange={field.onChange}
-							aria-invalid={fieldState.invalid || undefined}
-						/>
+						<FormGroup>
+							{options.map((option) => {
+								const optionValue = String(option.value);
 
-						{description && <FieldDescription>{description}</FieldDescription>}
-						{fieldState.error && (
-							<FieldError>{fieldState.error.message}</FieldError>
+								return (
+									<FormControlLabel
+										key={optionValue}
+										control={
+											<Checkbox
+												checked={value.includes(optionValue)}
+												onChange={(event) =>
+													handleChange(optionValue, event.target.checked)
+												}
+											/>
+										}
+										label={option.label}
+										disabled={disabled || option.disabled}
+									/>
+								);
+							})}
+						</FormGroup>
+
+						{fieldState.error ? (
+							<FormHelperText>{fieldState.error.message}</FormHelperText>
+						) : (
+							description && <FormHelperText>{description}</FormHelperText>
 						)}
-					</Field>
+					</FormControl>
 				);
 			}}
 		/>
@@ -79,4 +110,3 @@ function FormCheckboxGroup<T extends FieldValues, O>({
 }
 
 export { FormCheckboxGroup };
-

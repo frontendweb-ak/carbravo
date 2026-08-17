@@ -1,4 +1,4 @@
-import { toast } from "@/components/ui";
+import { toast } from "@/providers/toast-provider";
 import {
 	type UseMutationOptions,
 	type UseMutationResult,
@@ -66,8 +66,7 @@ export function useAppMutation<
 						: options.successMessage;
 
 				if (message.trim()) {
-					toast.add({
-						type: "success",
+					toast.success({
 						title: message,
 					});
 				}
@@ -92,8 +91,7 @@ export function useAppMutation<
 				}
 
 				if (typeof message === "string" && message.trim().length > 0) {
-					toast.add({
-						type: "error",
+					toast.error({
 						title: message,
 					});
 				}

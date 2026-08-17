@@ -1,91 +1,52 @@
+// src/components/ui/forms/form-checkbox.tsx
+
 import type { ReactNode } from "react";
+
 import {
-	type Control,
 	Controller,
+	type Control,
 	type FieldValues,
 	type Path,
 } from "react-hook-form";
+import { CheckboxField } from "../primitives/checkbox/checkbox-field";
 
-import {
-	Checkbox,
-	type CheckboxProps,
-	Field,
-	FieldContent,
-	FieldDescription,
-	FieldError,
-	FieldLabel,
-} from "../primitives";
-
-import { FieldRequired } from "../primitives/label";
-
-export type FormCheckboxProps<T extends FieldValues> = Omit<
-	CheckboxProps,
-	"checked" | "defaultChecked" | "onCheckedChange"
-> & {
+export interface FormCheckboxProps<T extends FieldValues> {
 	control: Control<T>;
 	name: Path<T>;
 
 	label?: ReactNode;
-	required?: boolean;
 	description?: ReactNode;
-};
+	required?: boolean;
+	disabled?: boolean;
+}
 
 function FormCheckbox<T extends FieldValues>({
 	control,
 	name,
 	label,
-	required = false,
 	description,
+	required,
 	disabled,
-	...props
 }: FormCheckboxProps<T>) {
 	return (
 		<Controller
 			control={control}
 			name={name}
-			render={({ field, fieldState }) => {
-				const id = `${String(name)}-checkbox`;
-				const descriptionId = description ? `${id}-description` : undefined;
-
-				return (
-					<Field
-						orientation="horizontal"
-						invalid={fieldState.invalid}
-						disabled={disabled}
-					>
-						<Checkbox
-							{...props}
-							id={id}
-							checked={Boolean(field.value)}
-							disabled={disabled}
-							onCheckedChange={(checked) => field.onChange(checked === true)}
-							onBlur={field.onBlur}
-							ref={field.ref}
-							aria-invalid={fieldState.invalid || undefined}
-							aria-describedby={descriptionId}
-						/>
-
-						<FieldContent>
-							{label && (
-								<FieldLabel htmlFor={id}>
-									{label}
-									{required && <FieldRequired />}
-								</FieldLabel>
-							)}
-
-							{description && (
-								<FieldDescription id={descriptionId}>
-									{description}
-								</FieldDescription>
-							)}
-
-							{fieldState.error && (
-								<FieldError>{fieldState.error.message}</FieldError>
-							)}
-						</FieldContent>
-					</Field>
-				);
-			}}
+			render={({ field, fieldState }) => (
+				<CheckboxField
+					label={label}
+					description={description}
+					required={required}
+					disabled={disabled}
+					checked={Boolean(field.value)}
+					error={fieldState.invalid}
+					helperText={fieldState.error?.message}
+					onBlur={field.onBlur}
+					onChange={(event) =>
+						field.onChange((event.target as HTMLInputElement).checked)
+					}
+				/>
+			)}
 		/>
 	);
 }

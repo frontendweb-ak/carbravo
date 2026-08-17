@@ -1,7 +1,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Box, Button, Grid, Stack, Typography } from "@mui/material";
 import { FormProvider, useForm } from "react-hook-form";
 
-import { Button, Col, FormChoiceChipGroup, FormInput } from "@/components/ui";
+import { FormChoiceChipGroup, FormInput } from "@/components/ui/forms";
 
 import { ProgramSection } from "../components";
 
@@ -28,7 +29,11 @@ export function IncentiveValuesForm() {
 
 	return (
 		<FormProvider {...form}>
-			<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+			<Stack
+				component="form"
+				onSubmit={form.handleSubmit(onSubmit)}
+				spacing={2.5}
+			>
 				{/* =========================================================
 				    1. APR BY TERM
 				========================================================= */}
@@ -37,10 +42,19 @@ export function IncentiveValuesForm() {
 					title="APR by term"
 					description="Set Purchase type to Finance in Setup to author APR by term."
 				>
-					<div className="rounded-lg bg-muted px-3 py-2.5 text-sm text-muted-foreground">
-						APR values can be configured when the program's Purchase Type is set
-						to Finance.
-					</div>
+					<Box
+						sx={{
+							borderRadius: 1.5,
+							backgroundColor: "action.hover",
+							px: 1.5,
+							py: 1.25,
+						}}
+					>
+						<Typography variant="body2" color="text.secondary">
+							APR values can be configured when the program's Purchase Type is
+							set to Finance.
+						</Typography>
+					</Box>
 				</ProgramSection>
 
 				{/* =========================================================
@@ -48,31 +62,37 @@ export function IncentiveValuesForm() {
 				========================================================= */}
 
 				<ProgramSection title="Cash values">
-					<div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
-						<FormInput
-							control={form.control}
-							name="customerCash"
-							label="Customer Cash"
-							type="number"
-							placeholder="0"
-						/>
+					<Grid container spacing={2.5}>
+						<Grid size={{ xs: 12, lg: 4 }}>
+							<FormInput
+								control={form.control}
+								name="customerCash"
+								label="Customer Cash"
+								type="number"
+								placeholder="0"
+							/>
+						</Grid>
 
-						<FormInput
-							control={form.control}
-							name="bonusCash"
-							label="Bonus Cash"
-							type="number"
-							placeholder="0"
-						/>
+						<Grid size={{ xs: 12, lg: 4 }}>
+							<FormInput
+								control={form.control}
+								name="bonusCash"
+								label="Bonus Cash"
+								type="number"
+								placeholder="0"
+							/>
+						</Grid>
 
-						<FormInput
-							control={form.control}
-							name="downPaymentAssist"
-							label="Down Payment Assist"
-							type="number"
-							placeholder="0"
-						/>
-					</div>
+						<Grid size={{ xs: 12, lg: 4 }}>
+							<FormInput
+								control={form.control}
+								name="downPaymentAssist"
+								label="Down Payment Assist"
+								type="number"
+								placeholder="0"
+							/>
+						</Grid>
+					</Grid>
 				</ProgramSection>
 
 				{/* =========================================================
@@ -83,8 +103,9 @@ export function IncentiveValuesForm() {
 					title="Stackability"
 					description="How this program combines with others on the same deal."
 				>
-					<Col gap={4}>
+					<Stack spacing={3}>
 						{/* Stackable with */}
+
 						<FormChoiceChipGroup
 							control={form.control}
 							name="stackableWith"
@@ -92,44 +113,46 @@ export function IncentiveValuesForm() {
 							description="Can combine"
 							selectionMode="multiple"
 							options={STACKABILITY_OPTIONS}
-							radius="full"
-							size="sm"
-							getValue={(option) => option.value}
-							getLabel={(option) => option.label}
 						/>
 
 						{/* Not stackable with */}
+
 						<FormChoiceChipGroup
-							radius="full"
-							size="sm"
 							control={form.control}
 							name="notStackableWith"
 							label="Not stackable with"
 							description="Mutually exclusive"
 							selectionMode="multiple"
-							color="destructive"
 							options={STACKABILITY_OPTIONS}
-							getValue={(option) => option.value}
-							getLabel={(option) => option.label}
 						/>
 
 						{/* Belongs to */}
+
 						<FormInput
 							control={form.control}
 							name="belongsTo"
 							label="Belongs to"
 							placeholder="e.g. GMF National"
 						/>
-					</Col>
+					</Stack>
 				</ProgramSection>
 
 				{/* =========================================================
 				    FORM ACTION
 				========================================================= */}
-				<div className="flex justify-end">
-					<Button type="submit">Save Incentive Values</Button>
-				</div>
-			</form>
+
+				<Stack direction="row" sx={{ justifyContent: "flex-end" }}>
+					<Button
+						type="submit"
+						variant="contained"
+						disabled={form.formState.isSubmitting}
+					>
+						{form.formState.isSubmitting
+							? "Saving..."
+							: "Save Incentive Values"}
+					</Button>
+				</Stack>
+			</Stack>
 		</FormProvider>
 	);
 }

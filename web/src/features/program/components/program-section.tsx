@@ -1,11 +1,12 @@
 import type { ReactNode } from "react";
 
+import { Box, Card, CardContent, Stack, Typography } from "@mui/material";
+
 interface ProgramSectionProps {
 	title: ReactNode;
 	description?: ReactNode;
 	headerAction?: ReactNode;
 	children: ReactNode;
-	className?: string;
 }
 
 function ProgramSection({
@@ -13,32 +14,54 @@ function ProgramSection({
 	description,
 	headerAction,
 	children,
-	className,
 }: ProgramSectionProps) {
 	return (
-		<section
-			className={["rounded-2xl border border-border bg-card p-6", className]
-				.filter(Boolean)
-				.join(" ")}
+		<Card
+			variant="outlined"
+			sx={{
+				borderRadius: 3,
+			}}
 		>
-			<div className="mb-6 flex items-start justify-between gap-4">
-				<div>
-					<h2 className="text-base font-bold text-foreground">{title}</h2>
+			<CardContent
+				sx={{
+					p: 3,
+					"&:last-child": {
+						pb: 3,
+					},
+				}}
+			>
+				<Box
+					sx={{
+						display: "flex",
+						alignItems: "flex-start",
+						justifyContent: "space-between",
+						gap: 2,
+						mb: 3,
+					}}
+				>
+					<Stack spacing={0.5} sx={{ minWidth: 0 }}>
+						{typeof title === "string" ? (
+							<Typography variant="h6" sx={{ fontWeight: 700 }}>
+								{title}
+							</Typography>
+						) : (
+							title
+						)}
 
-					{description && (
-						<p className="mt-0.5 text-sm text-muted-foreground">
-							{description}
-						</p>
-					)}
-				</div>
+						{description && (
+							<Typography variant="body2" color="text.secondary">
+								{description}
+							</Typography>
+						)}
+					</Stack>
 
-				{headerAction}
-			</div>
+					{headerAction && <Box sx={{ flexShrink: 0 }}>{headerAction}</Box>}
+				</Box>
 
-			{children}
-		</section>
+				{children}
+			</CardContent>
+		</Card>
 	);
 }
 
 export { ProgramSection };
-

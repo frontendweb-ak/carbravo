@@ -4,8 +4,8 @@ import { forwardRef } from "react";
 
 import TextField from "@mui/material/TextField";
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";
-import { Clock3 } from "lucide-react";
 
+import Clock3 from "@mui/icons-material/AccessTime";
 export interface TimeInputProps {
 	value?: Date | null;
 	onChange?: (value: Date | null) => void;
@@ -58,3 +58,4 @@ const TimeInput = forwardRef<HTMLInputElement, TimeInputProps>(
 TimeInput.displayName = "TimeInput";
 
 export { TimeInput };
+

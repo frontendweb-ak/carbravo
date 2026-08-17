@@ -17,7 +17,12 @@ export function transformValue(
 			return value;
 	}
 }
-export type InputParseMode = "number" | "decimal" | "phone";
+export type InputParseMode =
+	| "none"
+	| "number"
+	| "integer"
+	| "decimal"
+	| "phone";
 export function parseInputValue(
 	value: string,
 	parseMode: InputParseMode = "number",

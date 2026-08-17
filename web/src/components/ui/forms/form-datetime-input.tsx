@@ -5,12 +5,13 @@ import {
 	type FieldValues,
 	type Path,
 } from "react-hook-form";
+
 import { DateTimeInput, type DateTimeInputProps } from "../primitives";
 import { FormField } from "./form-field";
 
 export type FormDateTimeInputProps<T extends FieldValues> = Omit<
 	DateTimeInputProps,
-	"name" | "value" | "defaultValue" | "onChange" | "onBlur"
+	"value" | "onChange"
 > & {
 	control: Control<T>;
 	name: Path<T>;
@@ -45,10 +46,12 @@ function FormDateTimeInput<T extends FieldValues>({
 				>
 					<DateTimeInput
 						{...props}
-						{...field}
-						value={field.value ?? ""}
+						value={field.value ? new Date(field.value) : null}
+						onChange={(date) => {
+							field.onChange(date ? date.toISOString() : "");
+						}}
 						error={!!fieldState.error}
-						aria-invalid={fieldState.error ? true : undefined}
+						helperText={fieldState.error?.message}
 					/>
 				</FormField>
 			)}

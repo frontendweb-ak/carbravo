@@ -1,4 +1,6 @@
-import { X } from "lucide-react";
+import CloseIcon from "@mui/icons-material/Close";
+import { Box, Button, Chip, IconButton, Typography } from "@mui/material";
+
 import type { VehicleFilterRow } from "../../schema";
 import { formatSelectedVehicle } from "../../utils";
 
@@ -16,36 +18,89 @@ function SelectedVehicleRow({
 	onRemove,
 }: SelectedVehicleRowProps) {
 	return (
-		<div className="flex items-center gap-3 rounded-xl border border-border px-4 py-3">
-			<span className="shrink-0 rounded-md bg-primary/10 px-2 py-1 text-xs font-semibold text-primary">
-				Row {index + 1}
-			</span>
+		<Box
+			sx={{
+				display: "flex",
+				alignItems: "center",
+				gap: 1.5,
+				border: 1,
+				borderColor: "divider",
+				borderRadius: 3,
+				px: 2,
+				py: 1.5,
+			}}
+		>
+			<Chip
+				label={`Row ${index + 1}`}
+				size="small"
+				sx={{
+					flexShrink: 0,
+					borderRadius: 1.5,
+					backgroundColor: "rgba(108, 174, 64, 0.1)",
+					color: "primary.main",
+					fontWeight: 600,
+					"& .MuiChip-label": {
+						px: 1,
+					},
+				}}
+			/>
 
-			<div className="min-w-0 flex-1 text-sm font-semibold text-foreground">
+			<Typography
+				variant="body2"
+				sx={{
+					minWidth: 0,
+					flex: 1,
+					fontWeight: 600,
+					color: "text.primary",
+				}}
+			>
 				{formatSelectedVehicle(row)}
-			</div>
+			</Typography>
 
 			{onEdit && (
-				<button
+				<Button
 					type="button"
+					variant="outlined"
+					size="small"
 					onClick={onEdit}
-					className="shrink-0 rounded-lg border border-primary/30 bg-primary/5 px-3 py-1.5 text-sm font-semibold text-primary transition-colors hover:bg-primary/10"
+					sx={{
+						flexShrink: 0,
+						borderColor: "rgba(108, 174, 64, 0.3)",
+						backgroundColor: "rgba(108, 174, 64, 0.05)",
+						color: "primary.main",
+						fontWeight: 600,
+						"&:hover": {
+							borderColor: "rgba(108, 174, 64, 0.3)",
+							backgroundColor: "rgba(108, 174, 64, 0.1)",
+						},
+					}}
 				>
 					Edit
-				</button>
+				</Button>
 			)}
 
 			{onRemove && (
-				<button
+				<IconButton
 					type="button"
+					size="small"
 					onClick={onRemove}
 					aria-label={`Remove vehicle row ${index + 1}`}
-					className="shrink-0 rounded-md p-1.5 text-lg leading-none text-destructive transition-colors hover:bg-destructive/10"
+					sx={{
+						flexShrink: 0,
+						color: "error.main",
+						borderRadius: 1.5,
+						"&:hover": {
+							backgroundColor: "error.main",
+							"& .MuiSvgIcon-root": {
+								color: "common.white",
+							},
+						},
+					}}
 				>
-					<X />
-				</button>
+					<CloseIcon fontSize="small" />
+				</IconButton>
 			)}
-		</div>
+		</Box>
 	);
 }
 

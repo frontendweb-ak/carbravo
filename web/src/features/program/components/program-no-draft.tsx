@@ -1,19 +1,34 @@
+import { Box, Typography } from "@mui/material";
+
 import { PROGRAM_MESSAGES } from "@/features/program/constants/messages";
 
 export function ProgramNoDraft() {
 	const message = PROGRAM_MESSAGES.noDraftRevision;
 
 	return (
-		<div className="flex min-h-[50vh] items-center justify-center">
-			<div className="text-center">
-				<h2 className="text-lg font-semibold text-foreground">
+		<Box
+			sx={{
+				minHeight: "50vh",
+				display: "flex",
+				alignItems: "center",
+				justifyContent: "center",
+			}}
+		>
+			<Box sx={{ textAlign: "center" }}>
+				<Typography
+					variant="h6"
+					sx={{
+						fontSize: "1.125rem",
+						fontWeight: 600,
+					}}
+				>
 					{message.title}
-				</h2>
+				</Typography>
 
-				<p className="mt-1 text-sm text-muted-foreground">
+				<Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
 					{message.description}
-				</p>
-			</div>
-		</div>
+				</Typography>
+			</Box>
+		</Box>
 	);
 }

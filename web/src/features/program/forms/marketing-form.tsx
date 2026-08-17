@@ -1,16 +1,26 @@
-import {
-	Button,
-	Card,
-	CardContent,
-	FormInput,
-	FormTextarea,
-	toast,
-} from "@/components/ui";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Button, Card, CardContent, Stack, Typography } from "@mui/material";
 import { FormProvider, useForm } from "react-hook-form";
+
+import { FormInput, FormTextarea } from "@/components/ui/forms";
 
 import { marketingDefaultValues } from "../constants";
 import { type MarketingFormValues, marketingFormSchema } from "../schema";
+
+const REQUIRED_LABEL = {
+	display: "inline-flex",
+	alignItems: "center",
+	marginLeft: 8,
+	padding: "2px 6px",
+	borderRadius: 4,
+	fontSize: 10,
+	fontWeight: 700,
+	lineHeight: 1,
+	letterSpacing: "0.05em",
+	textTransform: "uppercase",
+	backgroundColor: "warning.main",
+	color: "warning.contrastText",
+};
 
 export function MarketingForm() {
 	const form = useForm<MarketingFormValues>({
@@ -21,38 +31,44 @@ export function MarketingForm() {
 
 	const onSubmit = (values: MarketingFormValues) => {
 		console.log("MARKETING SUBMIT", values);
-
-		toast.add({
-			title: "Marketing details saved.",
-		});
 	};
+
+	const isSubmitting = form.formState.isSubmitting;
 
 	return (
 		<FormProvider {...form}>
-			<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+			<Stack
+				component="form"
+				onSubmit={form.handleSubmit(onSubmit)}
+				spacing={2}
+			>
 				{/* ---------------------------------------------------------------- */}
 				{/* Marketing Friendly Program Name                                 */}
 				{/* ---------------------------------------------------------------- */}
 
-				<Card>
-					<CardContent className="p-6">
-						<div className="space-y-4">
-							<div>
-								<div className="flex items-center gap-2">
-									<h2 className="text-base font-bold text-foreground">
-										Marketing Friendly Program Name (MFPN)
-									</h2>
-
-									<span className="rounded bg-warning/15 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-warning">
+				<Card variant="outlined">
+					<CardContent sx={{ p: 3 }}>
+						<Stack spacing={2}>
+							<Stack spacing={0.5}>
+								<Typography
+									variant="h6"
+									sx={{
+										display: "flex",
+										alignItems: "center",
+										fontWeight: 700,
+									}}
+								>
+									Marketing Friendly Program Name (MFPN)
+									<Typography component="span" sx={REQUIRED_LABEL}>
 										Required
-									</span>
-								</div>
+									</Typography>
+								</Typography>
 
-								<p className="mt-1 text-sm text-muted-foreground">
+								<Typography variant="body2" color="text.secondary">
 									Consumer-facing program name shown in marketing. Editable in
 									minor revisions.
-								</p>
-							</div>
+								</Typography>
+							</Stack>
 
 							<FormInput
 								control={form.control}
@@ -61,7 +77,7 @@ export function MarketingForm() {
 								required
 								placeholder="e.g. Summer Finance Event"
 							/>
-						</div>
+						</Stack>
 					</CardContent>
 				</Card>
 
@@ -69,19 +85,19 @@ export function MarketingForm() {
 				{/* Disclosure                                                        */}
 				{/* ---------------------------------------------------------------- */}
 
-				<Card>
-					<CardContent className="p-6">
-						<div className="space-y-4">
-							<div>
-								<h2 className="text-base font-bold text-foreground">
+				<Card variant="outlined">
+					<CardContent sx={{ p: 3 }}>
+						<Stack spacing={2}>
+							<Stack spacing={0.5}>
+								<Typography variant="h6" sx={{ fontWeight: 700 }}>
 									Disclosure
-								</h2>
+								</Typography>
 
-								<p className="mt-1 text-sm text-muted-foreground">
+								<Typography variant="body2" color="text.secondary">
 									Consumer-facing legal disclosure shown with the incentive.
 									Editable in minor revisions.
-								</p>
-							</div>
+								</Typography>
+							</Stack>
 
 							<FormTextarea
 								control={form.control}
@@ -91,16 +107,20 @@ export function MarketingForm() {
 								placeholder="Enter consumer disclosure text..."
 								rows={5}
 							/>
-						</div>
+						</Stack>
 					</CardContent>
 				</Card>
 
-				<div className="flex justify-end">
-					<Button type="submit" disabled={form.formState.isSubmitting}>
-						{form.formState.isSubmitting ? "Saving..." : "Save Marketing"}
+				{/* ---------------------------------------------------------------- */}
+				{/* Actions                                                           */}
+				{/* ---------------------------------------------------------------- */}
+
+				<Stack direction="row" sx={{ justifyContent: "flex-end" }}>
+					<Button type="submit" variant="contained" disabled={isSubmitting}>
+						{isSubmitting ? "Saving..." : "Save Marketing"}
 					</Button>
-				</div>
-			</form>
+				</Stack>
+			</Stack>
 		</FormProvider>
 	);
 }

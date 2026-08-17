@@ -7,7 +7,7 @@ import {
 import type { ProgramStatusDto } from "@/features/program/api/programs.api";
 import { ProgramPagination } from "@/features/program/components";
 import { ProgramList } from "@/features/program/components/program-list";
-import { Search } from "lucide-react";
+import Button from "@mui/material/Button";
 import { useNavigate } from "react-router-dom";
 
 type ProgramStatusTab = "all" | ProgramStatusDto;
@@ -77,7 +77,7 @@ export default function ProgramsPage() {
 				<div className="relative w-full max-w-70">
 					<Input
 						value={filters.search ?? ""}
-						leftIcon={<Search />}
+						// leftIcon={<Search />}
 						onChange={(event) => setSearch(event.target.value)}
 						placeholder="Search programs, codes, vehicles..."
 						aria-label="Search programs, codes, vehicles"

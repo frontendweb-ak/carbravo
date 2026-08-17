@@ -1,14 +1,15 @@
-import {
-	Card,
-	CardAction,
-	CardContent,
-	CardHeader,
-	CardTitle,
-	StatusBadge,
-} from "@/components/ui";
-import { cn } from "@/utils";
-import { ChevronRight } from "lucide-react";
-import { Link } from "react-router-dom";
+import Box from "@mui/material/Box";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import Chip from "@mui/material/Chip";
+import Divider from "@mui/material/Divider";
+import Link from "@mui/material/Link";
+import Typography from "@mui/material/Typography";
+
+import ChevronRight from "@mui/icons-material/ChevronRight";
+import { Link as RouterLink } from "react-router-dom";
+
+import { StatusBadge } from "@/components/ui";
 import type { ExpiringProgram } from "../model/dashboard.types";
 import { mapStatus } from "../utils";
 import { ExpiringProgramsSkeleton } from "./expiring-programs-skeleton";
@@ -17,7 +18,6 @@ export interface ExpiringProgramsProps {
 	programs?: ExpiringProgram[];
 	days?: number;
 	viewAllHref?: string;
-	className?: string;
 	loading?: boolean;
 }
 
@@ -25,107 +25,174 @@ function ExpiringPrograms({
 	programs = [],
 	days = 14,
 	viewAllHref = "/programs",
-	className,
 	loading = false,
 }: ExpiringProgramsProps) {
 	return (
-		<Card className={cn("h-full min-h-0", className)}>
-			<CardHeader className="border-b px-5 py-4">
-				<CardTitle className="text-base font-bold">Expiring soon</CardTitle>
+		<Card sx={{ height: "100%" }}>
+			{/* Header */}
+			<Box
+				sx={{
+					px: 3,
+					py: 2,
+					display: "flex",
+					alignItems: "center",
+					justifyContent: "space-between",
+					borderBottom: 1,
+					borderColor: "divider",
+				}}
+			>
+				<Typography variant="h6" sx={{ fontWeight: 700 }}>
+					Expiring soon
+				</Typography>
 
-				<CardAction>
-					<span className="inline-flex rounded-full bg-warning/10 px-3 py-1 text-xs font-bold text-warning">
-						Next {days} days
-					</span>
-				</CardAction>
-			</CardHeader>
+				<Chip
+					label={`Next ${days} days`}
+					size="small"
+					color="warning"
+					variant="outlined"
+				/>
+			</Box>
 
-			<CardContent className="p-0">
-				{/* Header */}
-				<div
-					className={cn(
-						"grid",
-						"grid-cols-[minmax(180px,1.4fr)_80px_120px_minmax(150px,1fr)_100px]",
-						"items-center",
-						"border-b border-border",
-						"bg-muted/50",
-						"px-5 py-2.5",
-						"text-[11px] font-bold uppercase tracking-wide",
-						"text-muted-foreground",
-					)}
-				>
-					<span>Program</span>
-					<span>Rev</span>
-					<span>Expires</span>
-					<span>Vehicles</span>
-					<span>Status</span>
-				</div>
+			{/* Table Header */}
+			<Box
+				sx={{
+					display: "grid",
+					gridTemplateColumns:
+						"minmax(180px,1.4fr) 80px 120px minmax(150px,1fr) 100px",
+					alignItems: "center",
+					px: 3,
+					py: 1.5,
+					bgcolor: "action.hover",
+					borderBottom: 1,
+					borderColor: "divider",
+				}}
+			>
+				<Typography variant="caption" sx={{ fontWeight: 700 }}>
+					PROGRAM
+				</Typography>
 
+				<Typography variant="caption" sx={{ fontWeight: 700 }}>
+					REV
+				</Typography>
+
+				<Typography variant="caption" sx={{ fontWeight: 700 }}>
+					EXPIRES
+				</Typography>
+
+				<Typography variant="caption" sx={{ fontWeight: 700 }}>
+					VEHICLES
+				</Typography>
+
+				<Typography variant="caption" sx={{ fontWeight: 700 }}>
+					STATUS
+				</Typography>
+			</Box>
+
+			<CardContent sx={{ p: 0 }}>
 				{loading ? (
 					<ExpiringProgramsSkeleton />
 				) : programs.length === 0 ? (
-					<div className="flex min-h-40 items-center justify-center px-5 text-sm text-muted-foreground">
-						No programs expiring soon.
-					</div>
+					<Box
+						sx={{
+							minHeight: 160,
+							display: "flex",
+							alignItems: "center",
+							justifyContent: "center",
+							px: 3,
+						}}
+					>
+						<Typography color="text.secondary">
+							No programs expiring soon.
+						</Typography>
+					</Box>
 				) : (
-					programs.map((program) => (
-						<Link
+					programs.map((program, index) => (
+						<Box
 							key={program.id}
+							component={RouterLink}
 							to={`/programs/${program.id}`}
-							className={cn(
-								"group relative grid",
-								"grid-cols-[minmax(180px,1.4fr)_80px_120px_minmax(150px,1fr)_100px]",
-								"items-center",
-								"border-b border-border last:border-b-0",
-								"px-5 py-3",
-								"transition-colors",
-								"hover:bg-muted/40",
-							)}
+							sx={{
+								display: "grid",
+								gridTemplateColumns:
+									"minmax(180px,1.4fr) 80px 120px minmax(150px,1fr) 100px",
+								alignItems: "center",
+								px: 3,
+								py: 2,
+								textDecoration: "none",
+								color: "inherit",
+								position: "relative",
+
+								"&:hover": {
+									bgcolor: "action.hover",
+								},
+
+								...(index !== programs.length - 1 && {
+									borderBottom: 1,
+									borderColor: "divider",
+								}),
+							}}
 						>
-							<span className="min-w-0 truncate text-sm font-semibold text-foreground">
+							<Typography variant="body2" noWrap>
 								{program.name}
-							</span>
+							</Typography>
 
-							<span>
-								<span className="inline-flex rounded-md bg-muted px-2 py-1 text-xs font-semibold text-foreground">
-									{program.revision}
-								</span>
-							</span>
+							<Box>
+								<Chip
+									label={program.revision}
+									size="small"
+									variant="outlined"
+								/>
+							</Box>
 
-							<span className="text-sm text-muted-foreground">
+							<Typography variant="body2" color="text.secondary">
 								{program.expiresAt}
-							</span>
+							</Typography>
 
-							<span className="min-w-0 truncate text-sm text-muted-foreground">
+							<Typography variant="body2" color="text.secondary" noWrap>
 								{program.vehicles}
-							</span>
+							</Typography>
 
-							<span>
-								<StatusBadge status={mapStatus(program.status)} />
-							</span>
+							<StatusBadge status={mapStatus(program.status)} />
 
 							<ChevronRight
-								className={cn(
-									"absolute right-2 size-4",
-									"text-muted-foreground",
-									"opacity-0 transition-opacity",
-									"group-hover:opacity-100",
-								)}
+								size={16}
+								style={{
+									position: "absolute",
+									right: 12,
+									opacity: 0.4,
+								}}
 							/>
-						</Link>
+						</Box>
 					))
 				)}
 			</CardContent>
 
 			{!loading && programs.length > 0 && (
-				<div className="flex items-center justify-end border-t border-border px-5 py-3">
-					<Link
-						to={viewAllHref}
-						className="text-xs font-semibold text-muted-foreground transition-colors hover:text-foreground"
+				<>
+					<Divider />
+
+					<Box
+						sx={{
+							px: 3,
+							py: 2,
+							display: "flex",
+							justifyContent: "flex-end",
+						}}
 					>
-						View all programs
-					</Link>
-				</div>
+						<Link
+							component={RouterLink}
+							to={viewAllHref}
+							underline="hover"
+							color="text.secondary"
+							sx={{
+								fontSize: 12,
+								fontWeight: 600,
+							}}
+						>
+							View all programs
+						</Link>
+					</Box>
+				</>
 			)}
 		</Card>
 	);

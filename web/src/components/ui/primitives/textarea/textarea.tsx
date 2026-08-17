@@ -1,7 +1,7 @@
 import type { TextFieldProps } from "@mui/material/TextField";
 import TextField from "@mui/material/TextField";
 
-import { cn } from "@/utils";
+
 
 const textareaVariants = {
 	sm: {
@@ -32,6 +32,7 @@ export interface TextareaProps extends Omit<
 > {
 	size?: TextareaSize;
 	success?: boolean;
+	maxLength?: number;
 }
 
 function Textarea({
@@ -52,7 +53,7 @@ function Textarea({
 			variant="outlined"
 			error={error}
 			disabled={disabled}
-			className={cn(className)}
+			className={className}
 			slotProps={{
 				htmlInput: {
 					"data-slot": "textarea",
@@ -95,3 +96,4 @@ function Textarea({
 }
 
 export { Textarea };
+

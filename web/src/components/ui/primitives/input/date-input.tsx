@@ -1,6 +1,7 @@
 // src/components/ui/date-input.tsx
 
-import { CalendarDays } from "lucide-react";
+
+import CalendarDays from "@mui/icons-material/CalendarMonth";
 import { forwardRef } from "react";
 
 import TextField from "@mui/material/TextField";
@@ -66,3 +67,4 @@ const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
 DateInput.displayName = "DateInput";
 
 export { DateInput };
+

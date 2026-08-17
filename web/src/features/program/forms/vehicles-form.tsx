@@ -1,11 +1,13 @@
-import { Button, toast } from "@/components/ui";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Button, Stack } from "@mui/material";
+import React from "react";
+import { FormProvider, useForm, useWatch } from "react-hook-form";
+
 import {
 	SelectedVehiclesSection,
 	VehicleFilterBuilder,
 } from "@/features/program/components/vehicle";
-import { zodResolver } from "@hookform/resolvers/zod";
-import React from "react";
-import { FormProvider, useForm, useWatch } from "react-hook-form";
+
 import {
 	emptyVehicleFilterRow,
 	FUEL_TYPE_OPTIONS,
@@ -15,7 +17,12 @@ import {
 	SEGMENT_OPTIONS,
 	vehiclesDefaultValues,
 } from "../constants";
-import { type VehiclesFormValues, vehiclesFormSchema } from "../schema";
+
+import {
+	type VehicleFilterRow,
+	vehiclesFormSchema,
+	type VehiclesFormValues,
+} from "../schema";
 
 export function VehiclesForm() {
 	const [editingIndex, setEditingIndex] = React.useState<number | null>(null);
@@ -30,14 +37,19 @@ export function VehiclesForm() {
 	 * Single source of truth for selected vehicle rows.
 	 */
 	const selectedRows =
-		useWatch({ control: form.control, name: "selectedRows" }) ?? [];
+		useWatch({
+			control: form.control,
+			name: "selectedRows",
+		}) ?? [];
 
 	/**
 	 * Current row being built/edited.
 	 */
 	const currentRow =
-		useWatch({ control: form.control, name: "currentRow" }) ??
-		emptyVehicleFilterRow;
+		useWatch({
+			control: form.control,
+			name: "currentRow",
+		}) ?? emptyVehicleFilterRow;
 
 	/**
 	 * Add a new row OR update an existing row.
@@ -45,14 +57,6 @@ export function VehiclesForm() {
 	const onAddRow = () => {
 		const row = form.getValues("currentRow");
 
-		/**
-		 * Model year, make, model and fuel are mandatory.
-		 *
-		 * Segment is optional.
-		 *
-		 * "*" is already a valid selection because it is
-		 * represented inside the arrays.
-		 */
 		const missingRequired =
 			row.modelYears.length === 0 ||
 			row.makes.length === 0 ||
@@ -60,60 +64,67 @@ export function VehiclesForm() {
 			row.fuelTypes.length === 0;
 
 		if (missingRequired) {
-			toast.add({
-				title:
-					"Select at least one value or * for model year, make, model and fuel.",
-			});
+			// Replace this with your MUI Snackbar service.
+			console.warn(
+				"Select at least one value or * for model year, make, model and fuel.",
+			);
 
 			return;
 		}
 
+		const nextRow: VehicleFilterRow = {
+			...row,
+			modelYears: [...row.modelYears],
+			makes: [...row.makes],
+			models: [...row.models],
+			fuelTypes: [...row.fuelTypes],
+			segments: [...row.segments],
+		};
+
 		/**
 		 * EDIT MODE
-		 *
-		 * Replace the existing row.
 		 */
 		if (editingIndex !== null) {
 			const nextRows = selectedRows.map((existingRow, index) =>
-				index === editingIndex ? { ...row } : existingRow,
+				index === editingIndex ? nextRow : existingRow,
 			);
+
 			form.setValue("selectedRows", nextRows, {
 				shouldDirty: true,
 				shouldValidate: true,
 			});
+
 			setEditingIndex(null);
-			form.setValue("currentRow", { ...emptyVehicleFilterRow });
+
+			form.setValue("currentRow", {
+				...emptyVehicleFilterRow,
+			});
+
 			return;
 		}
 
 		/**
 		 * ADD MODE
-		 *
-		 * Append a new row.
 		 */
-		const nextRows = [...selectedRows, { ...row }];
-
-		form.setValue("selectedRows", nextRows, {
+		form.setValue("selectedRows", [...selectedRows, nextRow], {
 			shouldDirty: true,
 			shouldValidate: true,
 		});
 
-		form.setValue("currentRow", { ...emptyVehicleFilterRow });
+		form.setValue("currentRow", {
+			...emptyVehicleFilterRow,
+		});
 	};
 
 	/**
 	 * Start editing a selected row.
-	 *
-	 * IMPORTANT:
-	 * We do NOT remove the row from selectedRows.
-	 *
-	 * The row remains visible while editing.
-	 * When Update Row is clicked, it gets replaced.
 	 */
 	const onEditRow = (index: number) => {
 		const row = selectedRows[index];
 
-		if (!row) return;
+		if (!row) {
+			return;
+		}
 
 		form.setValue("currentRow", {
 			modelYears: [...row.modelYears],
@@ -153,7 +164,7 @@ export function VehiclesForm() {
 
 		/**
 		 * If a row before the edited row is deleted,
-		 * the edited row's index moves one position up.
+		 * move the edited index up.
 		 */
 		if (editingIndex !== null && index < editingIndex) {
 			setEditingIndex((current) => (current === null ? null : current - 1));
@@ -161,7 +172,7 @@ export function VehiclesForm() {
 	};
 
 	/**
-	 * Cancel editing without changing selectedRows.
+	 * Cancel editing.
 	 */
 	const onCancelEdit = () => {
 		setEditingIndex(null);
@@ -173,9 +184,6 @@ export function VehiclesForm() {
 
 	/**
 	 * Final form submission.
-	 *
-	 * currentRow is temporary UI state.
-	 * selectedRows contains the actual vehicle configuration.
 	 */
 	const onSubmit = (values: VehiclesFormValues) => {
 		const payload = {
@@ -188,7 +196,11 @@ export function VehiclesForm() {
 
 	return (
 		<FormProvider {...form}>
-			<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+			<Stack
+				component="form"
+				onSubmit={form.handleSubmit(onSubmit)}
+				spacing={2.5}
+			>
 				{/* =======================================================
 				    ADD / EDIT VEHICLE
 				======================================================= */}
@@ -280,15 +292,30 @@ export function VehiclesForm() {
 					onAddRow={onAddRow}
 				/>
 
+				{/* =======================================================
+				    SELECTED VEHICLES
+				======================================================= */}
+
 				<SelectedVehiclesSection
 					rows={selectedRows}
 					onEdit={onEditRow}
 					onDelete={onDeleteRow}
 				/>
-				<div className="flex justify-end">
-					<Button type="submit">Save Vehicles</Button>
-				</div>
-			</form>
+
+				{/* =======================================================
+				    FORM ACTION
+				======================================================= */}
+
+				<Stack direction="row" sx={{ justifyContent: "flex-end" }}>
+					<Button
+						type="submit"
+						variant="contained"
+						disabled={form.formState.isSubmitting}
+					>
+						{form.formState.isSubmitting ? "Saving..." : "Save Vehicles"}
+					</Button>
+				</Stack>
+			</Stack>
 		</FormProvider>
 	);
 }

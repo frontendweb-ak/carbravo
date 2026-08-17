@@ -1,15 +1,17 @@
+import CheckIcon from "@mui/icons-material/Check";
 import {
+	Box,
 	Button,
 	Container,
-	Separator,
-	StatusBadge,
+	Divider,
+	Stack,
 	Typography,
-} from "@/components/ui";
-import type { ProgramWorkflowStatus } from "@/config/constants";
-import { cn } from "@/utils";
-import { Check } from "lucide-react";
+} from "@mui/material";
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
+
+import type { ProgramWorkflowStatus } from "@/config/constants";
+import { StatusBadge } from "../ui";
 
 export interface ProgramRevisionTab {
 	id: "current" | "active" | "history";
@@ -32,16 +34,9 @@ export interface ProgramContextHeaderProps {
 	hideSave?: boolean;
 	saveDisabled?: boolean;
 	className?: string;
-	/**
-	 * Revision navigation tabs.
-	 *
-	 * The parent determines which tabs exist based on the
-	 * actual revision history returned by the API.
-	 */
+
 	revisionTabs?: ProgramRevisionTab[];
-	/**
-	 * Called when the user changes the revision view.
-	 */
+
 	onRevisionChange?: (revisionId: ProgramRevisionTab["id"]) => void;
 }
 
@@ -56,139 +51,343 @@ function ProgramContextHeader({
 	onSave,
 	backHref = "/programs",
 	backLabel = "← Programs",
-
 	hideSave = false,
 	saveDisabled = false,
-
 	revisionTabs = [],
 	onRevisionChange,
-
 	className,
 }: ProgramContextHeaderProps) {
 	return (
-		<div className={cn("py-3.5", className)}>
+		<Box
+			className={className}
+			sx={{
+				py: 1.75,
+			}}
+		>
+			{/* ============================================================
+			    HEADER
+			============================================================ */}
+
 			<Container
-				size="2xl"
-				className="flex items-center justify-between gap-4 mb-4"
+				maxWidth={false}
+				sx={{
+					width: "100%",
+					maxWidth: 1360,
+					mx: "auto",
+					px: { xs: 2, sm: 3, lg: 4 },
+				}}
 			>
-				{/* Left */}
-				<div className="flex min-w-0 items-center gap-3">
-					<Link
-						to={backHref}
-						className="shrink-0 text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground"
+				<Stack
+					sx={{
+						direction: "row",
+						alignItems: "center",
+						justifyContent: "space-between",
+						gap: 2,
+						mb: 2,
+					}}
+				>
+					{/* Left */}
+
+					<Stack
+						sx={{
+							direction: "row",
+							alignItems: "center",
+							gap: 1.5,
+							minWidth: 0,
+						}}
 					>
-						<Typography variant="bodyMedium" weight="bold" color="muted">
-							{backLabel}
-						</Typography>
-					</Link>
-
-					<div className="h-6 w-px bg-border" />
-					<Typography
-						variant="h2"
-						weight="bold"
-						className="truncate text-[#24424A]"
-					>
-						{name}
-					</Typography>
-					<Typography
-						variant="labelSmall"
-						color="muted"
-						weight="medium"
-						className="shrink-0"
-					>
-						{type}
-					</Typography>
-					<span className="shrink-0 text-xs text-muted-foreground">·</span>
-					<span className="shrink-0 text-xs text-muted-foreground">
-						{number}
-					</span>
-
-					<span className="shrink-0 rounded-md bg-muted px-3 py-1 text-xs font-semibold text-foreground">
-						Rev: {revision}
-					</span>
-
-					<StatusBadge status={status} size="sm" />
-				</div>
-
-				{/* Right */}
-				<div className="flex shrink-0 items-center gap-4">
-					{saved && (
-						<div className="flex items-center gap-1.5">
-							<Check className="size-4 text-success" />
-
-							<Typography variant="bodySmall" weight="medium" color="success">
-								All changes saved
-							</Typography>
-						</div>
-					)}
-
-					{!hideSave && (
-						<Button
-							type="button"
-							variant="outline"
-							disabled={saveDisabled}
-							onClick={onSave}
+						<Link
+							to={backHref}
+							style={{
+								flexShrink: 0,
+								textDecoration: "none",
+							}}
 						>
-							{saveLabel}
-						</Button>
-					)}
-				</div>
-			</Container>
-			<Container
-				size="2xl"
-				className="flex items-center justify-between gap-4 pb-4"
-			>
-				{revisionTabs.length > 0 ? (
-					<div
-						className="flex items-center gap-2"
-						role="tablist"
-						aria-label="Program revisions"
-					>
-						{revisionTabs.map((tab) => (
-							<button
-								key={tab.id}
-								type="button"
-								role="tab"
-								aria-selected={tab.active ?? false}
-								onClick={() => onRevisionChange?.(tab.id)}
-								className={[
-									"inline-flex items-center gap-2 rounded-full border px-4 py-2",
-									"text-xs font-bold transition-colors",
-									tab.active
-										? "border-foreground bg-foreground text-background"
-										: "border-border bg-card text-muted-foreground hover:bg-muted hover:text-foreground",
-								].join(" ")}
+							<Typography
+								variant="body2"
+								sx={{
+									fontWeight: 700,
+									color: "text.secondary",
+									transition: "color 150ms",
+									"&:hover": {
+										color: "text.primary",
+									},
+								}}
 							>
-								<span>{tab.label}</span>
-								<span
-									className={
-										tab.active ? "text-background/70" : "text-muted-foreground"
-									}
-								>
-									{tab.subtitle}
-								</span>
-							</button>
-						))}
-					</div>
-				) : (
-					<div />
-				)}
+								{backLabel}
+							</Typography>
+						</Link>
 
-				{status === "ACTIVE" && (
-					<div className="flex items-center gap-2 rounded-full bg-muted px-4 py-2">
-						<span className="text-xs">🔒</span>
+						{/* Vertical separator */}
 
-						<Typography variant="bodySmall" color="muted" weight="medium">
-							This revision is active and posted — read-only. Clone or revise to
-							make changes.
+						<Box
+							sx={{
+								width: 1,
+								height: 24,
+								backgroundColor: "divider",
+								flexShrink: 0,
+							}}
+						/>
+
+						{/* Program name */}
+
+						<Typography
+							variant="h5"
+							noWrap
+							sx={{
+								minWidth: 0,
+								fontWeight: 700,
+								color: "brandTeal.main",
+							}}
+						>
+							{name}
 						</Typography>
-					</div>
-				)}
+
+						{/* Type */}
+
+						<Typography
+							variant="caption"
+							sx={{
+								flexShrink: 0,
+								fontWeight: 500,
+								color: "text.secondary",
+							}}
+						>
+							{type}
+						</Typography>
+
+						<Typography
+							variant="caption"
+							sx={{
+								flexShrink: 0,
+								color: "text.secondary",
+							}}
+						>
+							·
+						</Typography>
+
+						<Typography
+							variant="caption"
+							sx={{
+								flexShrink: 0,
+								color: "text.secondary",
+							}}
+						>
+							{number}
+						</Typography>
+
+						{/* Revision */}
+
+						<Box
+							sx={{
+								flexShrink: 0,
+								px: 1.5,
+								py: 0.5,
+								borderRadius: 1.5,
+								backgroundColor: "action.hover",
+							}}
+						>
+							<Typography
+								variant="caption"
+								sx={{
+									fontWeight: 600,
+									color: "text.primary",
+								}}
+							>
+								Rev: {revision}
+							</Typography>
+						</Box>
+
+						{/* Status */}
+
+						<StatusBadge status={status} />
+					</Stack>
+
+					{/* Right */}
+
+					<Stack
+						sx={{
+							direction: "row",
+							alignItems: "center",
+							gap: 2,
+							flexShrink: 0,
+						}}
+					>
+						{saved && (
+							<Stack sx={{ direction: "row", alignItems: "center", gap: 0.75 }}>
+								<CheckIcon
+									aria-hidden
+									sx={{
+										fontSize: 18,
+										color: "success.main",
+									}}
+								/>
+
+								<Typography
+									variant="body2"
+									sx={{
+										fontWeight: 500,
+										color: "success.main",
+										whiteSpace: "nowrap",
+									}}
+								>
+									All changes saved
+								</Typography>
+							</Stack>
+						)}
+
+						{!hideSave && (
+							<Button
+								type="button"
+								variant="outlined"
+								disabled={saveDisabled}
+								onClick={onSave}
+							>
+								{saveLabel}
+							</Button>
+						)}
+					</Stack>
+				</Stack>
+
+				{/* ============================================================
+				    REVISION NAVIGATION
+				============================================================ */}
+
+				<Stack
+					sx={{
+						direction: "row",
+						alignItems: "center",
+						pb: 2,
+						justifyContent: "space-between",
+						gap: 2,
+					}}
+				>
+					{revisionTabs.length > 0 ? (
+						<Stack
+							role="tablist"
+							aria-label="Program revisions"
+							sx={{
+								gap: 1,
+								direction: "row",
+								alignItems: "center",
+							}}
+						>
+							{revisionTabs.map((tab) => {
+								const active = tab.active ?? false;
+
+								return (
+									<Button
+										key={tab.id}
+										type="button"
+										role="tab"
+										aria-selected={active}
+										onClick={() => onRevisionChange?.(tab.id)}
+										variant={active ? "contained" : "outlined"}
+										color={active ? "inherit" : "primary"}
+										sx={{
+											minWidth: 0,
+											borderRadius: 999,
+											px: 2,
+											py: 0.75,
+											fontSize: 12,
+											fontWeight: 700,
+											textTransform: "none",
+
+											...(active
+												? {
+														backgroundColor: "foreground",
+														color: "background.default",
+														"&:hover": {
+															backgroundColor: "foreground",
+														},
+													}
+												: {
+														backgroundColor: "background.paper",
+														color: "text.secondary",
+														borderColor: "divider",
+														"&:hover": {
+															backgroundColor: "action.hover",
+															borderColor: "divider",
+														},
+													}),
+										}}
+									>
+										<Box
+											component="span"
+											sx={{
+												display: "inline-flex",
+												alignItems: "center",
+												gap: 1,
+											}}
+										>
+											<span>{tab.label}</span>
+
+											<Box
+												component="span"
+												sx={{
+													color: active ? "text.disabled" : "text.secondary",
+												}}
+											>
+												{tab.subtitle}
+											</Box>
+										</Box>
+									</Button>
+								);
+							})}
+						</Stack>
+					) : (
+						<Box />
+					)}
+
+					{/* Active revision notice */}
+
+					{status === "ACTIVE" && (
+						<Stack
+							sx={{
+								gap: 1,
+								alignItems: "center",
+								direction: "row",
+								borderRadius: 999,
+								backgroundColor: "action.hover",
+								px: 2,
+								py: 1,
+							}}
+						>
+							<Typography component="span" variant="caption">
+								🔒
+							</Typography>
+
+							<Typography
+								variant="body2"
+								sx={{
+									color: "text.secondary",
+									fontWeight: 500,
+								}}
+							>
+								This revision is active and posted — read-only. Clone or revise
+								to make changes.
+							</Typography>
+						</Stack>
+					)}
+				</Stack>
 			</Container>
-			<Container>
-				<Separator orientation="horizontal" />
+
+			{/* ============================================================
+			    DIVIDER
+			============================================================ */}
+
+			<Container
+				maxWidth={false}
+				sx={{
+					width: "100%",
+					maxWidth: 1360,
+					mx: "auto",
+					px: { xs: 2, sm: 3, lg: 4 },
+				}}
+			>
+				<Divider />
 			</Container>
-		</div>
+		</Box>
 	);
 }
 

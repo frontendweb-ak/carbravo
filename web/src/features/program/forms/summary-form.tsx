@@ -1,18 +1,16 @@
-import {
-	Button,
-	Card,
-	CardContent,
-	FormTextarea,
-	toast,
-} from "@/components/ui";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Button, Card, CardContent, Stack, Typography } from "@mui/material";
 import { FormProvider, useForm } from "react-hook-form";
 
+import { FormTextarea } from "@/components/ui";
+
+import { useToast } from "@/providers/toast-provider";
 import { type SummaryFormValues, summaryFormSchema } from "../schema";
 
 const SUMMARY_MAX_LENGTH = 2000;
 
 export function SummaryForm() {
+	const toast = useToast();
 	const form = useForm<SummaryFormValues>({
 		resolver: zodResolver(summaryFormSchema),
 		defaultValues: {
@@ -21,76 +19,66 @@ export function SummaryForm() {
 		mode: "onBlur",
 	});
 
-	// const summary =
-	// 	useWatch({
-	// 		control: form.control,
-	// 		name: "summary",
-	// 	}) ?? "";
-
 	const onSubmit = (values: SummaryFormValues) => {
 		console.log("SUMMARY SUBMIT", values);
 
-		toast.add({
+		toast.success({
 			title: "Dealer summary saved.",
 		});
 	};
 
 	return (
 		<FormProvider {...form}>
-			<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+			<Stack
+				component="form"
+				onSubmit={form.handleSubmit(onSubmit)}
+				spacing={2}
+			>
 				<Card>
-					<CardContent className="p-6">
-						<div className="space-y-5">
+					<CardContent sx={{ p: 3 }}>
+						<Stack spacing={2.5}>
 							{/* Header */}
-							<div>
-								<h2 className="text-base font-bold text-foreground">
+							<Stack spacing={0.5}>
+								<Typography
+									variant="h6"
+									sx={{
+										fontWeight: 700,
+									}}
+								>
 									10-Point dealer summary
-								</h2>
+								</Typography>
 
-								<p className="mt-1 text-sm text-muted-foreground">
+								<Typography variant="body2" color="text.secondary">
 									The plain-language summary dealers see. Describes how the
 									program was authored.
-								</p>
-							</div>
+								</Typography>
+							</Stack>
 
 							{/* Summary */}
-							<div className="space-y-2">
-								<div className="flex items-center gap-2">
-									<label
-										htmlFor="summary"
-										className="text-xs font-bold uppercase tracking-wide text-foreground"
-									>
-										Summary
-									</label>
-
-									<span className="rounded bg-warning/15 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-warning">
-										Required
-									</span>
-								</div>
-
-								<FormTextarea
-									control={form.control}
-									id="summary"
-									placeholder="Summarize the program for dealers..."
-									maxLength={SUMMARY_MAX_LENGTH}
-									rows={8}
-									aria-invalid={
-										form.formState.errors.summary ? true : undefined
-									}
-									{...form.register("summary")}
-								/>
-							</div>
-						</div>
+							<FormTextarea
+								control={form.control}
+								name="summary"
+								label="Summary"
+								required
+								placeholder="Summarize the program for dealers..."
+								maxLength={SUMMARY_MAX_LENGTH}
+								rows={8}
+							/>
+						</Stack>
 					</CardContent>
 				</Card>
 
 				{/* Actions */}
-				<div className="flex justify-end">
-					<Button type="submit" disabled={form.formState.isSubmitting}>
+				<Stack direction="row" sx={{ justifyContent: "flex-end" }}>
+					<Button
+						type="submit"
+						variant="contained"
+						disabled={form.formState.isSubmitting}
+					>
 						{form.formState.isSubmitting ? "Saving..." : "Save Summary"}
 					</Button>
-				</div>
-			</form>
+				</Stack>
+			</Stack>
 		</FormProvider>
 	);
 }

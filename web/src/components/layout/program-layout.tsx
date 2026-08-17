@@ -1,9 +1,14 @@
+import { Box, Container, Paper, Typography } from "@mui/material";
+import { Outlet, useLocation, useNavigate, useParams } from "react-router-dom";
+
+import type { ProgramWorkflowStatus } from "@/config/constants";
+
 import {
 	ProgramSectionSidebar,
 	useProgram,
 	useProgramRevisionHistory,
 } from "@/features/program";
-import { ProgramRevisionHistory } from "@/features/program/components";
+
 import { PROGRAM_SIDE_MENU } from "@/features/program/constants";
 
 import {
@@ -11,6 +16,8 @@ import {
 	ProgramEditorProvider,
 	useProgramEditor,
 } from "@/features/program/editor/program-editor-context";
+
+import type { ProgramRevisionHistoryState } from "@/features/program/model/revisions.types";
 
 import {
 	getCurrentRevision,
@@ -20,12 +27,8 @@ import {
 	type ProgramRevisionView,
 } from "@/features/program/utils";
 
-import type { ProgramRevisionHistoryState } from "@/features/program/model/revisions.types";
-
-import { Outlet, useLocation, useNavigate, useParams } from "react-router-dom";
-
-import type { ProgramWorkflowStatus } from "@/config/constants";
-import { Container, PageState } from "../ui";
+import { ProgramRevisionHistory } from "@/features/program/components";
+import { PageState } from "../ui";
 import {
 	ProgramContextHeader,
 	type ProgramRevisionTab,
@@ -47,8 +50,8 @@ function ProgramLayoutContent({
 	currentRevisionId,
 }: ProgramLayoutContentProps) {
 	const navigate = useNavigate();
-
 	const location = useLocation();
+
 	const revisionSelection = getProgramRevisionSelection(location.search);
 
 	const {
@@ -88,36 +91,20 @@ function ProgramLayoutContent({
 		};
 	});
 
-	/**
-	 * Whether we are displaying the history list.
-	 *
+	/*
 	 * History list:
 	 *
-	 *   ?view=history
-	 *
-	 * Historical revision:
-	 *
-	 *   ?view=history&revision=106
+	 * ?view=history
 	 */
 	const isHistoryList =
 		revisionSelection.view === "history" &&
 		revisionSelection.revisionId == null;
 
-	/**
-	 * All revision views except the history list use
-	 * the normal editor layout.
+	/*
+	 * Current / active / historical revision editor.
 	 */
 	const isRevisionEditor = !isHistoryList;
 
-	/**
-	 * Current is editable.
-	 *
-	 * Active and historical revisions are read-only.
-	 *
-	 * `isReadOnly` from the editor context remains the final
-	 * source of truth for any additional application-level
-	 * restrictions.
-	 */
 	const revisionReadOnly = isReadOnly || revisionSelection.view !== "current";
 
 	const handleSectionChange = (sectionId: string) => {
@@ -130,18 +117,6 @@ function ProgramLayoutContent({
 			return;
 		}
 
-		/*
-		 * Preserve the selected revision view when moving
-		 * between sections.
-		 *
-		 * Example:
-		 *
-		 * /programs/6/setup?view=active
-		 *
-		 * ->
-		 *
-		 * /programs/6/vehicles?view=active
-		 */
 		const params = new URLSearchParams(location.search);
 
 		navigate({
@@ -159,9 +134,6 @@ function ProgramLayoutContent({
 
 		switch (view) {
 			case "current":
-				/*
-				 * Current does not need a query parameter.
-				 */
 				params.delete("view");
 				params.delete("revision");
 				break;
@@ -209,12 +181,16 @@ function ProgramLayoutContent({
 		switch (programStatus) {
 			case "SUBMITTED":
 				return "Submitted";
+
 			case "APPROVED":
 				return "Approved";
+
 			case "ACTIVE":
 				return "Active";
+
 			case "EXPIRED":
 				return "Expired";
+
 			case "DRAFT":
 			default:
 				return "Draft";
@@ -226,12 +202,25 @@ function ProgramLayoutContent({
 	const headerRevision = revisionLabel || "1.0";
 
 	return (
-		<div className="min-h-screen bg-background">
+		<Box
+			sx={{
+				minHeight: "100vh",
+				backgroundColor: "background.default",
+				color: "text.primary",
+			}}
+		>
 			{/* ---------------------------------------------------------- */}
 			{/* Program context header                                     */}
 			{/* ---------------------------------------------------------- */}
 
-			<div className="sticky top-16.25 z-30 bg-background">
+			<Box
+				sx={{
+					position: "sticky",
+					top: 64,
+					zIndex: 30,
+					backgroundColor: "background.default",
+				}}
+			>
 				<ProgramContextHeader
 					name={headerName}
 					type="INC"
@@ -249,22 +238,38 @@ function ProgramLayoutContent({
 					hideSave={revisionReadOnly}
 					onSave={handleSave}
 				/>
-			</div>
+			</Box>
 
 			{/* ---------------------------------------------------------- */}
 			{/* Content                                                     */}
 			{/* ---------------------------------------------------------- */}
 
-			<Container className="mx-auto w-full">
+			<Container
+				maxWidth={false}
+				disableGutters
+				sx={{
+					width: "100%",
+					maxWidth: 1360,
+					mx: "auto",
+					px: {
+						xs: 2,
+						sm: 3,
+						lg: 4,
+					},
+				}}
+			>
 				{isHistoryList ? (
 					/*
 					 * ---------------------------------------------------
 					 * History list
 					 * ---------------------------------------------------
-					 *
-					 * No sidebar.
 					 */
-					<main className="min-w-0">
+					<Box
+						component="main"
+						sx={{
+							minWidth: 0,
+						}}
+					>
 						{revisionHistory ? (
 							<ProgramRevisionHistory
 								history={revisionHistory}
@@ -272,24 +277,50 @@ function ProgramLayoutContent({
 								onViewRevision={handleViewRevision}
 							/>
 						) : (
-							<div className="rounded-xl border bg-card p-6">
-								<p className="text-sm text-muted-foreground">
+							<Paper
+								variant="outlined"
+								sx={{
+									p: 3,
+									borderRadius: 3,
+									backgroundColor: "background.paper",
+								}}
+							>
+								<Typography variant="body2" color="text.secondary">
 									Loading revision history...
-								</p>
-							</div>
+								</Typography>
+							</Paper>
 						)}
-					</main>
+					</Box>
 				) : (
 					/*
 					 * ---------------------------------------------------
 					 * Current / Active / Historical revision
 					 * ---------------------------------------------------
-					 *
-					 * Sidebar remains visible.
 					 */
 					isRevisionEditor && (
-						<div className="grid min-w-0 grid-cols-1 items-start gap-5 lg:grid-cols-[245px_minmax(0,1fr)]">
-							<aside className="sticky top-40 hidden lg:block">
+						<Box
+							sx={{
+								display: "grid",
+								minWidth: 0,
+								gridTemplateColumns: {
+									xs: "minmax(0, 1fr)",
+									lg: "245px minmax(0, 1fr)",
+								},
+								alignItems: "start",
+								gap: 2.5,
+							}}
+						>
+							<Box
+								component="aside"
+								sx={{
+									position: "sticky",
+									top: 160,
+									display: {
+										xs: "none",
+										lg: "block",
+									},
+								}}
+							>
 								<ProgramSectionSidebar
 									sections={sidebarSections}
 									activeSection={activeSection}
@@ -297,16 +328,21 @@ function ProgramLayoutContent({
 									completion={completion}
 									disabled={false}
 								/>
-							</aside>
+							</Box>
 
-							<main className="min-w-0">
+							<Box
+								component="main"
+								sx={{
+									minWidth: 0,
+								}}
+							>
 								<Outlet />
-							</main>
-						</div>
+							</Box>
+						</Box>
 					)
 				)}
 			</Container>
-		</div>
+		</Box>
 	);
 }
 
@@ -315,19 +351,19 @@ function ProgramLayout({ mode = "edit" }: ProgramLayoutProps) {
 
 	const location = useLocation();
 
-	/**
+	/*
 	 * Route params are strings.
 	 */
 	const numericProgramId = programId ? Number(programId) : undefined;
 
-	/**
+	/*
 	 * Existing program detail.
 	 */
 	const programQuery = useProgram(
 		mode === "edit" ? numericProgramId : undefined,
 	);
 
-	/**
+	/*
 	 * Revision history.
 	 */
 	const revisionHistoryQuery = useProgramRevisionHistory(
@@ -368,19 +404,18 @@ function ProgramLayout({ mode = "edit" }: ProgramLayoutProps) {
 	const program = programQuery.data;
 	const revisionHistory = revisionHistoryQuery.data;
 
-	/**
+	/*
 	 * Determine which revision view the URL requests.
 	 */
 	const revisionSelection = getProgramRevisionSelection(location.search);
 
-	/**
-	 * Current revision is used to build the
-	 * Current tab and as the fallback editor revision.
+	/*
+	 * Current revision.
 	 */
 	const currentRevision =
 		mode === "edit" && program ? getCurrentRevision(program) : null;
 
-	/**
+	/*
 	 * Build tabs from API data.
 	 */
 	const revisionTabs =
@@ -388,13 +423,8 @@ function ProgramLayout({ mode = "edit" }: ProgramLayoutProps) {
 			? getProgramRevisionTabs(program, revisionHistory)
 			: [];
 
-	/**
-	 * Resolve the actual revision the editor
-	 * must work against.
-	 *
-	 * Current  -> draft
-	 * Active   -> active revision
-	 * History  -> selected historical revision
+	/*
+	 * Resolve actual revision.
 	 */
 	const selectedRevision =
 		mode === "edit" && program && revisionHistory

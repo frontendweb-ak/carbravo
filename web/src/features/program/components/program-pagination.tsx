@@ -1,14 +1,13 @@
-import { Button } from "@/components/ui";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import { Box, Button, Typography } from "@mui/material";
 
 export interface ProgramPaginationProps {
 	page: number;
 	size: number;
 	totalElements: number;
 	totalPages: number;
-
 	onPageChange: (page: number) => void;
-
 	disabled?: boolean;
 }
 
@@ -31,31 +30,84 @@ function ProgramPagination({
 	const canNext = page < totalPages - 1;
 
 	return (
-		<nav
+		<Box
+			component="nav"
 			aria-label="Program pagination"
-			className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+			sx={{
+				display: "flex",
+				flexDirection: {
+					xs: "column",
+					sm: "row",
+				},
+				alignItems: {
+					xs: "stretch",
+					sm: "center",
+				},
+				justifyContent: "space-between",
+				gap: 1.5,
+			}}
 		>
-			{/* Result summary */}
-			<p className="text-sm text-muted-foreground">
-				Showing <span className="font-medium text-foreground">{firstItem}</span>{" "}
-				– <span className="font-medium text-foreground">{lastItem}</span> of{" "}
-				<span className="font-medium text-foreground">{totalElements}</span>{" "}
+			<Typography variant="body2" color="text.secondary">
+				Showing{" "}
+				<Box
+					component="span"
+					sx={{
+						fontWeight: 600,
+						color: "text.primary",
+					}}
+				>
+					{firstItem}
+				</Box>{" "}
+				–{" "}
+				<Box
+					component="span"
+					sx={{
+						fontWeight: 600,
+						color: "text.primary",
+					}}
+				>
+					{lastItem}
+				</Box>{" "}
+				of{" "}
+				<Box
+					component="span"
+					sx={{
+						fontWeight: 600,
+						color: "text.primary",
+					}}
+				>
+					{totalElements}
+				</Box>{" "}
 				programs
-			</p>
+			</Typography>
 
-			{/* Navigation */}
-			<div className="flex items-center gap-1">
+			<Box
+				sx={{
+					display: "flex",
+					alignItems: "center",
+					gap: 0.5,
+				}}
+			>
 				<Button
 					type="button"
-					variant="outline"
-					size="sm"
+					variant="outlined"
+					size="small"
 					disabled={disabled || !canPrevious}
 					aria-label="Go to previous page"
 					onClick={() => onPageChange(page - 1)}
+					startIcon={<ChevronLeftIcon />}
 				>
-					<ChevronLeft aria-hidden="true" className="size-4" />
-
-					<span className="hidden sm:inline">Previous</span>
+					<Box
+						component="span"
+						sx={{
+							display: {
+								xs: "none",
+								sm: "inline",
+							},
+						}}
+					>
+						Previous
+					</Box>
 				</Button>
 
 				<PageNumbers
@@ -67,24 +119,29 @@ function ProgramPagination({
 
 				<Button
 					type="button"
-					variant="outline"
-					size="sm"
+					variant="outlined"
+					size="small"
 					disabled={disabled || !canNext}
 					aria-label="Go to next page"
 					onClick={() => onPageChange(page + 1)}
+					endIcon={<ChevronRightIcon />}
 				>
-					<span className="hidden sm:inline">Next</span>
-
-					<ChevronRight aria-hidden="true" className="size-4" />
+					<Box
+						component="span"
+						sx={{
+							display: {
+								xs: "none",
+								sm: "inline",
+							},
+						}}
+					>
+						Next
+					</Box>
 				</Button>
-			</div>
-		</nav>
+			</Box>
+		</Box>
 	);
 }
-
-/* -------------------------------------------------------------------------- */
-/* Page numbers                                                                */
-/* -------------------------------------------------------------------------- */
 
 interface PageNumbersProps {
 	page: number;
@@ -102,17 +159,35 @@ function PageNumbers({
 	const pages = getPageNumbers(page, totalPages);
 
 	return (
-		<div className="hidden items-center gap-1 sm:flex">
+		<Box
+			sx={{
+				display: {
+					xs: "none",
+					sm: "flex",
+				},
+				alignItems: "center",
+				gap: 0.5,
+			}}
+		>
 			{pages.map((item, index) => {
 				if (item === "ellipsis") {
 					return (
-						<span
-							key={`ellipsis-${index.toString()}`}
+						<Box
+							key={`ellipsis-${index}`}
+							component="span"
 							aria-hidden="true"
-							className="flex size-8 items-center justify-center text-sm text-muted-foreground"
+							sx={{
+								width: 32,
+								height: 32,
+								display: "flex",
+								alignItems: "center",
+								justifyContent: "center",
+								color: "text.secondary",
+								fontSize: 14,
+							}}
 						>
 							…
-						</span>
+						</Box>
 					);
 				}
 
@@ -122,37 +197,28 @@ function PageNumbers({
 					<Button
 						key={item}
 						type="button"
-						variant={selected ? "default" : "outline"}
-						size="icon"
-						className="size-8"
+						variant={selected ? "contained" : "outlined"}
+						color="primary"
+						size="small"
 						disabled={disabled}
 						aria-label={`Go to page ${item + 1}`}
 						aria-current={selected ? "page" : undefined}
 						onClick={() => onPageChange(item)}
+						sx={{
+							minWidth: 32,
+							width: 32,
+							height: 32,
+							padding: 0,
+						}}
 					>
 						{item + 1}
 					</Button>
 				);
 			})}
-		</div>
+		</Box>
 	);
 }
 
-/* -------------------------------------------------------------------------- */
-/* Page calculation                                                            */
-/* -------------------------------------------------------------------------- */
-
-/**
- * Backend pages are zero-based.
- *
- * Example:
- *
- * page = 0, totalPages = 10
- * → 1 2 3 4 5 … 10
- *
- * page = 5
- * → 1 … 4 5 6 7 8 … 10
- */
 function getPageNumbers(
 	currentPage: number,
 	totalPages: number,
@@ -163,17 +229,14 @@ function getPageNumbers(
 
 	const pages = new Set<number>();
 
-	// Always show first page.
 	pages.add(0);
 
-	// Pages around current page.
 	for (let page = currentPage - 1; page <= currentPage + 1; page++) {
 		if (page > 0 && page < totalPages - 1) {
 			pages.add(page);
 		}
 	}
 
-	// Always show last page.
 	pages.add(totalPages - 1);
 
 	const sortedPages = [...pages].sort((a, b) => a - b);

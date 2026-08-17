@@ -1,90 +1,101 @@
 import type { ReactNode } from "react";
-
 import {
-	type Control,
 	Controller,
+	type Control,
 	type FieldValues,
 	type Path,
 } from "react-hook-form";
 
-import {
-	ChipGroup,
-	type ChipGroupProps,
-	Field,
-	FieldDescription,
-	FieldError,
-	FieldLabel,
-	FieldRequired,
-} from "../primitives";
+import FormControl from "@mui/material/FormControl";
+import FormHelperText from "@mui/material/FormHelperText";
+import FormLabel from "@mui/material/FormLabel";
+import ToggleButton from "@mui/material/ToggleButton";
+import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 
-export type FormChoiceChipGroupProps<
-	T,
+export interface ChoiceOption<T> {
+	label: ReactNode;
+	value: T;
+}
+
+export interface FormChoiceChipGroupProps<
+		T  extends {},
 	TFieldValues extends FieldValues,
-> = Omit<ChipGroupProps<T>, "value" | "onValueChange" | "disabled"> & {
+> {
 	control: Control<TFieldValues>;
 	name: Path<TFieldValues>;
-	label?: ReactNode;
-	required?: boolean;
-	description?: ReactNode;
-	disabled?: boolean;
-};
 
-function FormChoiceChipGroup<T, TFieldValues extends FieldValues>({
+	options: ChoiceOption<T>[];
+
+	label?: ReactNode;
+	description?: ReactNode;
+
+	required?: boolean;
+	disabled?: boolean;
+
+	selectionMode?: "single" | "multiple";
+}
+
+function FormChoiceChipGroup<
+	T  extends {},
+	TFieldValues extends FieldValues,
+>({
 	control,
 	name,
+	options,
 	label,
-	required = false,
 	description,
+	required = false,
 	disabled = false,
 	selectionMode = "single",
-	...props
 }: FormChoiceChipGroupProps<T, TFieldValues>) {
-	const id = `${String(name)}-choice-chip-group`;
-
 	return (
 		<Controller
 			control={control}
 			name={name}
-			render={({ field, fieldState }) => {
-				const value =
-					selectionMode === "multiple"
-						? Array.isArray(field.value)
-							? field.value
-							: []
-						: typeof field.value === "string"
-							? field.value
-							: "";
+			render={({ field, fieldState }) => (
+				<FormControl fullWidth error={fieldState.invalid} disabled={disabled}>
+					{label && (
+						<FormLabel
+							sx={{
+								mb: 1,
+								fontWeight: 600,
+							}}
+						>
+							{label}
+							{required && " *"}
+						</FormLabel>
+					)}
 
-				return (
-					<Field invalid={fieldState.invalid} disabled={disabled}>
-						{label && (
-							<FieldLabel htmlFor={id}>
-								{label}
+					<ToggleButtonGroup
+						exclusive={selectionMode === "single"}
+						value={
+							selectionMode === "multiple"
+								? (field.value ?? [])
+								: (field.value ?? null)
+						}
+						onChange={(_, value) => field.onChange(value)}
+						sx={{
+							flexWrap: "wrap",
+							gap: 1,
+						}}
+					>
+						{options.map((option) => (
+							<ToggleButton key={String(option.value)} value={option.value}>
+								{option.label}
+							</ToggleButton>
+						))}
+					</ToggleButtonGroup>
 
-								{required && <FieldRequired />}
-							</FieldLabel>
-						)}
-
-						<ChipGroup
-							{...props}
-							id={id}
-							selectionMode={selectionMode}
-							value={value}
-							onValueChange={field.onChange}
-							disabled={disabled}
-							aria-invalid={fieldState.invalid || undefined}
-						/>
-
-						{description && <FieldDescription>{description}</FieldDescription>}
-
-						{fieldState.error && (
-							<FieldError>{fieldState.error.message}</FieldError>
-						)}
-					</Field>
-				);
-			}}
+					{fieldState.error ? (
+						<FormHelperText>{fieldState.error.message}</FormHelperText>
+					) : (
+						description && <FormHelperText>{description}</FormHelperText>
+					)}
+				</FormControl>
+			)}
 		/>
 	);
 }
 
 export { FormChoiceChipGroup };
+

@@ -1,7 +1,17 @@
-import { Checkbox } from "@/components/ui";
-import { cn, type OptionGroupAccessors, resolveOption } from "@/utils";
+import {
+	Box,
+	Card,
+	Checkbox,
+	Divider,
+	FormControlLabel,
+	Stack,
+	TextField,
+	Typography,
+} from "@mui/material";
 import type { ReactNode } from "react";
 import { useMemo, useState } from "react";
+
+import { type OptionGroupAccessors, resolveOption } from "@/utils";
 
 export interface FilterSelectCardProps<T> extends OptionGroupAccessors<T> {
 	title: ReactNode;
@@ -9,38 +19,18 @@ export interface FilterSelectCardProps<T> extends OptionGroupAccessors<T> {
 	options: T[];
 
 	value?: string[];
-
 	onValueChange?: (value: string[]) => void;
 
-	/**
-	 * Show the wildcard option.
-	 *
-	 * Example:
-	 * * Any Model
-	 */
 	allowAny?: boolean;
-
-	/**
-	 * Internal wildcard value.
-	 */
 	anyValue?: string;
-
-	/**
-	 * Wildcard display label.
-	 */
 	anyLabel?: ReactNode;
 
-	/**
-	 * Show "Select all search results".
-	 */
 	selectAll?: boolean;
 
 	searchable?: boolean;
-
 	searchPlaceholder?: string;
 
 	loading?: boolean;
-
 	loadingMessage?: ReactNode;
 
 	emptyMessage?: ReactNode;
@@ -48,8 +38,6 @@ export interface FilterSelectCardProps<T> extends OptionGroupAccessors<T> {
 	disabled?: boolean;
 
 	maxHeight?: number | string;
-
-	className?: string;
 }
 
 function FilterSelectCard<T>({
@@ -80,8 +68,6 @@ function FilterSelectCard<T>({
 	disabled = false,
 
 	maxHeight = 190,
-
-	className,
 }: FilterSelectCardProps<T>) {
 	const [search, setSearch] = useState("");
 
@@ -135,20 +121,11 @@ function FilterSelectCard<T>({
 			return;
 		}
 
-		/**
-		 * Wildcard.
-		 *
-		 * Selecting "*" clears normal selections.
-		 */
 		if (optionValue === anyValue) {
 			updateValue(isAnySelected ? [] : [anyValue]);
-
 			return;
 		}
 
-		/**
-		 * Selecting a real option removes wildcard.
-		 */
 		const withoutAny = selectedValues.filter((item) => item !== anyValue);
 
 		const nextValue = withoutAny.includes(optionValue)
@@ -185,98 +162,108 @@ function FilterSelectCard<T>({
 	};
 
 	return (
-		<div
-			className={cn(
-				"flex min-w-0 flex-col",
-				"rounded-xl border border-border",
-				"bg-card",
-				className,
-			)}
-		>
-			{/* Header */}
-			<div className="flex items-center justify-between gap-2 px-3 pt-3">
-				<span className="truncate text-xs font-bold uppercase tracking-wide text-foreground">
-					{title}
-				</span>
-
-				<span className="shrink-0 text-xs font-semibold text-muted-foreground">
+		<Card variant="outlined">
+			<Box
+				sx={{
+					display: "flex",
+					justifyContent: "space-between",
+					alignItems: "center",
+					p: 2,
+					pb: 1,
+				}}
+			>
+				<Typography
+  variant="subtitle2"
+  sx={{
+    fontWeight: 700,
+    textTransform: "uppercase",
+  }}
+>
+  {title}
+</Typography>
+				<Typography variant="caption" color="text.secondary">
 					{isAnySelected ? "Any" : `${selectedValues.length} selected`}
-				</span>
-			</div>
+				</Typography>
+			</Box>
 
-			{/* Search */}
 			{searchable && (
-				<div className="px-3 pt-2.5">
-					<input
+				<Box sx={{ px: 2, pb: 1 }}>
+					<TextField
+						size="small"
+						fullWidth
 						type="search"
 						value={search}
 						disabled={disabled}
 						placeholder={searchPlaceholder}
 						onChange={(event) => setSearch(event.target.value)}
-						className={cn(
-							"h-8 w-full",
-							"rounded-lg border border-input",
-							"bg-transparent px-2.5",
-							"text-sm text-foreground",
-							"outline-none",
-
-							"placeholder:text-muted-foreground",
-
-							"focus:border-ring",
-							"focus:ring-2",
-							"focus:ring-ring/20",
-
-							"disabled:cursor-not-allowed",
-							"disabled:opacity-50",
-						)}
 					/>
-				</div>
+				</Box>
 			)}
 
-			{/* Selection controls */}
-			<div className="px-3 pt-2">
-				{allowAny && (
-					<FilterCheckboxRow
-						label={anyLabel}
-						checked={isAnySelected}
-						disabled={disabled}
-						bold
-						onCheckedChange={() => toggleValue(anyValue)}
-					/>
-				)}
+			<Box sx={{ px: 2 }}>
+				<Stack spacing={0.5}>
+					{allowAny && (
+						<FilterCheckboxRow
+							label={anyLabel}
+							checked={isAnySelected}
+							disabled={disabled}
+							onCheckedChange={() => toggleValue(anyValue)}
+						/>
+					)}
 
-				{selectAll && (
-					<FilterCheckboxRow
-						label="Select all search results"
-						checked={allFilteredSelected}
-						disabled={
-							disabled || loading || enabledFilteredOptions.length === 0
-						}
-						onCheckedChange={toggleSelectAll}
-					/>
-				)}
-			</div>
+					{selectAll && (
+						<FilterCheckboxRow
+							label="Select all search results"
+							checked={allFilteredSelected}
+							disabled={
+								disabled || loading || enabledFilteredOptions.length === 0
+							}
+							onCheckedChange={toggleSelectAll}
+						/>
+					)}
+				</Stack>
+			</Box>
 
-			{/* Divider */}
-			<div className="mx-3 mt-2 border-t border-border" />
+			<Divider sx={{ mt: 1 }} />
 
-			{/* Options */}
-			<div className="overflow-y-auto px-3 py-2" style={{ maxHeight }}>
+			<Box
+				sx={{
+					maxHeight,
+					overflowY: "auto",
+					p: 2,
+				}}
+			>
 				{loading ? (
-					<div className="flex min-h-20 items-center justify-center text-xs text-muted-foreground">
-						{loadingMessage}
-					</div>
+					<Box
+						sx={{
+							display: "flex",
+							justifyContent: "center",
+							alignItems: "center",
+							minHeight: 80,
+						}}
+					>
+						<Typography variant="caption" color="text.secondary">
+							{loadingMessage}
+						</Typography>
+					</Box>
 				) : filteredOptions.length === 0 ? (
-					<div className="flex min-h-20 items-center justify-center text-xs text-muted-foreground">
-						{emptyMessage}
-					</div>
+					<Box
+						sx={{
+							display: "flex",
+							justifyContent: "center",
+							alignItems: "center",
+							minHeight: 80,
+						}}
+					>
+						<Typography variant="caption" color="text.secondary">
+							{emptyMessage}
+						</Typography>
+					</Box>
 				) : (
-					<div className="space-y-1">
+					<Stack spacing={0.5}>
 						{filteredOptions.map((option) => {
 							const checked =
 								!isAnySelected && selectedValues.includes(option.value);
-
-							const optionDisabled = disabled || option.disabled;
 
 							return (
 								<FilterCheckboxRow
@@ -284,29 +271,23 @@ function FilterSelectCard<T>({
 									label={option.label}
 									description={option.description}
 									checked={checked}
-									disabled={optionDisabled}
+									disabled={disabled || option.disabled}
 									onCheckedChange={() => toggleValue(option.value)}
 								/>
 							);
 						})}
-					</div>
+					</Stack>
 				)}
-			</div>
-		</div>
+			</Box>
+		</Card>
 	);
 }
 
 interface FilterCheckboxRowProps {
 	label: ReactNode;
-
 	description?: ReactNode;
-
 	checked: boolean;
-
 	disabled?: boolean;
-
-	bold?: boolean;
-
 	onCheckedChange: () => void;
 }
 
@@ -314,44 +295,27 @@ function FilterCheckboxRow({
 	label,
 	description,
 	checked,
-	disabled = false,
-	bold = false,
+	disabled,
 	onCheckedChange,
 }: FilterCheckboxRowProps) {
 	return (
-		<label
-			className={cn(
-				"flex min-w-0 items-start gap-2",
-				"rounded-md px-1 py-1",
-				disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer",
-			)}
-		>
-			<Checkbox
-				checked={checked}
-				disabled={disabled}
-				onCheckedChange={(nextChecked) => {
-					if (nextChecked === checked) {
-						return;
-					}
-					onCheckedChange();
-				}}
-			/>
+		<FormControlLabel
+			disabled={disabled}
+			control={<Checkbox checked={checked} onChange={onCheckedChange} />}
+			label={
+				<Box>
+					<Typography variant="body2">{label}</Typography>
 
-			<div className="min-w-0 flex-1">
-				<div
-					className={cn("truncate text-sm leading-5", bold && "font-semibold")}
-				>
-					{label}
-				</div>
-
-				{description && (
-					<div className="truncate text-xs text-muted-foreground">
-						{description}
-					</div>
-				)}
-			</div>
-		</label>
+					{description && (
+						<Typography variant="caption" color="text.secondary">
+							{description}
+						</Typography>
+					)}
+				</Box>
+			}
+		/>
 	);
 }
 
 export { FilterSelectCard };
+

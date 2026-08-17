@@ -1,8 +1,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Box, Button, Stack } from "@mui/material";
 import { FormProvider, useForm } from "react-hook-form";
 
 import {
-	Button,
 	FormCheckbox,
 	FormChoiceChipGroup,
 	FormSelect,
@@ -18,7 +18,6 @@ import {
 } from "../constants";
 
 import { type EligibilityFormValues, eligibilityFormSchema } from "../schema";
-
 export function EligibilityForm() {
 	const form = useForm<EligibilityFormValues>({
 		resolver: zodResolver(eligibilityFormSchema),
@@ -32,32 +31,52 @@ export function EligibilityForm() {
 
 	return (
 		<FormProvider {...form}>
-			<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+			<Box
+				component="form"
+				onSubmit={form.handleSubmit(onSubmit)}
+				sx={{
+					display: "flex",
+					flexDirection: "column",
+					gap: 2.5,
+				}}
+			>
 				{/* =========================================================
 				    1. FINANCIAL PROVIDER
 				========================================================= */}
 
 				<ProgramSection title="Financial provider">
-					<div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+					<Box
+						sx={{
+							display: "grid",
+							gridTemplateColumns: {
+								xs: "1fr",
+								lg: "repeat(2, minmax(0, 1fr))",
+							},
+							gap: 2.5,
+						}}
+					>
 						<FormSelect
 							control={form.control}
 							name="financialProviderCode"
 							label="Provider"
 							required
-							valueType="id"
 							options={FINANCIAL_PROVIDER_OPTIONS}
-							getValue={(option) => option.value}
-							getLabel={(option) => option.label}
 						/>
 
-						<div className="flex items-end pb-0.5">
+						<Box
+							sx={{
+								display: "flex",
+								alignItems: "flex-end",
+								pb: 0.0625,
+							}}
+						>
 							<FormCheckbox
 								control={form.control}
 								name="tierRate"
 								label="Apply tier-based rate structure (TBD)"
 							/>
-						</div>
-					</div>
+						</Box>
+					</Box>
 				</ProgramSection>
 
 				{/* =========================================================
@@ -73,12 +92,8 @@ export function EligibilityForm() {
 						name="customerTypeCodes"
 						label="Customer type"
 						required
-						radius="full"
-						size="sm"
 						selectionMode="multiple"
 						options={CUSTOMER_TYPE_OPTIONS}
-						getValue={(option) => option.value}
-						getLabel={(option) => option.label}
 					/>
 				</ProgramSection>
 
@@ -105,10 +120,16 @@ export function EligibilityForm() {
 				    FORM ACTION
 				========================================================= */}
 
-				<div className="flex justify-end">
-					<Button type="submit">Save Eligibility</Button>
-				</div>
-			</form>
+	<Stack direction="row" sx={{justifyContent:"flex-end"}}>
+					<Button
+						type="submit"
+						variant="contained"
+						disabled={form.formState.isSubmitting}
+					>
+						Save Eligibility
+					</Button>
+				</Stack>
+			</Box>
 		</FormProvider>
 	);
 }

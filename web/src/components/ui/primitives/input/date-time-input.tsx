@@ -4,8 +4,8 @@ import { forwardRef } from "react";
 
 import TextField from "@mui/material/TextField";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
-import { CalendarClock } from "lucide-react";
 
+import CalendarClock from "@mui/icons-material/EventAvailable";
 export interface DateTimeInputProps {
 	value?: Date | null;
 	onChange?: (value: Date | null) => void;
@@ -58,3 +58,4 @@ const DateTimeInput = forwardRef<HTMLInputElement, DateTimeInputProps>(
 DateTimeInput.displayName = "DateTimeInput";
 
 export { DateTimeInput };
+
