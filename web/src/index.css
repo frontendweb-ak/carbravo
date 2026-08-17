@@ -3,7 +3,9 @@
 :root {
 	--radius: 0.5rem;
 
-	--default-font-family: "Mulish", system-ui, sans-serif;
+	/* --default-font-family: "Mulish", system-ui, sans-serif;
+							 */
+		--default-font-family: "Sora", system-ui, sans-serif;
 	/* ================================================================
 	 * CARBRAVO BRAND
 	 * ================================================================ */
@@ -217,7 +219,8 @@
 		margin: 0;
 		background-color: var(--background);
 		color: var(--foreground);
-		font-family: "Mulish", system-ui, sans-serif;
+		/* font-family: "Mulish", system-ui, sans-serif; */
+			font-family: "Sora", system-ui, sans-serif;
 		-webkit-font-smoothing: antialiased;
 		-moz-osx-font-smoothing: grayscale;
 	}

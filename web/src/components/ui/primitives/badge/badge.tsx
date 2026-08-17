@@ -166,17 +166,11 @@ function Badge({
 	return useRender({
 		defaultTagName: "span",
 		props: mergeProps<"span">(
-			{
-				className: cn(badgeVariants({ variant, size }), className),
-			},
+			{ className: cn(badgeVariants({ variant, size }), className) },
 			props,
 		),
 		render,
-		state: {
-			slot: "badge",
-			variant,
-			size,
-		},
+		state: { slot: "badge", variant, size },
 	});
 }
 

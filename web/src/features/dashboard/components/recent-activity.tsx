@@ -22,6 +22,7 @@ function RecentActivity({
 	className,
 	loading = false,
 }: RecentActivityProps) {
+	console.log("items", items);
 	const INITIAL_ITEMS = 5;
 
 	const [expanded, setExpanded] = useState(false);
@@ -63,11 +64,12 @@ function RecentActivity({
 }
 
 function ActivityRow({ item }: { item: ActivityItem }) {
+	console.log("Activity item:", item);
 	return (
 		<div className="flex gap-3">
 			<StatusDot
 				className="mt-2 size-2 shrink-0 rounded-full"
-				status={item.color ?? "draft"}
+				status={item.color ?? "DRAFT"}
 			/>
 			<div className="min-w-0 flex-1">
 				<p className="text-sm leading-5">
@@ -86,3 +88,4 @@ function ActivityRow({ item }: { item: ActivityItem }) {
 }
 
 export { RecentActivity };
+

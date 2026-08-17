@@ -33,8 +33,12 @@ const PROGRAM_TYPE_LABELS = {
 	CUSTOMER_CASH: "Customer Cash",
 	APR: "APR",
 	BONUS_CASH: "Bonus Cash",
-} as const satisfies Record<Program["type"], string>;
+} as const satisfies Record<NonNullable<Program["type"]>, string>;
 
 export function getProgramTypeLabel(type: Program["type"]): string {
+	if (!type) {
+		return "—";
+	}
+
 	return PROGRAM_TYPE_LABELS[type];
 }

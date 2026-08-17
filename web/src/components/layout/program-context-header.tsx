@@ -1,4 +1,12 @@
-import { Button, Container, Separator } from "@/components/ui";
+import {
+	Button,
+	Container,
+	Separator,
+	StatusBadge,
+	Typography,
+} from "@/components/ui";
+import type { ProgramWorkflowStatus } from "@/config/constants";
+import { cn } from "@/utils";
 import { Check } from "lucide-react";
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
@@ -15,7 +23,7 @@ export interface ProgramContextHeaderProps {
 	type?: ReactNode;
 	number?: ReactNode;
 	revision?: ReactNode;
-	status?: ReactNode;
+	status?: ProgramWorkflowStatus;
 	saved?: boolean;
 	saveLabel?: ReactNode;
 	onSave?: () => void;
@@ -42,7 +50,7 @@ function ProgramContextHeader({
 	type = "INC",
 	number = "—",
 	revision = "1.0",
-	status = "Draft",
+	status = "DRAFT",
 	saved = true,
 	saveLabel = "Save draft",
 	onSave,
@@ -58,10 +66,10 @@ function ProgramContextHeader({
 	className,
 }: ProgramContextHeaderProps) {
 	return (
-		<div className={className}>
+		<div className={cn("py-3.5", className)}>
 			<Container
 				size="2xl"
-				className="flex min-h-19 items-center justify-between gap-4"
+				className="flex items-center justify-between gap-4 mb-4"
 			>
 				{/* Left */}
 				<div className="flex min-w-0 items-center gap-3">
@@ -69,12 +77,27 @@ function ProgramContextHeader({
 						to={backHref}
 						className="shrink-0 text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground"
 					>
-						{backLabel}
+						<Typography variant="bodyMedium" weight="bold" color="muted">
+							{backLabel}
+						</Typography>
 					</Link>
 
 					<div className="h-6 w-px bg-border" />
-					<h1 className="truncate text-xl font-bold text-foreground">{name}</h1>
-					<span className="shrink-0 text-xs text-muted-foreground">{type}</span>
+					<Typography
+						variant="h2"
+						weight="bold"
+						className="truncate text-[#24424A]"
+					>
+						{name}
+					</Typography>
+					<Typography
+						variant="labelSmall"
+						color="muted"
+						weight="medium"
+						className="shrink-0"
+					>
+						{type}
+					</Typography>
 					<span className="shrink-0 text-xs text-muted-foreground">·</span>
 					<span className="shrink-0 text-xs text-muted-foreground">
 						{number}
@@ -84,17 +107,18 @@ function ProgramContextHeader({
 						Rev: {revision}
 					</span>
 
-					<span className="shrink-0 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-600">
-						{status}
-					</span>
+					<StatusBadge status={status} size="sm" />
 				</div>
 
 				{/* Right */}
 				<div className="flex shrink-0 items-center gap-4">
 					{saved && (
-						<div className="flex items-center gap-1.5 text-sm font-semibold text-success">
-							<Check className="size-4" />
-							<span>All changes saved</span>
+						<div className="flex items-center gap-1.5">
+							<Check className="size-4 text-success" />
+
+							<Typography variant="bodySmall" weight="medium" color="success">
+								All changes saved
+							</Typography>
 						</div>
 					)}
 
@@ -110,8 +134,11 @@ function ProgramContextHeader({
 					)}
 				</div>
 			</Container>
-			{revisionTabs.length > 0 && (
-				<Container size="2xl" className="pb-3">
+			<Container
+				size="2xl"
+				className="flex items-center justify-between gap-4 pb-4"
+			>
+				{revisionTabs.length > 0 ? (
 					<div
 						className="flex items-center gap-2"
 						role="tablist"
@@ -143,8 +170,21 @@ function ProgramContextHeader({
 							</button>
 						))}
 					</div>
-				</Container>
-			)}
+				) : (
+					<div />
+				)}
+
+				{status === "ACTIVE" && (
+					<div className="flex items-center gap-2 rounded-full bg-muted px-4 py-2">
+						<span className="text-xs">🔒</span>
+
+						<Typography variant="bodySmall" color="muted" weight="medium">
+							This revision is active and posted — read-only. Clone or revise to
+							make changes.
+						</Typography>
+					</div>
+				)}
+			</Container>
 			<Container>
 				<Separator orientation="horizontal" />
 			</Container>
@@ -153,4 +193,3 @@ function ProgramContextHeader({
 }
 
 export { ProgramContextHeader };
-

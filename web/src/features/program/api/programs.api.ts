@@ -110,6 +110,19 @@ export interface CreateProgramResponseDto {
 	revisionLabel?: string;
 }
 
+export interface CloneProgramResponseDto {
+	programId?: number;
+	programIdentifier?: string;
+	programStatus?: ProgramStatusDto;
+
+	revisionId?: number;
+	revisionStatus?: RevisionStatusDto;
+
+	majorRevision?: number;
+	minorRevision?: number;
+	revisionLabel?: string;
+}
+
 /* -------------------------------------------------------------------------- */
 /* API                                                                        */
 /* -------------------------------------------------------------------------- */
@@ -137,10 +150,15 @@ export const programsApi = {
 		return response.data;
 	},
 
-	async deleteProgram(programId: number) {
-		const response = await http.delete(`/programs/${programId}`);
+	async clone(programId: number): Promise<CloneProgramResponseDto> {
+		const response = await http.post<CloneProgramResponseDto>(
+			`/programs/${programId}/clone`,
+		);
+
 		return response.data;
 	},
 
-	
+	async deleteProgram(programId: number): Promise<void> {
+		await http.delete(`/programs/${programId}`);
+	},
 };

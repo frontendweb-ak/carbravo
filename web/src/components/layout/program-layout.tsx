@@ -24,7 +24,8 @@ import type { ProgramRevisionHistoryState } from "@/features/program/model/revis
 
 import { Outlet, useLocation, useNavigate, useParams } from "react-router-dom";
 
-import { PageState } from "../ui";
+import type { ProgramWorkflowStatus } from "@/config/constants";
+import { Container, PageState } from "../ui";
 import {
 	ProgramContextHeader,
 	type ProgramRevisionTab,
@@ -230,13 +231,13 @@ function ProgramLayoutContent({
 			{/* Program context header                                     */}
 			{/* ---------------------------------------------------------- */}
 
-			<div className="sticky top-16.25 z-30 border-b bg-background">
+			<div className="sticky top-16.25 z-30 bg-background">
 				<ProgramContextHeader
 					name={headerName}
 					type="INC"
 					number={headerNumber}
 					revision={headerRevision}
-					status={headerStatus}
+					status={headerStatus.toUpperCase() as ProgramWorkflowStatus}
 					revisionTabs={revisionTabs.map((tab) => ({
 						...tab,
 						active: tab.id === revisionSelection.view,
@@ -254,7 +255,7 @@ function ProgramLayoutContent({
 			{/* Content                                                     */}
 			{/* ---------------------------------------------------------- */}
 
-			<div className="mx-auto w-full max-w-7xl py-4">
+			<Container className="mx-auto w-full">
 				{isHistoryList ? (
 					/*
 					 * ---------------------------------------------------
@@ -304,7 +305,7 @@ function ProgramLayoutContent({
 						</div>
 					)
 				)}
-			</div>
+			</Container>
 		</div>
 	);
 }

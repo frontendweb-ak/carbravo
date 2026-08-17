@@ -22,35 +22,35 @@ function ProgramStatusSummary({
 			<ProgramStatusCard
 				label="Draft"
 				value={draft}
-				status="draft"
+				status="DRAFT"
 				loading={loading}
 			/>
 
 			<ProgramStatusCard
 				label="Review"
 				value={review}
-				status="review"
+				status="REVIEW"
 				loading={loading}
 			/>
 
 			<ProgramStatusCard
 				label="Approved"
 				value={approved}
-				status="approved"
+				status="APPROVED"
 				loading={loading}
 			/>
 
 			<ProgramStatusCard
 				label="Active"
 				value={active}
-				status="active"
+				status="ACTIVE"
 				loading={loading}
 			/>
 
 			<ProgramStatusCard
 				label="Expired"
 				value={expired}
-				status="expired"
+				status="EXPIRED"
 				loading={loading}
 			/>
 		</div>

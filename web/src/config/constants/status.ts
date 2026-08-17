@@ -1,30 +1,46 @@
-// src/lib/status.ts
+export const PROGRAM_STATUSES = [
+	"DRAFT",
+	"REVIEW",
+	"APPROVED",
+	"ACTIVE",
+	"EXPIRED",
+] as const;
 
-export type AppStatus = "draft" | "review" | "approved" | "active" | "expired";
+export type ProgramWorkflowStatus = (typeof PROGRAM_STATUSES)[number];
+
 export const STATUS_CONFIG = {
-	draft: {
+	DRAFT: {
 		label: "Draft",
-		dot: "bg-status-draft",
-		text: "text-status-draft",
+		badgeVariant: "statusDraft",
+		textClass: "text-status-draft",
+		dotClass: "bg-status-draft",
 	},
-	review: {
+
+	REVIEW: {
 		label: "Review",
-		dot: "bg-status-review",
-		text: "text-status-review",
+		badgeVariant: "statusReview",
+		textClass: "text-status-review",
+		dotClass: "bg-status-review",
 	},
-	approved: {
+
+	APPROVED: {
 		label: "Approved",
-		dot: "bg-status-approved",
-		text: "text-status-approved",
+		badgeVariant: "statusApproved",
+		textClass: "text-status-approved",
+		dotClass: "bg-status-approved",
 	},
-	active: {
+
+	ACTIVE: {
 		label: "Active",
-		dot: "bg-status-active",
-		text: "text-status-active",
+		badgeVariant: "statusActive",
+		textClass: "text-status-active",
+		dotClass: "bg-status-active",
 	},
-	expired: {
+
+	EXPIRED: {
 		label: "Expired",
-		dot: "bg-status-expired",
-		text: "text-status-expired",
+		badgeVariant: "statusExpired",
+		textClass: "text-status-expired",
+		dotClass: "bg-status-expired",
 	},
 } as const;

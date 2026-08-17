@@ -3,110 +3,21 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-
-/**
- * ============================================================
- * OpenAPI domain enums
- * ============================================================
- */
-
-export type ProgramStatus =
-	| "DRAFT"
-	| "ACTIVE"
-	| "EXPIRED";
-
-export type RevisionStatus =
-	| "DRAFT"
-	| "ACTIVE"
-	| "EXPIRED";
-
-export type UserRole =
-	| "AUTHOR"
-	| "APPROVER"
-	| "ADMIN";
-
-export type GeoLevel =
-	| "REGION"
-	| "STATE"
-	| "DMA"
-	| "COUNTY";
-
-export type AttributeKey =
-	| "TERM_MONTHS"
-	| "APR_RATE"
-	| "CASH_AMOUNT";
-
-export type ProgramTypeCode =
-	| "CUSTOMER_CASH"
-	| "APR"
-	| "BONUS_CASH";
-
-export type PurchaseType =
-	| "CASH"
-	| "FINANCE";
-
-export type ConditionCode =
-	| "CARBRAVO"
-	| "MANUFACTURER_CERTIFIED"
-	| "USED_INSPECTED"
-	| "USED_AS_IS";
-
-export type CreditTier =
-	| "A_PLUS"
-	| "A1"
-	| "A2"
-	| "B";
-
-/**
- * ============================================================
- * OpenAPI AuditOperation
- * ============================================================
- *
- * Keep this aligned with the AuditOperation enum in
- * openapi.yaml.
- */
-
-export type AuditOperation =
-	| "CREATE"
-	| "UPDATE"
-	| "SUBMIT"
-	| "APPROVE"
-	| "REJECT"
-	| "REVISE"
-	| "MINOR_REVISE"
-	| "POST_TO_PRODUCTION"
-	| "EXPIRE"
-	| "DELETE";
-
-/**
- * ============================================================
- * Approval
- * ============================================================
- *
- * Internal persistence object.
- *
- * The HTTP ApprovalState response is richer than this object
- * in the OpenAPI contract because the API can combine approval
- * information with revision metadata.
- */
-
-export interface ApprovalState {
-	revisionId: number;
-
-	isSubmitted: boolean;
-	submittedAt: string | null;
-	submittedBy: string | null;
-
-	approved: boolean;
-	approvedAt: string | null;
-	approvedBy: string | null;
-
-	approvalComment: string | null;
-
-	rejectedAt: string | null;
-	rejectedBy: string | null;
-	rejectionReason: string | null;
-}
+import type {
+	AttributeKey,
+	AuditOperation,
+	ComponentRecord,
+	ConditionCode,
+	CreditTier,
+	GeoLevel,
+	GeoRuleRecord,
+	ProgramStatus,
+	ProgramTypeCode,
+	PurchaseType,
+	RevisionStatus,
+	SetupFields,
+	VehicleSelection,
+} from "./types/types.js";
 
 /**
  * ============================================================
@@ -120,36 +31,32 @@ export interface ApprovalState {
  */
 
 export interface MockProgram {
-	id: number;
+  id: number;
+  identifier: string;
+  name: string;
+  /**
+   * Persisted lifecycle state.
+   *
+   * REVIEW / APPROVED are derived from the draft revision
+   * and are NOT stored here.
+   */
+  status: ProgramStatus;
 
-	identifier: string;
-
-	name: string;
-
-	status: ProgramStatus;
-
-	/**
-	 * OpenAPI ProgramListItem / ProgramDetail expose this
-	 * as a string.
-	 *
-	 * The Setup revision stores the more specific
-	 * ProgramTypeCode.
-	 */
-	programType: string;
-
-	activeRevisionId: number | null;
-
-	draftRevisionId: number | null;
-
-	deliveryStartDate: string | null;
-
-	deliveryEndDate: string | null;
-
-	createdAt: string;
-
-	updatedAt: string;
-
-	deletedAt: string | null;
+  /**
+   * OpenAPI ProgramListItem / ProgramDetail expose this
+   * as a string.
+   *
+   * The Setup revision stores the more specific
+   * ProgramTypeCode.
+   */
+  programType: string;
+  activeRevisionId: number | null;
+  draftRevisionId: number | null;
+  deliveryStartDate: string | null;
+  deliveryEndDate: string | null;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
 }
 
 /**
@@ -182,47 +89,27 @@ export interface MockProgram {
  */
 
 export interface Setup {
-	programName: string | null;
-
-	programTypeCode: ProgramTypeCode | null;
-
-	purchaseType: PurchaseType | null;
-
-	customerTypeCodes: string[];
-
-	contactName: string | null;
-
-	contactEmail: string | null;
-
-	contactPhone: string | null;
-
-	financialProviderCode: string | null;
-
-	conditionCode: ConditionCode | null;
-
-	mileageCeiling: number | null;
-
-	topOfDeal: boolean;
-
-	vinException: boolean;
-
-	mfpnText: string | null;
-
-	disclosureText: string | null;
-
-	localeCode: string;
-
-	deliveryStartDate: string | null;
-
-	deliveryEndDate: string | null;
-
-	effectiveStartDate: string | null;
-
-	effectiveEndDate: string | null;
-
-	financeTerms: number[];
-
-	creditTiers: CreditTier[];
+  programName: string | null;
+  programTypeCode: ProgramTypeCode | null;
+  purchaseType: PurchaseType | null;
+  customerTypeCodes: string[];
+  contactName: string | null;
+  contactEmail: string | null;
+  contactPhone: string | null;
+  financialProviderCode: string | null;
+  conditionCode: ConditionCode | null;
+  mileageCeiling: number | null;
+  topOfDeal: boolean;
+  vinException: boolean;
+  mfpnText: string | null;
+  disclosureText: string | null;
+  localeCode: string;
+  deliveryStartDate: string | null;
+  deliveryEndDate: string | null;
+  effectiveStartDate: string | null;
+  effectiveEndDate: string | null;
+  financeTerms: number[];
+  creditTiers: CreditTier[];
 }
 
 /**
@@ -251,34 +138,24 @@ export interface Setup {
  */
 
 export interface Vehicle {
-	vehicleCatalogId: number;
-
-	vehicleId: string;
-
-	year: number;
-
-	make: string;
-
-	model: string;
-
-	trimName: string;
-
-	bodyStyle: string;
-
-	segment: string;
-
-	fuelType: string;
-
-	drivetrain: string;
-
-	/**
-	 * Internal catalog/reference field.
-	 *
-	 * Used by:
-	 * GET /vehicles/makes
-	 * GET /vehicles/search?oemCode
-	 */
-	oemCode: string;
+  vehicleCatalogId: number;
+  vehicleId: string;
+  year: number;
+  make: string;
+  model: string;
+  trimName: string;
+  bodyStyle: string;
+  segment: string;
+  fuelType: string;
+  drivetrain: string;
+  /**
+   * Internal catalog/reference field.
+   *
+   * Used by:
+   * GET /vehicles/makes
+   * GET /vehicles/search?oemCode
+   */
+  oemCode: string;
 }
 
 /**
@@ -299,9 +176,8 @@ export interface Vehicle {
  */
 
 export interface SelectedVehicle {
-	revisionVehicleId: number;
-
-	vehicleCatalogId: number;
+  revisionVehicleId: number;
+  vehicleCatalogId: number;
 }
 
 /**
@@ -311,33 +187,16 @@ export interface SelectedVehicle {
  */
 
 export interface GeoNode {
-	code: string;
-
-	name: string;
+  code: string;
+  name: string;
 }
 
 export interface GeographyData {
-	regions: GeoNode[];
+  regions: GeoNode[];
 
-	states: Array<
-		GeoNode & {
-			region: string;
-		}
-	>;
-
-	dmas: Array<
-		GeoNode & {
-			state: string;
-			region: string;
-		}
-	>;
-
-	counties: Array<
-		GeoNode & {
-			state: string;
-			dma?: string;
-		}
-	>;
+  states: Array<GeoNode & { region: string }>;
+  dmas: Array<GeoNode & { state: string; region: string }>;
+  counties: Array<GeoNode & { state: string; dma?: string }>;
 }
 
 /**
@@ -347,15 +206,15 @@ export interface GeographyData {
  */
 
 export interface GeoRule {
-	geoRuleId: number;
+  geoRuleId: number;
 
-	isIncluded: boolean;
+  isIncluded: boolean;
 
-	level: GeoLevel;
+  level: GeoLevel;
 
-	code: string;
+  code: string;
 
-	name?: string;
+  name?: string;
 }
 
 /**
@@ -369,13 +228,13 @@ export interface GeoRule {
  */
 
 export interface Attribute {
-	attributeId: number;
+  attributeId: number;
 
-	key: AttributeKey;
+  key: AttributeKey;
 
-	numberValue: number | null;
+  numberValue: number | null;
 
-	textValue: string | null;
+  textValue: string | null;
 }
 
 /**
@@ -388,17 +247,12 @@ export interface Attribute {
  */
 
 export interface Component {
-	componentId: number;
-
-	componentCode: string;
-
-	componentName: string;
-
-	sequenceNo: number;
-
-	attributes: Attribute[];
-
-	vehicleOverrides: Record<string, unknown>[];
+  componentId: number;
+  componentCode: string;
+  componentName: string;
+  sequenceNo: number;
+  attributes: Attribute[];
+  vehicleOverrides: Record<string, unknown>[];
 }
 
 /**
@@ -409,9 +263,8 @@ export interface Component {
  */
 
 export interface RevisionValues {
-	financeTerms: number[];
-
-	components: Component[];
+  financeTerms: number[];
+  components: Component[];
 }
 
 /**
@@ -421,48 +274,53 @@ export interface RevisionValues {
  */
 
 export interface MockRevision {
-	id: number;
+  id: number;
+  programId: number;
 
-	programId: number;
+  majorRevision: number;
+  minorRevision: number;
 
-	majorRevision: number;
+  status: RevisionStatus;
+  isMinorRevision: boolean;
 
-	minorRevision: number;
+  createdAt: string;
+  createdBy: string;
 
-	status: RevisionStatus;
+  postedAt: string | null;
+  postedBy: string | null;
 
-	isMinorRevision: boolean;
+  approval: {
+    revisionId: number;
 
-	createdAt: string;
+    isSubmitted: boolean;
+    submittedAt: string | null;
+    submittedBy: string | null;
 
-	createdBy: string;
+    approved: boolean;
+    approvedAt: string | null;
+    approvedBy: string | null;
 
-	postedAt: string | null;
+    approvalComment: string | null;
 
-	postedBy: string | null;
+    rejectedAt: string | null;
+    rejectedBy: string | null;
+    rejectionReason: string | null;
+  };
 
-	approval: ApprovalState;
+  copiedFromRevisionId: number | null;
 
-	setup: Setup;
+  setup: SetupFields;
 
-	vehicles: SelectedVehicle[];
+  vehicles: VehicleSelection[];
 
-	geography: GeoRule[];
+  geography: GeoRuleRecord[];
 
-	values: RevisionValues;
+  values: {
+    financeTerms: number[];
+    components: ComponentRecord[];
+  };
 
-	/**
-	 * Completion/summary information is an internal
-	 * persistence snapshot.
-	 *
-	 * The Summary API maps this into the OpenAPI Summary DTO.
-	 */
-	summary: Record<string, unknown>;
-
-	/**
-	 * Revision lifecycle relationship.
-	 */
-	copiedFromRevisionId: number | null;
+  summary: Record<string, unknown>;
 }
 
 /**
@@ -478,59 +336,59 @@ export interface MockRevision {
  */
 
 export interface ReferenceProgramType {
-	code: string;
+  code: string;
 
-	name: string;
+  name: string;
 
-	supportsCash: boolean;
+  supportsCash: boolean;
 
-	supportsRate: boolean;
+  supportsRate: boolean;
 }
 
 export interface ReferencePurchaseType {
-	code: string;
+  code: string;
 
-	name: string;
+  name: string;
 }
 
 export interface ReferenceCustomerType {
-	code: string;
+  code: string;
 
-	name: string;
+  name: string;
 }
 
 export interface ReferenceConditionCode {
-	code: string;
+  code: string;
 
-	name: string;
+  name: string;
 }
 
 export interface ReferenceFinanceTermOption {
-	termMonths: number;
+  termMonths: number;
 
-	label: string;
+  label: string;
 }
 
 export interface ReferenceCreditTierOption {
-	code: string;
+  code: string;
 
-	name: string;
+  name: string;
 
-	sortOrder: number;
+  sortOrder: number;
 }
 
 export interface ReferenceFinancialProvider {
-	code: string;
+  code: string;
 
-	name: string;
+  name: string;
 
-	isActive: boolean;
+  isActive: boolean;
 
-	supportedTerms: number[];
+  supportedTerms: number[];
 
-	supportsCash: boolean;
+  supportsCash: boolean;
 
-	supportsRate: boolean;
+  supportsRate: boolean;
 }
 
 /**
@@ -538,19 +396,13 @@ export interface ReferenceFinancialProvider {
  */
 
 export interface ReferenceSetupData {
-	programTypes: ReferenceProgramType[];
-
-	purchaseTypes: ReferencePurchaseType[];
-
-	customerTypes: ReferenceCustomerType[];
-
-	conditionCodes: ReferenceConditionCode[];
-
-	financeTermOptions: ReferenceFinanceTermOption[];
-
-	creditTierOptions: ReferenceCreditTierOption[];
-
-	financialProviders: ReferenceFinancialProvider[];
+  programTypes: ReferenceProgramType[];
+  purchaseTypes: ReferencePurchaseType[];
+  customerTypes: ReferenceCustomerType[];
+  conditionCodes: ReferenceConditionCode[];
+  financeTermOptions: ReferenceFinanceTermOption[];
+  creditTierOptions: ReferenceCreditTierOption[];
+  financialProviders: ReferenceFinancialProvider[];
 }
 
 export type ReferenceSetup = ReferenceSetupData;
@@ -564,23 +416,21 @@ export type ReferenceSetup = ReferenceSetupData;
  */
 
 export interface MockActivity {
-	id: number;
+  id: number;
 
-	entityType:
-		| "INCENTIVE_REVISION"
-		| "INCENTIVE_PROGRAM";
+  entityType: "INCENTIVE_REVISION" | "INCENTIVE_PROGRAM";
+  entityId: number;
 
-	entityId: number;
+  operation: AuditOperation;
 
-	operation: AuditOperation;
+  changedBy: string;
+  changedAt: string;
 
-	changedBy: string;
+  programId?: number;
+  programName: string;
 
-	changedAt: string;
-
-	programName: string;
-
-	programIdentifier: string;
+  programIdentifier: string;
+  comment?: string | null;
 }
 
 /**
@@ -590,17 +440,12 @@ export interface MockActivity {
  */
 
 export interface MockDb {
-	programs: MockProgram[];
-
-	revisions: MockRevision[];
-
-	vehicles: Vehicle[];
-
-	geography: GeographyData;
-
-	referenceSetup: ReferenceSetup;
-
-	activity: MockActivity[];
+  programs: MockProgram[];
+  revisions: MockRevision[];
+  vehicles: Vehicle[];
+  geography: GeographyData;
+  referenceSetup: ReferenceSetup;
+  activity: MockActivity[];
 }
 
 /**
@@ -610,21 +455,15 @@ export interface MockDb {
  */
 
 const __filename = fileURLToPath(import.meta.url);
-
 const __dirname = dirname(__filename);
-
-export const DB_PATH = resolve(
-	__dirname,
-	"./data/db.json",
-);
+export const DB_PATH = resolve(__dirname, "./data/db.json");
 
 /**
  * Serialize writes so concurrent mutations cannot overwrite
  * one another.
  */
 
-let writeQueue: Promise<void> =
-	Promise.resolve();
+let writeQueue: Promise<void> = Promise.resolve();
 
 /**
  * ============================================================
@@ -633,60 +472,44 @@ let writeQueue: Promise<void> =
  */
 
 export async function readDb(): Promise<MockDb> {
-	try {
-		const content = await readFile(
-			DB_PATH,
-			"utf8",
-		);
+  try {
+    const content = await readFile(DB_PATH, "utf8");
 
-		return JSON.parse(
-			content,
-		) as MockDb;
-	} catch {
-		const empty: MockDb = {
-			programs: [],
+    return JSON.parse(content) as MockDb;
+  } catch {
+    const empty: MockDb = {
+      programs: [],
 
-			revisions: [],
+      revisions: [],
 
-			vehicles: [],
+      vehicles: [],
 
-			geography: {
-				regions: [],
-				states: [],
-				dmas: [],
-				counties: [],
-			},
+      geography: {
+        regions: [],
+        states: [],
+        dmas: [],
+        counties: [],
+      },
 
-			referenceSetup: {
-				programTypes: [],
-				purchaseTypes: [],
-				customerTypes: [],
-				conditionCodes: [],
-				financeTermOptions: [],
-				creditTierOptions: [],
-				financialProviders: [],
-			},
+      referenceSetup: {
+        programTypes: [],
+        purchaseTypes: [],
+        customerTypes: [],
+        conditionCodes: [],
+        financeTermOptions: [],
+        creditTierOptions: [],
+        financialProviders: [],
+      },
 
-			activity: [],
-		};
+      activity: [],
+    };
 
-		await mkdir(
-			dirname(DB_PATH),
-			{ recursive: true },
-		);
+    await mkdir(dirname(DB_PATH), { recursive: true });
 
-		await writeFile(
-			DB_PATH,
-			JSON.stringify(
-				empty,
-				null,
-				2,
-			),
-			"utf8",
-		);
+    await writeFile(DB_PATH, JSON.stringify(empty, null, 2), "utf8");
 
-		return empty;
-	}
+    return empty;
+  }
 }
 
 /**
@@ -695,27 +518,14 @@ export async function readDb(): Promise<MockDb> {
  * ============================================================
  */
 
-export async function writeDb(
-	db: MockDb,
-): Promise<void> {
-	await mkdir(
-		dirname(DB_PATH),
-		{ recursive: true },
-	);
+export async function writeDb(db: MockDb): Promise<void> {
+  await mkdir(dirname(DB_PATH), { recursive: true });
 
-	writeQueue = writeQueue.then(() =>
-		writeFile(
-			DB_PATH,
-			JSON.stringify(
-				db,
-				null,
-				2,
-			),
-			"utf8",
-		),
-	);
+  writeQueue = writeQueue.then(() =>
+    writeFile(DB_PATH, JSON.stringify(db, null, 2), "utf8"),
+  );
 
-	return writeQueue;
+  return writeQueue;
 }
 
 /**
@@ -729,20 +539,12 @@ export async function writeDb(
  * activity.
  */
 
-export function getNextId(
-	values: Array<{ id: number }>,
-): number {
-	if (!values.length) {
-		return 1;
-	}
+export function getNextId(values: Array<{ id: number }>): number {
+  if (!values.length) {
+    return 1;
+  }
 
-	return (
-		Math.max(
-			...values.map(
-				(item) => item.id,
-			),
-		) + 1
-	);
+  return Math.max(...values.map((item) => item.id)) + 1;
 }
 
 /**
@@ -752,12 +554,9 @@ export function getNextId(
  */
 
 export function revisionLabel(
-	revision: Pick<
-		MockRevision,
-		"majorRevision" | "minorRevision"
-	>,
+  revision: Pick<MockRevision, "majorRevision" | "minorRevision">,
 ): string {
-	return `${revision.majorRevision}.${revision.minorRevision}`;
+  return `${revision.majorRevision}.${revision.minorRevision}`;
 }
 
 /**
@@ -766,10 +565,6 @@ export function revisionLabel(
  * ============================================================
  */
 
-export function clone<T>(
-	value: T,
-): T {
-	return JSON.parse(
-		JSON.stringify(value),
-	) as T;
+export function clone<T>(value: T): T {
+  return JSON.parse(JSON.stringify(value)) as T;
 }

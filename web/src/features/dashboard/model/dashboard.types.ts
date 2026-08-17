@@ -1,12 +1,8 @@
-export type DashboardProgramStatus =
-	| "draft"
-	| "review"
-	| "approved"
-	| "active"
-	| "expired";
+import type { ProgramWorkflowStatus } from "@/config/constants";
 
+export type DashboardProgramStatus = ProgramWorkflowStatus;
 export type DashboardEventType = "INCENTIVE_REVISION" | "INCENTIVE_PROGRAM";
-export type ActivityColor = "draft" | "review" | "approved" | "active";
+export type ActivityColor = ProgramWorkflowStatus;
 
 export interface DashboardStatusCount {
 	status: DashboardProgramStatus;

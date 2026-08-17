@@ -10,7 +10,6 @@ export interface StatusCounts {
 	active: number;
 	expired: number;
 }
-
 export function getStatusCounts(counts: DashboardStatusCount[]): StatusCounts {
 	const result: StatusCounts = {
 		draft: 0,
@@ -22,49 +21,48 @@ export function getStatusCounts(counts: DashboardStatusCount[]): StatusCounts {
 
 	for (const item of counts) {
 		switch (item.status) {
-			case "draft":
+			case "DRAFT":
 				result.draft += item.total;
 				break;
 
-			case "active":
-				result.active += item.total;
-				break;
-
-			case "expired":
-				result.expired += item.total;
-				break;
-
-			case "review":
+			case "REVIEW":
 				result.review += item.total;
 				break;
 
-			case "approved":
+			case "APPROVED":
 				result.approved += item.total;
 				break;
-		}
 
-		// pendingApproval is a separate API concept.
-		// It contributes to the Review card.
-		// result.review += item.pendingApproval;
+			case "ACTIVE":
+				result.active += item.total;
+				break;
+
+			case "EXPIRED":
+				result.expired += item.total;
+				break;
+		}
 	}
 
 	return result;
 }
-
 export function mapStatus(status: string): DashboardProgramStatus {
 	switch (status.toUpperCase()) {
 		case "DRAFT":
-			return "draft";
+			return "DRAFT";
+
 		case "REVIEW":
-			return "review";
+			return "REVIEW";
+
 		case "APPROVED":
-			return "approved";
+			return "APPROVED";
+
 		case "ACTIVE":
-			return "active";
+			return "ACTIVE";
+
 		case "EXPIRED":
-			return "expired";
+			return "EXPIRED";
+
 		default:
-			return "draft";
+			return "DRAFT";
 	}
 }
-

@@ -9,7 +9,7 @@ function Header() {
 	const navigate = useNavigate();
 
 	return (
-		<header className="sticky top-0 z-50 border-b border-border bg-card">
+		<header className="sticky top-0 z-50 border-b border-border bg-card shadow-sm">
 			<Container className="flex h-16 items-center justify-between px-8">
 				{/* Left */}
 				<div className="flex h-full items-center">

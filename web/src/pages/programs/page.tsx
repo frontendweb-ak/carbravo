@@ -6,7 +6,11 @@ import {
 	Input,
 	PageState,
 } from "@/components/ui";
-import { useProgramFilters, usePrograms } from "@/features/program";
+import {
+	useCloneProgram,
+	useProgramFilters,
+	usePrograms,
+} from "@/features/program";
 import type { ProgramStatusDto } from "@/features/program/api/programs.api";
 import { ProgramPagination } from "@/features/program/components";
 import { ProgramList } from "@/features/program/components/program-list";
@@ -35,6 +39,19 @@ export default function ProgramsPage() {
 
 	const handleCreate = () => {
 		navigate("/programs/new/setup");
+	};
+
+	const cloneProgram = useCloneProgram();
+
+	const handleClone = (programId: number) => {
+		console.log("ProgramId", programId);
+		cloneProgram.mutate(programId, {
+			onSuccess: (data) => {
+				if (data.programId) {
+					navigate(`/programs/${data.programId}`);
+				}
+			},
+		});
 	};
 
 	const statusTabs = [
@@ -117,6 +134,7 @@ export default function ProgramsPage() {
 							programs={programs}
 							isFetching={isFetching}
 							onProgramClick={(programId) => navigate(`/programs/${programId}`)}
+							onClone={handleClone}
 						/>
 						<div className="mt-5">
 							<ProgramPagination

@@ -6,8 +6,36 @@ import {
   type MockProgram,
   type MockRevision,
 } from "../store.js";
+import type { ProgramWorkflowStatus } from "../types/types.js";
 
 import { notFound } from "./errors.js";
+
+export function getProgramWorkflowStatus(
+  program: MockProgram,
+  draft: MockRevision | null,
+): ProgramWorkflowStatus {
+  /*
+   * Program lifecycle always wins for posted programs.
+   */
+  if (program.status === "ACTIVE") return "ACTIVE";
+  if (program.status === "EXPIRED") return "EXPIRED";
+
+  /*
+   * A program that has never been posted is represented
+   * by its draft revision workflow.
+   */
+  if (!draft) return "DRAFT";
+
+  if (draft.approval.isSubmitted && draft.approval.approved) {
+    return "APPROVED";
+  }
+
+  if (draft.approval.isSubmitted && !draft.approval.approved) {
+    return "REVIEW";
+  }
+
+  return "DRAFT";
+}
 
 export function getProgramOrThrow(db: MockDb, programId: number): MockProgram {
   const program = db.programs.find(
@@ -67,6 +95,8 @@ export function revisionRef(revision: MockRevision) {
     revisionLabel: `${revision.majorRevision}.${revision.minorRevision}`,
     revisionStatus: revision.status,
     isMinorRevision: revision.isMinorRevision,
+    isSubmitted: revision.approval.isSubmitted,
+    approved: revision.approval.approved,
   };
 }
 
@@ -110,4 +140,35 @@ export function programListItem(db: MockDb, program: MockProgram) {
     deliveryEndDate: program.deliveryEndDate,
     updatedAt: program.updatedAt,
   };
+}
+
+export function getRevisionForMajorRevision(
+  db: MockDb,
+  program: MockProgram,
+): MockRevision | null {
+  const active = getActiveRevision(db, program);
+
+  if (active) {
+    return active;
+  }
+
+  /*
+   * Expired programs no longer have an active revision.
+   * Use the latest posted revision as the source for revival.
+   */
+  const revisions = db.revisions
+    .filter(
+      (revision) =>
+        revision.programId === program.id &&
+        (revision.status === "ACTIVE" || revision.status === "EXPIRED"),
+    )
+    .sort((a, b) => {
+      if (a.majorRevision !== b.majorRevision) {
+        return b.majorRevision - a.majorRevision;
+      }
+
+      return b.minorRevision - a.minorRevision;
+    });
+
+  return revisions[0] ?? null;
 }

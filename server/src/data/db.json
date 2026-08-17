@@ -53,7 +53,7 @@
       "deliveryStartDate": "2026-09-01",
       "deliveryEndDate": "2026-09-30",
       "createdAt": "2026-08-12T10:00:00.000Z",
-      "updatedAt": "2026-08-14T16:38:53.194Z",
+      "updatedAt": "2026-08-17T05:45:47.168Z",
       "deletedAt": null
     },
     {
@@ -110,6 +110,20 @@
       "deliveryEndDate": null,
       "createdAt": "2026-08-14T16:50:21.402Z",
       "updatedAt": "2026-08-14T16:50:21.402Z",
+      "deletedAt": null
+    },
+    {
+      "id": 9,
+      "identifier": "PROG-2026-0009",
+      "name": "Summer Finance Event",
+      "status": "DRAFT",
+      "programType": "APR",
+      "activeRevisionId": null,
+      "draftRevisionId": 110,
+      "deliveryStartDate": "2026-07-01",
+      "deliveryEndDate": "2026-08-20",
+      "createdAt": "2026-08-17T06:17:16.010Z",
+      "updatedAt": "2026-08-17T06:17:31.012Z",
       "deletedAt": null
     }
   ],
@@ -475,7 +489,7 @@
       "setup": {
         "programName": "Non-GM Certified Cash",
         "programTypeCode": "CUSTOMER_CASH",
-        "purchaseType": "CASH",
+        "purchaseType": "FINANCE",
         "customerTypeCodes": [
           "STANDARD"
         ],
@@ -494,7 +508,10 @@
         "deliveryEndDate": "2026-09-30",
         "effectiveStartDate": null,
         "effectiveEndDate": null,
-        "financeTerms": [],
+        "financeTerms": [
+          "36",
+          "48"
+        ],
         "creditTiers": [
           "A_PLUS"
         ]
@@ -917,6 +934,129 @@
       },
       "summary": {},
       "copiedFromRevisionId": null
+    },
+    {
+      "id": 110,
+      "programId": 9,
+      "majorRevision": 1,
+      "minorRevision": 0,
+      "status": "DRAFT",
+      "isMinorRevision": false,
+      "createdAt": "2026-08-17T06:17:16.010Z",
+      "createdBy": "demo.user",
+      "postedAt": null,
+      "postedBy": null,
+      "approval": {
+        "revisionId": 110,
+        "isSubmitted": false,
+        "submittedAt": null,
+        "submittedBy": null,
+        "approved": false,
+        "approvedAt": null,
+        "approvedBy": null,
+        "approvalComment": null,
+        "rejectedAt": null,
+        "rejectedBy": null,
+        "rejectionReason": null
+      },
+      "setup": {
+        "programName": "Summer Finance Event",
+        "programTypeCode": "APR",
+        "purchaseType": "FINANCE",
+        "customerTypeCodes": [
+          "STANDARD"
+        ],
+        "contactName": "Jordan Smith",
+        "contactEmail": null,
+        "contactPhone": null,
+        "financialProviderCode": null,
+        "conditionCode": "CARBRAVO",
+        "mileageCeiling": 75000,
+        "topOfDeal": true,
+        "vinException": false,
+        "mfpnText": null,
+        "disclosureText": null,
+        "localeCode": "en-US",
+        "deliveryStartDate": "2026-07-01",
+        "deliveryEndDate": "2026-08-20",
+        "effectiveStartDate": null,
+        "effectiveEndDate": null,
+        "financeTerms": [
+          36,
+          48,
+          60,
+          "36",
+          "48"
+        ],
+        "creditTiers": [
+          "A_PLUS",
+          "A1"
+        ]
+      },
+      "vehicles": [
+        {
+          "revisionVehicleId": 1,
+          "vehicleCatalogId": 1001
+        }
+      ],
+      "geography": [
+        {
+          "geoRuleId": 1,
+          "isIncluded": true,
+          "level": "STATE",
+          "code": "CA",
+          "name": "California"
+        },
+        {
+          "geoRuleId": 2,
+          "isIncluded": true,
+          "level": "STATE",
+          "code": "TX",
+          "name": "Texas"
+        },
+        {
+          "geoRuleId": 3,
+          "isIncluded": true,
+          "level": "STATE",
+          "code": "FL",
+          "name": "Florida"
+        }
+      ],
+      "values": {
+        "financeTerms": [
+          36,
+          48,
+          60
+        ],
+        "components": [
+          {
+            "componentId": 1,
+            "componentCode": "TERM_36",
+            "componentName": "36 Month APR",
+            "sequenceNo": 1,
+            "attributes": [
+              {
+                "attributeId": 1,
+                "key": "TERM_MONTHS",
+                "numberValue": 36,
+                "textValue": null
+              },
+              {
+                "attributeId": 2,
+                "key": "APR_RATE",
+                "numberValue": 2.9,
+                "textValue": null
+              }
+            ],
+            "vehicleOverrides": []
+          }
+        ]
+      },
+      "summary": {
+        "mfpnText": "Not all buyers will qualify. See dealer for details.",
+        "disclosureText": "Offer valid on approved credit through GM Financial."
+      },
+      "copiedFromRevisionId": 101
     }
   ],
   "vehicles": [
@@ -1463,6 +1603,56 @@
     ]
   },
   "activity": [
+    {
+      "id": 119,
+      "entityType": "INCENTIVE_REVISION",
+      "entityId": 110,
+      "operation": "UPDATE",
+      "changedBy": "demo.user",
+      "changedAt": "2026-08-17T06:17:31.012Z",
+      "programName": "Summer Finance Event",
+      "programIdentifier": "PROG-2026-0009"
+    },
+    {
+      "id": 118,
+      "entityType": "INCENTIVE_REVISION",
+      "entityId": 104,
+      "operation": "UPDATE",
+      "changedBy": "demo.user",
+      "changedAt": "2026-08-17T05:45:47.168Z",
+      "programName": "Non-GM Certified Cash",
+      "programIdentifier": "PROG-2026-0004"
+    },
+    {
+      "id": 117,
+      "entityType": "INCENTIVE_REVISION",
+      "entityId": 104,
+      "operation": "UPDATE",
+      "changedBy": "demo.user",
+      "changedAt": "2026-08-17T05:45:45.731Z",
+      "programName": "Non-GM Certified Cash",
+      "programIdentifier": "PROG-2026-0004"
+    },
+    {
+      "id": 116,
+      "entityType": "INCENTIVE_REVISION",
+      "entityId": 104,
+      "operation": "UPDATE",
+      "changedBy": "demo.user",
+      "changedAt": "2026-08-17T05:45:44.929Z",
+      "programName": "Non-GM Certified Cash",
+      "programIdentifier": "PROG-2026-0004"
+    },
+    {
+      "id": 115,
+      "entityType": "INCENTIVE_REVISION",
+      "entityId": 104,
+      "operation": "UPDATE",
+      "changedBy": "demo.user",
+      "changedAt": "2026-08-17T05:45:44.779Z",
+      "programName": "Non-GM Certified Cash",
+      "programIdentifier": "PROG-2026-0004"
+    },
     {
       "id": 114,
       "entityType": "INCENTIVE_PROGRAM",

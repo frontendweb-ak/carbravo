@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 
 import { currentUser } from "../lib/auth.js";
-import { getActiveRevision } from "../lib/programs.js";
+import { getActiveRevision, getDraftRevision } from "../lib/programs.js";
 
 import { readDb, revisionLabel } from "../store.js";
 
@@ -27,20 +27,12 @@ dashboard.get("/dashboard/summary", async (c) => {
   const programs = db.programs.filter((program) => program.deletedAt === null);
   const countFor = (status: "DRAFT" | "ACTIVE" | "EXPIRED") =>
     programs.filter((program) => program.status === status).length;
+
   const pendingApprovalFor = (status: "DRAFT" | "ACTIVE" | "EXPIRED") =>
-    db.revisions.filter((revision) => {
-      const program = programs.find((item) => item.id === revision.programId);
-
-      if (!program) {
-        return false;
-      }
-
-      return (
-        program.status === status &&
-        revision.status === "DRAFT" &&
-        revision.approval.isSubmitted &&
-        !revision.approval.approved
-      );
+    programs.filter((program) => {
+      if (program.status !== status) return false;
+      const draft = getDraftRevision(db, program);
+      return Boolean(draft?.approval.isSubmitted && !draft.approval.approved);
     }).length;
 
   return c.json({
@@ -69,19 +61,14 @@ dashboard.get("/dashboard/summary", async (c) => {
  */
 dashboard.get("/dashboard/activity", async (c) => {
   currentUser(c);
-
   const db = await readDb();
-
   const items = [...db.activity]
     .sort(
       (a, b) =>
         new Date(b.changedAt).getTime() - new Date(a.changedAt).getTime(),
     )
     .slice(0, 20);
-
-  return c.json({
-    items,
-  });
+  return c.json({ items });
 });
 
 /**

@@ -1,63 +1,40 @@
 import type {
 	ActivityItemDto,
-	DashboardStatusDto,
 	DashboardSummaryDto,
 	ExpiringProgramDto,
 } from "../api/dashboard.api";
+
 import { ACTIVITY_OPERATIONS } from "../constants";
 
 import type {
 	ActivityItem,
-	DashboardProgramStatus,
 	DashboardSummary,
 	ExpiringProgram,
 } from "./dashboard.types";
 
-/**
- * API status -> application/UI status.
- *
- * Keep this conversion here so the rest of the application
- * never needs to know how the backend represents statuses.
- */
-function mapDashboardStatus(
-	status: DashboardStatusDto,
-): DashboardProgramStatus {
-	switch (status) {
-		case "DRAFT":
-			return "draft";
+/* -------------------------------------------------------------------------- */
+/* Dashboard summary                                                          */
+/* -------------------------------------------------------------------------- */
 
-		case "ACTIVE":
-			return "active";
-
-		case "EXPIRED":
-			return "expired";
-
-		default:
-			return "expired";
-	}
-}
-
-/**
- * Dashboard summary
- */
 export function mapDashboardSummary(
 	dto: DashboardSummaryDto,
 ): DashboardSummary {
 	return {
 		counts: dto.counts.map((item) => ({
-			status: mapDashboardStatus(item.status),
+			status: item.status,
 			total: item.total,
-			pendingApproval: item.pendingApproval,
 		})),
 	};
 }
 
-/**
- * Activity
- */
+/* -------------------------------------------------------------------------- */
+/* Activity                                                                   */
+/* -------------------------------------------------------------------------- */
+
 export function mapActivityOperation(operation: string) {
 	const mapped =
 		ACTIVITY_OPERATIONS[operation as keyof typeof ACTIVITY_OPERATIONS];
+
 	return {
 		operation,
 		operationLabel: mapped?.label ?? operation.toLowerCase(),
@@ -67,6 +44,7 @@ export function mapActivityOperation(operation: string) {
 
 export function mapActivityItem(dto: ActivityItemDto): ActivityItem {
 	const operation = mapActivityOperation(dto.operation);
+
 	return {
 		id: String(dto.id),
 
@@ -90,10 +68,10 @@ export function mapActivityItems(items: ActivityItemDto[]): ActivityItem[] {
 	return items.map(mapActivityItem);
 }
 
-/**
- * Convert vehicle objects returned by the API
- * into the display string required by the dashboard.
- */
+/* -------------------------------------------------------------------------- */
+/* Expiring programs                                                          */
+/* -------------------------------------------------------------------------- */
+
 function formatVehicles(vehicles: ExpiringProgramDto["vehicles"]): string {
 	if (vehicles.length === 0) {
 		return "All vehicles";
@@ -102,19 +80,10 @@ function formatVehicles(vehicles: ExpiringProgramDto["vehicles"]): string {
 	return vehicles.map((vehicle) => vehicle.label).join(", ");
 }
 
-/**
- * Expiring-program API currently does NOT provide
- * an individual status.
- *
- * Therefore we should not derive a status from unrelated fields.
- */
 function deriveExpiringProgramStatus(): ExpiringProgram["status"] {
-	return "active";
+	return "ACTIVE";
 }
 
-/**
- * Expiring program
- */
 export function mapExpiringProgram(dto: ExpiringProgramDto): ExpiringProgram {
 	return {
 		id: String(dto.programId),

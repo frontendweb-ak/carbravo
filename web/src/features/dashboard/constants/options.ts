@@ -1,8 +1,34 @@
+import type { ProgramWorkflowStatus } from "@/config/constants";
+
 export const ACTIVITY_OPERATIONS = {
-	CREATE: { label: "created draft", color: "draft" },
-	UPDATE: { label: "updated", color: "draft" },
-	REVISE: { label: "revised", color: "review" },
-	SUBMIT: { label: "submitted", color: "review" },
-	APPROVE: { label: "approved", color: "approved" },
-	POST_TO_PRODUCTION: { label: "published", color: "active" },
-} as const;
+	CREATE: {
+		label: "created draft",
+		color: "DRAFT",
+	},
+	UPDATE: {
+		label: "updated",
+		color: "DRAFT",
+	},
+	REVISE: {
+		label: "revised",
+		color: "REVIEW",
+	},
+	SUBMIT: {
+		label: "submitted",
+		color: "REVIEW",
+	},
+	APPROVE: {
+		label: "approved",
+		color: "APPROVED",
+	},
+	POST_TO_PRODUCTION: {
+		label: "published",
+		color: "ACTIVE",
+	},
+} as const satisfies Record<
+	string,
+	{
+		label: string;
+		color: ProgramWorkflowStatus;
+	}
+>;

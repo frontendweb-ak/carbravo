@@ -5,12 +5,14 @@ export interface ProgramListProps {
 	programs: Program[];
 	isFetching?: boolean;
 	onProgramClick?: (programId: number) => void;
+	onClone?: (programId: number) => void;
 }
 
 function ProgramList({
 	programs,
 	isFetching = false,
 	onProgramClick,
+	onClone,
 }: ProgramListProps) {
 	return (
 		<Card className="overflow-hidden">
@@ -28,7 +30,11 @@ function ProgramList({
 
 				{/* Desktop */}
 				<div className="hidden md:block">
-					<ProgramTable programs={programs} onProgramClick={onProgramClick} />
+					<ProgramTable
+						onClone={onClone}
+						programs={programs}
+						onProgramClick={onProgramClick}
+					/>
 				</div>
 
 				{/* Mobile */}
@@ -55,9 +61,14 @@ function ProgramList({
 interface ProgramTableProps {
 	programs: Program[];
 	onProgramClick?: (programId: number) => void;
+	onClone?: (programId: number) => void;
 }
 
-function ProgramTable({ programs, onProgramClick }: ProgramTableProps) {
+function ProgramTable({
+	programs,
+	onProgramClick,
+	onClone,
+}: ProgramTableProps) {
 	return (
 		<div className="overflow-x-auto">
 			<table className="w-full border-collapse">
@@ -111,6 +122,7 @@ function ProgramTable({ programs, onProgramClick }: ProgramTableProps) {
 						<ProgramTableRow
 							key={program.id}
 							program={program}
+							onClone={onClone}
 							onClick={
 								onProgramClick ? () => onProgramClick(program.id) : undefined
 							}
@@ -129,9 +141,10 @@ function ProgramTable({ programs, onProgramClick }: ProgramTableProps) {
 interface ProgramTableRowProps {
 	program: Program;
 	onClick?: () => void;
+	onClone?: (programId: number) => void;
 }
 
-function ProgramTableRow({ program, onClick }: ProgramTableRowProps) {
+function ProgramTableRow({ program, onClick, onClone }: ProgramTableRowProps) {
 	const canOpen = Boolean(onClick);
 
 	return (
@@ -141,7 +154,7 @@ function ProgramTableRow({ program, onClick }: ProgramTableRowProps) {
 			}
 		>
 			{/* Program */}
-			<td className="px-5 py-4">
+			<td className="px-5 py-2">
 				{canOpen ? (
 					<button
 						type="button"
@@ -156,41 +169,50 @@ function ProgramTableRow({ program, onClick }: ProgramTableRowProps) {
 			</td>
 
 			{/* Type */}
-			<td className="px-4 py-4">
+			<td className="px-4  py-2">
 				<span className="text-sm text-foreground">
 					{getProgramTypeLabel(program.type)}
 				</span>
 			</td>
 
 			{/* Revision */}
-			<td className="px-4 py-4">
+			<td className="px-4  py-2">
 				<RevisionInfo program={program} />
 			</td>
 
 			{/* Delivery */}
-			<td className="px-4 py-4">
+			<td className="px-4  py-2">
 				<DeliveryPeriod program={program} />
 			</td>
 
 			{/* Status */}
-			<td className="px-4 py-4">
+			<td className="px-4  py-2">
 				<ProgramStatusBadge status={program.status} />
 			</td>
 
 			{/* Action */}
-			<td className="px-3 py-4">
-				{canOpen && (
+			<td className="px-3  py-2">
+				<div className="flex flex-row gap-4">
 					<Button
 						type="button"
-						variant="ghost"
-						size="icon"
+						variant="secondary"
 						aria-label={`Open ${program.name || "program"}`}
-						className="opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100"
 						onClick={onClick}
 					>
-						<ChevronRight aria-hidden="true" className="size-4" />
+						Open
 					</Button>
-				)}
+					<Button
+						type="button"
+						variant="outline"
+						onClick={(e) => {
+							e.preventDefault();
+							e.stopPropagation();
+							onClone?.(program.id);
+						}}
+					>
+						Clone
+					</Button>
+				</div>
 			</td>
 		</tr>
 	);
@@ -385,3 +407,4 @@ import { ProgramStatusBadge } from "./program-status-badge";
 /* -------------------------------------------------------------------------- */
 
 export { ProgramList };
+

@@ -1,54 +1,19 @@
 import type { ReactNode } from "react";
 
-import { Badge, type BadgeProps } from "./badge";
+import {
+	STATUS_CONFIG,
+	type ProgramWorkflowStatus,
+} from "@/config/constants/status";
 
-export type Status =
-	| "draft"
-	| "review"
-	| "approved"
-	| "active"
-	| "expired"
-	| "success"
-	| "warning"
-	| "destructive"
-	| "info"
-	| "neutral";
+import { Badge, type BadgeProps } from "./badge";
 
 export interface StatusBadgeProps extends Omit<
 	BadgeProps,
 	"variant" | "children"
 > {
-	status: Status;
+	status: ProgramWorkflowStatus;
 	children?: ReactNode;
 }
-
-const statusLabels = {
-	draft: "Draft",
-	review: "Review",
-	approved: "Approved",
-	active: "Active",
-	expired: "Expired",
-
-	success: "Success",
-	warning: "Warning",
-	destructive: "Error",
-	info: "Info",
-	neutral: "Neutral",
-} satisfies Record<Status, ReactNode>;
-
-const statusVariants = {
-	draft: "statusDraft",
-	review: "statusReview",
-	approved: "statusApproved",
-	active: "statusActive",
-	expired: "statusExpired",
-
-	success: "success",
-	warning: "warning",
-	destructive: "destructive",
-	info: "info",
-	neutral: "outline",
-} satisfies Record<Status, NonNullable<BadgeProps["variant"]>>;
 
 function StatusBadge({
 	status,
@@ -57,17 +22,20 @@ function StatusBadge({
 	className,
 	...props
 }: StatusBadgeProps) {
+	const config = STATUS_CONFIG[status];
+
 	return (
 		<Badge
 			{...props}
 			size={size}
-			variant={statusVariants[status]}
+			variant={config.badgeVariant}
 			data-status={status}
 			className={className}
 		>
-			{children ?? statusLabels[status]}
+			{children ?? config.label}
 		</Badge>
 	);
 }
 
 export { StatusBadge };
+
