@@ -1,6 +1,7 @@
+import Box from "@mui/material/Box";
+import Stack from "@mui/material/Stack";
 import { useNavigate } from "react-router-dom";
 
-import { Container } from "@/components/ui";
 import {
 	DashboardHeader,
 	ExpiringPrograms,
@@ -11,13 +12,13 @@ import {
 	useDashboardSummary,
 	useExpiringPrograms,
 } from "@/features/dashboard";
+
 import { getStatusCounts } from "@/features/dashboard/utils";
 import { formatLongDate } from "@/utils";
 
 function DashboardPage() {
 	const navigate = useNavigate();
 
-	// Server
 	const summaryQuery = useDashboardSummary();
 	const activityQuery = useDashboardActivity();
 	const expiringQuery = useExpiringPrograms();
@@ -26,55 +27,72 @@ function DashboardPage() {
 	const formattedDate = formatLongDate(new Date());
 
 	return (
-		<main className="min-h-[calc(100vh-60px)] bg-background">
-			<Container size="2xl" className="py-7">
-				<DashboardHeader
-					userName="Alex Chen"
-					rightContent={
-						<>
-							Signed in as <strong className="text-foreground">Admin</strong>
-							{` · ${formattedDate}`}
-						</>
-					}
+		<Box
+			sx={{
+				minHeight: "calc(100vh - 64px)",
+				backgroundColor: "background.default",
+				py: 6,
+			}}
+		>
+			<DashboardHeader
+				userName="Alex Chen"
+				rightContent={
+					<>
+						Signed in as{" "}
+						<Box
+							component="strong"
+							sx={{								color: "text.primary",								fontWeight: 600,							}}
+						>
+							Admin
+						</Box>
+						{` · ${formattedDate}`}
+					</>
+				}
+			/>
+
+			<Box sx={{ mt: 6 }}>
+				<ProgramStatusSummary
+					{...statusCounts}
+					loading={summaryQuery.isLoading}
 				/>
+			</Box>
 
-				{/* Program status */}
-				<div className="mt-6">
-					<ProgramStatusSummary
-						{...statusCounts}
-						loading={summaryQuery.isLoading}
+			<Box
+				sx={{
+					mt: 6,
+					display: "grid",
+					gap: 5,
+					gridTemplateColumns: {
+						xs: "1fr",
+						lg: "minmax(0,1.7fr) minmax(320px,1fr)",
+					},
+				}}
+			>
+				<Box>
+					<ExpiringPrograms programs={expiringQuery.data?.items ?? []} />
+				</Box>
+
+				<Stack spacing={5}>
+					<RecentActivity
+						loading={activityQuery.isLoading}
+						items={activityQuery.data?.items ?? []}
 					/>
-				</div>
 
-				{/* Dashboard content */}
-				<div className="mt-6 grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(320px,1fr)]">
-					<div>
-						<ExpiringPrograms programs={expiringQuery.data?.items ?? []} />
-					</div>
-
-					{/* Right column */}
-					<div className="space-y-5">
-						<RecentActivity
-							loading={activityQuery.isLoading}
-							items={activityQuery.data?.items ?? []}
-						/>
-
-						<QuickActions
-							reviewCount={statusCounts.review}
-							onNewProgram={() => {
-								navigate("/programs/new");
-							}}
-							onBrowsePrograms={() => {
-								navigate("/programs");
-							}}
-							onReviewQueue={() => {
-								// TODO: navigate to review queue
-							}}
-						/>
-					</div>
-				</div>
-			</Container>
-		</main>
+					<QuickActions
+						reviewCount={statusCounts.review}
+						onNewProgram={() => {
+							navigate("/programs/new");
+						}}
+						onBrowsePrograms={() => {
+							navigate("/programs");
+						}}
+						onReviewQueue={() => {
+							// TODO
+						}}
+					/>
+				</Stack>
+			</Box>
+		</Box>
 	);
 }
 

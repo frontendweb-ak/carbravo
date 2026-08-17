@@ -6,7 +6,7 @@ import {
 	toast,
 } from "@/components/ui";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FormProvider, useForm, useWatch } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 
 import { type SummaryFormValues, summaryFormSchema } from "../schema";
 
@@ -21,11 +21,11 @@ export function SummaryForm() {
 		mode: "onBlur",
 	});
 
-	const summary =
-		useWatch({
-			control: form.control,
-			name: "summary",
-		}) ?? "";
+	// const summary =
+	// 	useWatch({
+	// 		control: form.control,
+	// 		name: "summary",
+	// 	}) ?? "";
 
 	const onSubmit = (values: SummaryFormValues) => {
 		console.log("SUMMARY SUBMIT", values);

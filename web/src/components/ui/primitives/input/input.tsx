@@ -1,139 +1,71 @@
-import { Input as InputPrimitive } from "@base-ui/react/input";
-import {
-	type ComponentPropsWithoutRef,
-	forwardRef,
-	type ReactNode,
-} from "react";
+// src/components/ui/primitives/input/input.tsx
 
-import { cn, type InputParseMode } from "@/utils";
+import OutlinedInput, {
+	type OutlinedInputProps,
+} from "@mui/material/OutlinedInput";
+import { forwardRef } from "react";
 
-const inputVariants = {
-	sm: "h-8 rounded-md px-2.5 py-0 text-sm",
-	default: "h-9 rounded-md px-3 py-0 text-sm",
-	lg: "h-10 rounded-lg px-3.5 py-0 text-base",
-} as const;
+export type InputSize = "sm" | "default" | "lg";
 
-export type InputSize = keyof typeof inputVariants;
-
-export type InputProps = Omit<
-	ComponentPropsWithoutRef<typeof InputPrimitive>,
-	"size"
-> & {
+export interface InputProps extends Omit<OutlinedInputProps, "size"> {
 	size?: InputSize;
-	error?: boolean;
 	success?: boolean;
-	parseMode?: InputParseMode;
-	leftIcon?: ReactNode;
-	rightIcon?: ReactNode;
-};
+}
 
 const Input = forwardRef<HTMLInputElement, InputProps>(
 	(
 		{
-			className,
 			size = "default",
-			error = false,
 			success = false,
+			error = false,
 			disabled,
 			readOnly,
-			"aria-invalid": ariaInvalid,
-			leftIcon,
-			rightIcon,
+			sx,
 			...props
 		},
 		ref,
 	) => {
-		const hasError = error || ariaInvalid === true || ariaInvalid === "true";
-		const hasSuccess = success && !hasError;
-
-		const input = (
-			<InputPrimitive
-				ref={ref}
-				data-slot="input"
-				data-size={size}
-				data-error={hasError || undefined}
-				data-success={hasSuccess || undefined}
+		return (
+			<OutlinedInput
+				{...props}
+				inputRef={ref}
+				error={error}
 				disabled={disabled}
 				readOnly={readOnly}
-				aria-invalid={hasError ? true : undefined}
-				className={cn(
-					"flex w-full min-w-0",
-					"appearance-none",
-					"border border-input",
-					"bg-white",
-					"text-foreground",
-					"leading-none",
-					"shadow-xs",
-					"outline-none",
+				fullWidth
+				sx={(theme) => ({
+					backgroundColor: theme.palette.background.paper,
 
-					"placeholder:text-muted-foreground",
+					...(size === "sm" && {
+						height: 32,
+						fontSize: 14,
+					}),
 
-					"selection:bg-primary",
-					"selection:text-primary-foreground",
+					...(size === "default" && {
+						height: 36,
+						fontSize: 14,
+					}),
 
-					"transition-[border-color,box-shadow,background-color]",
-					"duration-150",
+					...(size === "lg" && {
+						height: 40,
+						fontSize: 16,
+					}),
 
-					"hover:border-ring/60",
+					"& .MuiOutlinedInput-notchedOutline": {
+						borderColor: theme.palette.divider,
+					},
 
-					"focus-visible:border-ring",
-					"focus-visible:ring-3",
-					"focus-visible:ring-ring/30",
+					"&:hover .MuiOutlinedInput-notchedOutline": {
+						borderColor: theme.palette.primary.main,
+					},
 
-					"aria-invalid:border-destructive",
-					"aria-invalid:ring-3",
-					"aria-invalid:ring-destructive/20",
-					"dark:aria-invalid:ring-destructive/40",
-
-					"data-[success=true]:border-success",
-					"data-[success=true]:ring-3",
-					"data-[success=true]:ring-success/20",
-
-					"disabled:pointer-events-none",
-					"disabled:cursor-not-allowed",
-					"disabled:opacity-50",
-					"disabled:bg-muted",
-
-					"read-only:cursor-default",
-					"read-only:bg-muted/50",
-
-					inputVariants[size],
-
-					leftIcon && "pl-9",
-					rightIcon && "pr-9",
-
-					className,
-				)}
+					"&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+						borderColor: theme.palette.primary.main,
+						borderWidth: 1,
+					},
+				})}
 				{...props}
 			/>
-		);
-
-		if (!leftIcon && !rightIcon) {
-			return input;
-		}
-
-		return (
-			<div className="relative w-full">
-				{leftIcon && (
-					<span
-						aria-hidden="true"
-						className="pointer-events-none absolute top-1/2 left-3 z-10 flex size-4 -translate-y-1/2 items-center justify-center text-muted-foreground"
-					>
-						{leftIcon}
-					</span>
-				)}
-
-				{input}
-
-				{rightIcon && (
-					<span
-						aria-hidden="true"
-						className="pointer-events-none absolute top-1/2 right-3 z-10 flex size-4 -translate-y-1/2 items-center justify-center text-muted-foreground"
-					>
-						{rightIcon}
-					</span>
-				)}
-			</div>
 		);
 	},
 );

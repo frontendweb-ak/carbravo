@@ -1,66 +1,64 @@
+// src/components/ui/date-input.tsx
+
 import { CalendarDays } from "lucide-react";
-import { forwardRef, useRef } from "react";
+import { forwardRef } from "react";
 
-import { cn, displayToIso, isoToDisplay, mergeRefs } from "@/utils";
+import TextField from "@mui/material/TextField";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 
-import type { InputProps } from "./input";
-import {
-	InputGroup,
-	InputGroupAddon,
-	InputGroupButton,
-	InputGroupInput,
-} from "./input-group";
+import { displayToIso, isoToDisplay } from "@/utils";
 
-export type DateInputProps = Omit<InputProps, "type">;
+export interface DateInputProps {
+	value?: string;
+	onChange?: (value: string) => void;
+	disabled?: boolean;
+	label?: string;
+	placeholder?: string;
+	error?: boolean;
+	helperText?: string;
+}
+
 const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
-	({ className, disabled, value, onChange, ...props }, forwardedRef) => {
-		const inputRef = useRef<HTMLInputElement>(null);
-
-		const openPicker = () => {
-			if (disabled) return;
-			inputRef.current?.showPicker?.();
-		};
-
-		const isoValue = displayToIso(String(value ?? ""));
-
+	(
+		{
+			value,
+			onChange,
+			disabled,
+			label,
+			placeholder = "DD-MM-YYYY",
+			error,
+			helperText,
+		},
+		ref,
+	) => {
 		return (
-			<InputGroup>
-				<InputGroupInput
-					readOnly
-					value={value ?? ""}
-					placeholder="DD-MM-YYYY"
-					disabled={disabled}
-					className={cn("pr-1", className)}
-				/>
+			<DatePicker
+				disabled={disabled}
+				format="dd-MM-yyyy"
+				value={value ? new Date(displayToIso(value)) : null}
+				onChange={(date) => {
+					if (!date) {
+						onChange?.("");
+						return;
+					}
 
-				<input
-					ref={mergeRefs(inputRef, forwardedRef)}
-					type="date"
-					value={isoValue}
-					disabled={disabled}
-					className="absolute inset-0 pointer-events-none opacity-0"
-					onChange={(event) => {
-						const displayValue = isoToDisplay(event.target.value);
+					const iso = date.toISOString().split("T")[0];
+					onChange?.(isoToDisplay(iso));
+				}}
+				slots={{
+					openPickerIcon: CalendarDays,
+				}}
+				slotProps={{
+					textField: {
+						inputRef: ref,
+						label,
+						error,
+						helperText,
 
-						if (typeof onChange === "function") {
-							onChange(displayValue as never);
-						}
-					}}
-				/>
-
-				<InputGroupAddon align="inline-end">
-					<InputGroupButton
-						type="button"
-						variant="ghost"
-						size="icon-sm"
-						disabled={disabled}
-						aria-label="Open date picker"
-						onClick={openPicker}
-					>
-						<CalendarDays aria-hidden="true" />
-					</InputGroupButton>
-				</InputGroupAddon>
-			</InputGroup>
+						fullWidth: true,
+					} satisfies React.ComponentProps<typeof TextField>,
+				}}
+			/>
 		);
 	},
 );
@@ -68,4 +66,3 @@ const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
 DateInput.displayName = "DateInput";
 
 export { DateInput };
-

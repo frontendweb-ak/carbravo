@@ -3,10 +3,7 @@ import type {
 	RevisionHistoryResponseDto,
 } from "../api/revisions.api";
 
-import type {
-	ProgramRevisionHistory,
-	ProgramRevisionHistoryItem,
-} from "./revisions.types";
+import type { ProgramRevisionHistoryItem } from "./revisions.types";
 
 function mapRevisionHistoryItem(
 	dto: RevisionHistoryItemDto,
@@ -42,9 +39,7 @@ function mapRevisionHistoryItem(
 	};
 }
 
-export function mapRevisionHistory(
-	dto: RevisionHistoryResponseDto,
-): ProgramRevisionHistory {
+export function mapRevisionHistory(dto: RevisionHistoryResponseDto) {
 	return {
 		programId: dto.programId,
 		programIdentifier: dto.programIdentifier,

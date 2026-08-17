@@ -1,12 +1,12 @@
-// src/components/ui/time-input.tsx
+// src/components/ui/date-time-input.tsx
 
 import { forwardRef } from "react";
 
 import TextField from "@mui/material/TextField";
-import { TimePicker } from "@mui/x-date-pickers/TimePicker";
-import { Clock3 } from "lucide-react";
+import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
+import { CalendarClock } from "lucide-react";
 
-export interface TimeInputProps {
+export interface DateTimeInputProps {
 	value?: Date | null;
 	onChange?: (value: Date | null) => void;
 	disabled?: boolean;
@@ -17,7 +17,7 @@ export interface TimeInputProps {
 	fullWidth?: boolean;
 }
 
-const TimeInput = forwardRef<HTMLInputElement, TimeInputProps>(
+const DateTimeInput = forwardRef<HTMLInputElement, DateTimeInputProps>(
 	(
 		{
 			value,
@@ -32,13 +32,13 @@ const TimeInput = forwardRef<HTMLInputElement, TimeInputProps>(
 		ref,
 	) => {
 		return (
-			<TimePicker
+			<DateTimePicker
 				value={value}
 				onChange={onChange}
 				disabled={disabled}
-				format="HH:mm"
+				format="dd-MM-yyyy HH:mm"
 				slots={{
-					openPickerIcon: Clock3,
+					openPickerIcon: CalendarClock,
 				}}
 				slotProps={{
 					textField: {
@@ -55,6 +55,6 @@ const TimeInput = forwardRef<HTMLInputElement, TimeInputProps>(
 	},
 );
 
-TimeInput.displayName = "TimeInput";
+DateTimeInput.displayName = "DateTimeInput";
 
-export { TimeInput };
+export { DateTimeInput };

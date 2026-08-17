@@ -1,5 +1,5 @@
 import { STATUS_CONFIG, type ProgramWorkflowStatus } from "@/config/constants";
-import { cn } from "@/utils";
+import { Box } from "@mui/material";
 
 interface StatusDotProps {
 	status: ProgramWorkflowStatus;
@@ -12,9 +12,16 @@ export function StatusDot({ status, className }: StatusDotProps) {
 	const config = STATUS_CONFIG[normalized];
 
 	return (
-		<span
+		<Box
 			aria-hidden
-			className={cn("size-2 rounded-full", config.dotClass, className)}
+			className={className}
+			sx={{
+				width: 8,
+				height: 8,
+				borderRadius: "50%",
+				backgroundColor: config.color,
+				flexShrink: 0,
+			}}
 		/>
 	);
 }

@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { RouterProvider } from "react-router-dom";
 
-import { AppProviders } from "@/providers/AppProviders";
+import { AppProviders } from "@/providers/app-provider";
 
 import { setupMockAuth } from "./features/auth/session/mock-auth";
 import { router } from "./router/routes";
@@ -35,6 +35,7 @@ function App() {
 
 	return (
 		<AppProviders>
+			{/* <ThemePreview /> */}
 			<RouterProvider router={router} />
 		</AppProviders>
 	);

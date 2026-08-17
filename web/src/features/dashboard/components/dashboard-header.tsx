@@ -1,3 +1,5 @@
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
 import type { ReactNode } from "react";
 
 export interface DashboardHeaderProps {
@@ -12,23 +14,50 @@ function DashboardHeader({
 	rightContent,
 }: DashboardHeaderProps) {
 	return (
-		<div className="flex items-end justify-between gap-6">
-			<div>
-				<div className="text-xs font-bold uppercase tracking-wide text-primary">
+		<Box
+			sx={{
+				display: "flex",
+				alignItems: "flex-end",
+				justifyContent: "space-between",
+				gap: 4,
+			}}
+		>
+			<Box>
+				<Typography
+					variant="overline"
+					sx={{
+						color: "primary.main",
+						fontWeight: 700,
+						letterSpacing: "0.08em",
+					}}
+				>
 					Welcome back, {userName}
-				</div>
-				<h1 className="mt-1 text-3xl font-bold tracking-tight text-foreground">
+				</Typography>
+
+				<Typography
+					variant="h3"
+					sx={{
+						fontWeight: 700,
+						letterSpacing: "-0.02em",
+						color: "text.primary",
+					}}
+				>
 					{title}
-				</h1>
-			</div>
+				</Typography>
+			</Box>
+
 			{rightContent && (
-				<div className="shrink-0 text-sm text-muted-foreground">
-					{rightContent}
-				</div>
+				<Box
+					sx={{
+						flexShrink: 0,
+						color: "text.secondary",
+					}}
+				>
+					<Typography variant="body2">{rightContent}</Typography>
+				</Box>
 			)}
-		</div>
+		</Box>
 	);
 }
 
 export { DashboardHeader };
-

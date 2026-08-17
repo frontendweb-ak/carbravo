@@ -1,4 +1,8 @@
-import { Button } from "@/components/ui";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Chip from "@mui/material/Chip";
+import Paper from "@mui/material/Paper";
+import Typography from "@mui/material/Typography";
 import { ClipboardCheck, Plus, Search } from "lucide-react";
 
 export interface QuickActionsProps {
@@ -15,52 +19,120 @@ function QuickActions({
 	reviewCount = 0,
 }: QuickActionsProps) {
 	return (
-		<section className="rounded-2xl bg-brand-teal p-5 text-white">
-			<h2 className="text-base font-bold">Quick actions</h2>
+		<Paper
+			elevation={0}
+			sx={(theme) => ({
+				p: 2.5,
+				borderRadius: 3,
+				backgroundColor: theme.palette.brandTeal.main,
+				color: "#fff",
+			})}
+		>
+			<Typography
+				variant="subtitle1"
+				sx={{
+					fontWeight: 700,
+				}}
+			>
+				Quick actions
+			</Typography>
 
-			<p className="mt-0.5 text-sm text-white/70">
+			<Typography
+				variant="body2"
+				sx={{
+					mt: 0.5,
+					opacity: 0.7,
+				}}
+			>
 				Start or manage incentive programs
-			</p>
+			</Typography>
 
-			<div className="mt-4 space-y-2">
+			<Box
+				sx={{
+					mt: 2,
+					display: "flex",
+					flexDirection: "column",
+					gap: 1,
+				}}
+			>
 				<Button
-					type="button"
-					className="w-full justify-start gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
+					fullWidth
+					variant="contained"
+					startIcon={<Plus size={16} />}
 					onClick={onNewProgram}
+					sx={{
+						justifyContent: "flex-start",
+					}}
 				>
-					<Plus className="size-4" />
 					New program
 				</Button>
 
 				<Button
-					type="button"
-					variant="outline"
-					className="w-full justify-start gap-2 border-white/20 bg-white/10 text-white hover:bg-white/20 hover:text-white"
+					fullWidth
+					variant="outlined"
+					startIcon={<Search size={16} />}
 					onClick={onBrowsePrograms}
+					sx={{
+						justifyContent: "flex-start",
+						borderColor: "rgba(255,255,255,0.2)",
+						backgroundColor: "rgba(255,255,255,0.08)",
+						color: "#fff",
+
+						"&:hover": {
+							borderColor: "rgba(255,255,255,0.2)",
+							backgroundColor: "rgba(255,255,255,0.16)",
+						},
+					}}
 				>
-					<Search className="size-4" />
 					Browse all programs
 				</Button>
 
 				<Button
-					type="button"
-					variant="outline"
-					className="w-full justify-between border-white/20 bg-white/10 text-white hover:bg-white/20 hover:text-white"
+					fullWidth
+					variant="outlined"
 					onClick={onReviewQueue}
+					sx={{
+						justifyContent: "space-between",
+						borderColor: "rgba(255,255,255,0.2)",
+						backgroundColor: "rgba(255,255,255,0.08)",
+						color: "#fff",
+
+						"&:hover": {
+							borderColor: "rgba(255,255,255,0.2)",
+							backgroundColor: "rgba(255,255,255,0.16)",
+						},
+					}}
 				>
-					<span className="flex items-center gap-2">
-						<ClipboardCheck className="size-4" />
+					<Box
+						sx={{
+							display: "flex",
+							alignItems: "center",
+							gap: 1,
+						}}
+					>
+						<ClipboardCheck size={16} />
 						Review queue
-					</span>
+					</Box>
 
 					{reviewCount > 0 && (
-						<span className="rounded-full bg-white/20 px-2 py-0.5 text-xs">
-							{reviewCount}
-						</span>
+						<Chip
+							label={reviewCount}
+							size="small"
+							sx={{
+								height: 22,
+								backgroundColor: "rgba(255,255,255,0.2)",
+								color: "#fff",
+								fontWeight: 600,
+
+								"& .MuiChip-label": {
+									px: 1,
+								},
+							}}
+						/>
 					)}
 				</Button>
-			</div>
-		</section>
+			</Box>
+		</Paper>
 	);
 }
 

@@ -11,36 +11,26 @@ export type ProgramWorkflowStatus = (typeof PROGRAM_STATUSES)[number];
 export const STATUS_CONFIG = {
 	DRAFT: {
 		label: "Draft",
-		badgeVariant: "statusDraft",
-		textClass: "text-status-draft",
-		dotClass: "bg-status-draft",
+		color: "status.draft",
 	},
 
 	REVIEW: {
 		label: "Review",
-		badgeVariant: "statusReview",
-		textClass: "text-status-review",
-		dotClass: "bg-status-review",
+		color: "status.review",
 	},
 
 	APPROVED: {
 		label: "Approved",
-		badgeVariant: "statusApproved",
-		textClass: "text-status-approved",
-		dotClass: "bg-status-approved",
+		color: "status.approved",
 	},
 
 	ACTIVE: {
 		label: "Active",
-		badgeVariant: "statusActive",
-		textClass: "text-status-active",
-		dotClass: "bg-status-active",
+		color: "status.active",
 	},
 
 	EXPIRED: {
 		label: "Expired",
-		badgeVariant: "statusExpired",
-		textClass: "text-status-expired",
-		dotClass: "bg-status-expired",
+		color: "status.expired",
 	},
 } as const;

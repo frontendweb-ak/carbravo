@@ -1,3 +1,5 @@
+import Grid from "@mui/material/Grid";
+
 import { ProgramStatusCard } from "./program-status-card";
 
 export interface ProgramStatusSummaryProps {
@@ -18,44 +20,53 @@ function ProgramStatusSummary({
 	loading = false,
 }: ProgramStatusSummaryProps) {
 	return (
-		<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
-			<ProgramStatusCard
-				label="Draft"
-				value={draft}
-				status="DRAFT"
-				loading={loading}
-			/>
+		<Grid container spacing={2}>
+			<Grid size={{ xs: 12, sm: 6, lg: 2.4 }}>
+				<ProgramStatusCard
+					label="Draft"
+					value={draft}
+					status="DRAFT"
+					loading={loading}
+				/>
+			</Grid>
 
-			<ProgramStatusCard
-				label="Review"
-				value={review}
-				status="REVIEW"
-				loading={loading}
-			/>
+			<Grid size={{ xs: 12, sm: 6, lg: 2.4 }}>
+				<ProgramStatusCard
+					label="Review"
+					value={review}
+					status="REVIEW"
+					loading={loading}
+				/>
+			</Grid>
 
-			<ProgramStatusCard
-				label="Approved"
-				value={approved}
-				status="APPROVED"
-				loading={loading}
-			/>
+			<Grid size={{ xs: 12, sm: 6, lg: 2.4 }}>
+				<ProgramStatusCard
+					label="Approved"
+					value={approved}
+					status="APPROVED"
+					loading={loading}
+				/>
+			</Grid>
 
-			<ProgramStatusCard
-				label="Active"
-				value={active}
-				status="ACTIVE"
-				loading={loading}
-			/>
+			<Grid size={{ xs: 12, sm: 6, lg: 2.4 }}>
+				<ProgramStatusCard
+					label="Active"
+					value={active}
+					status="ACTIVE"
+					loading={loading}
+				/>
+			</Grid>
 
-			<ProgramStatusCard
-				label="Expired"
-				value={expired}
-				status="EXPIRED"
-				loading={loading}
-			/>
-		</div>
+			<Grid size={{ xs: 12, sm: 6, lg: 2.4 }}>
+				<ProgramStatusCard
+					label="Expired"
+					value={expired}
+					status="EXPIRED"
+					loading={loading}
+				/>
+			</Grid>
+		</Grid>
 	);
 }
 
 export { ProgramStatusSummary };
-

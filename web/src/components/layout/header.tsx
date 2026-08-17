@@ -1,96 +1,160 @@
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Container from "@mui/material/Container";
+import Divider from "@mui/material/Divider";
+import Typography from "@mui/material/Typography";
 import { Plus } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
 
-import { Button, Container } from "@/components/ui";
-
+import { AppBar, Avatar } from "@mui/material";
 import { Logo } from "./logo";
+import NavItem from "./nav-item";
 
 function Header() {
 	const navigate = useNavigate();
 
 	return (
-		<header className="sticky top-0 z-50 border-b border-border bg-card shadow-sm">
-			<Container className="flex h-16 items-center justify-between px-8">
-				{/* Left */}
-				<div className="flex h-full items-center">
-					<NavLink
-						to="/dashboard"
-						className="flex items-center"
-						aria-label="CarBravo"
+		<AppBar
+			component="header"
+			sx={{
+				position: "sticky",
+				top: 0,
+				zIndex: 50,
+
+				borderBottom: 1,
+				borderColor: "divider",
+				backgroundColor: "background.paper",
+				boxShadow: 1,
+			}}
+		>
+			<Container
+				maxWidth={false}
+				sx={{
+					width: "100%",
+					maxWidth: 1360,
+					mx: "auto",
+					px: { xs: 2, sm: 3, lg: 4 },
+				}}
+			>
+				<Box
+					sx={{
+						height: 64,
+						display: "flex",
+						alignItems: "center",
+						justifyContent: "space-between",
+					}}
+				>
+					{/* Left */}
+					<Box
+						sx={{
+							height: "100%",
+							display: "flex",
+							alignItems: "center",
+							gap: 6,
+						}}
 					>
-						<Logo size={28} className="h-8 w-auto" />
-					</NavLink>
+						<Box component={NavLink} to="/dashboard" aria-label="CarBravo">
+							<Logo size={28} />
+						</Box>
 
-					{/* Navigation */}
-					<nav className="ml-8 flex items-center gap-2">
-						<NavLink
-							to="/dashboard"
-							className={({ isActive }) =>
-								[
-									"rounded-lg px-4 py-2",
-									"text-sm font-semibold",
-									"transition-colors",
-									isActive
-										? "bg-muted text-foreground"
-										: "text-foreground hover:bg-muted",
-								].join(" ")
-							}
+						{/* Navigation */}
+						<Box
+							component="nav"
+							sx={{
+								ml: 4,
+								display: "flex",
+								alignItems: "center",
+								gap: 1,
+							}}
 						>
-							Dashboard
-						</NavLink>
+							<NavItem to="/dashboard">Dashboard</NavItem>
+							<NavItem to="/programs">Programs</NavItem>
+						</Box>
+					</Box>
 
-						<NavLink
-							to="/programs"
-							className={({ isActive }) =>
-								[
-									"rounded-lg px-4 py-2",
-									"text-sm font-semibold",
-									"transition-colors",
-									isActive
-										? "bg-muted text-foreground"
-										: "text-foreground hover:bg-muted",
-								].join(" ")
-							}
-						>
-							Programs
-						</NavLink>
-					</nav>
-				</div>
-
-				{/* Right */}
-				<div className="flex items-center gap-4">
-					<Button
-						type="button"
-						className="gap-2 rounded-xl px-5"
-						onClick={() => navigate("/programs/new")}
+					{/* Right */}
+					<Box
+						sx={{
+							display: "flex",
+							alignItems: "center",
+							gap: 4,
+						}}
 					>
-						<Plus className="h-4 w-4" />
-						New Program
-					</Button>
-
-					<div className="h-8 w-px bg-border" />
-
-					<div className="flex items-center gap-2">
-						<span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-							Role
-						</span>
-
-						<button
+						<Button
 							type="button"
-							className="flex h-9 min-w-22 items-center justify-between rounded-lg border border-input bg-background px-3 text-sm font-semibold"
+							variant="contained"
+							startIcon={<Plus size={16} />}
+							onClick={() => navigate("/programs/new")}
 						>
-							<span>Admin</span>
+							New Program
+						</Button>
 
-							<span className="text-muted-foreground">▾</span>
-						</button>
-					</div>
+						<Divider
+							orientation="vertical"
+							flexItem
+							sx={{
+								height: 32,
+								alignSelf: "center",
+							}}
+						/>
 
-					<div className="flex h-10 w-10 items-center justify-center rounded-full bg-sky-100 text-sm font-semibold text-sky-700">
-						AC
-					</div>
-				</div>
+						<Box
+							sx={{
+								display: "flex",
+								alignItems: "center",
+								gap: 2,
+							}}
+						>
+							<Typography
+								variant="overline"
+								sx={{
+									color: "text.secondary",
+									fontWeight: 700,
+									letterSpacing: "0.08em",
+								}}
+							>
+								ROLE
+							</Typography>
+
+							<Button
+								variant="text"
+								color="inherit"
+								size="small"
+								sx={{
+									minWidth: "auto",
+									p: 0.5,
+									textTransform: "none",
+									fontWeight: 600,
+								}}
+							>
+								Admin
+								<Box
+									component="span"
+									sx={{
+										ml: 0.5,
+										color: "text.secondary",
+									}}
+								>
+									▾
+								</Box>
+							</Button>
+						</Box>
+
+						<Avatar
+							sx={{
+								width: 35,
+								height: 35,
+								bgcolor: "#DDEFF8",
+								color: "#0077B6",
+								fontWeight: 700,
+							}}
+						>
+							AC
+						</Avatar>
+					</Box>
+				</Box>
 			</Container>
-		</header>
+		</AppBar>
 	);
 }
 

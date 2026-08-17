@@ -1,11 +1,4 @@
-import {
-	Button,
-	Container,
-	type FilterTab,
-	FilterTabs,
-	Input,
-	PageState,
-} from "@/components/ui";
+import { type FilterTab, FilterTabs, Input, PageState } from "@/components/ui";
 import {
 	useCloneProgram,
 	useProgramFilters,
@@ -79,76 +72,74 @@ export default function ProgramsPage() {
 
 	return (
 		<main className="min-h-[calc(100vh-60px)] bg-background">
-			<Container size="2xl" className="py-7">
-				<div className="flex items-center justify-between gap-4">
-					<h1 className="text-2xl font-bold text-foreground">Programs</h1>
-					<div className="relative w-full max-w-70">
-						<Input
-							value={filters.search ?? ""}
-							leftIcon={<Search />}
-							onChange={(event) => setSearch(event.target.value)}
-							placeholder="Search programs, codes, vehicles..."
-							aria-label="Search programs, codes, vehicles"
-							className="h-9 pl-8 bg-white"
-						/>
-					</div>
-				</div>
-
-				{/* Status tabs */}
-				<div className="mt-6">
-					<FilterTabs
-						items={statusTabs}
-						value={filters.status ?? "all"}
-						onValueChange={(value) =>
-							setStatus(value === "all" ? undefined : value)
-						}
+			<div className="flex items-center justify-between gap-4">
+				<h1 className="text-2xl font-bold text-foreground">Programs</h1>
+				<div className="relative w-full max-w-70">
+					<Input
+						value={filters.search ?? ""}
+						leftIcon={<Search />}
+						onChange={(event) => setSearch(event.target.value)}
+						placeholder="Search programs, codes, vehicles..."
+						aria-label="Search programs, codes, vehicles"
+						className="h-9 pl-8 bg-white"
 					/>
 				</div>
+			</div>
 
-				{/* Content */}
-				<div className="mt-5">
-					<PageState
-						status={
-							isLoading
-								? "loading"
-								: isError
-									? "error"
-									: programs.length === 0
-										? "empty"
-										: "ready"
-						}
-						onRetry={refetch}
-						emptyTitle="No programs found"
-						emptyDescription={
-							hasActiveFilters
-								? "Try changing your filters or search criteria."
-								: "Create your first incentive program to get started."
-						}
-						emptyAction={
-							!hasActiveFilters ? (
-								<Button onClick={handleCreate}>Create program</Button>
-							) : undefined
-						}
-					>
-						<ProgramList
-							programs={programs}
-							isFetching={isFetching}
-							onProgramClick={(programId) => navigate(`/programs/${programId}`)}
-							onClone={handleClone}
+			{/* Status tabs */}
+			<div className="mt-6">
+				<FilterTabs
+					items={statusTabs}
+					value={filters.status ?? "all"}
+					onValueChange={(value) =>
+						setStatus(value === "all" ? undefined : value)
+					}
+				/>
+			</div>
+
+			{/* Content */}
+			<div className="mt-5">
+				<PageState
+					status={
+						isLoading
+							? "loading"
+							: isError
+								? "error"
+								: programs.length === 0
+									? "empty"
+									: "ready"
+					}
+					onRetry={refetch}
+					emptyTitle="No programs found"
+					emptyDescription={
+						hasActiveFilters
+							? "Try changing your filters or search criteria."
+							: "Create your first incentive program to get started."
+					}
+					emptyAction={
+						!hasActiveFilters ? (
+							<Button onClick={handleCreate}>Create program</Button>
+						) : undefined
+					}
+				>
+					<ProgramList
+						programs={programs}
+						isFetching={isFetching}
+						onProgramClick={(programId) => navigate(`/programs/${programId}`)}
+						onClone={handleClone}
+					/>
+					<div className="mt-5">
+						<ProgramPagination
+							page={pagination?.page ?? 0}
+							size={pagination?.size ?? filters.size ?? 20}
+							totalElements={pagination?.totalElements ?? 0}
+							totalPages={pagination?.totalPages ?? 0}
+							disabled={isFetching}
+							onPageChange={setPage}
 						/>
-						<div className="mt-5">
-							<ProgramPagination
-								page={pagination?.page ?? 0}
-								size={pagination?.size ?? filters.size ?? 20}
-								totalElements={pagination?.totalElements ?? 0}
-								totalPages={pagination?.totalPages ?? 0}
-								disabled={isFetching}
-								onPageChange={setPage}
-							/>
-						</div>
-					</PageState>
-				</div>
-			</Container>
+					</div>
+				</PageState>
+			</div>
 		</main>
 	);
 }

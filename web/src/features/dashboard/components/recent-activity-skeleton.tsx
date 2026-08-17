@@ -1,21 +1,54 @@
-import { Skeleton } from "@/components/ui";
+import Box from "@mui/material/Box";
+import Skeleton from "@mui/material/Skeleton";
 
 function RecentActivitySkeleton() {
 	return (
-		<div className="space-y-2">
+		<Box
+			sx={{
+				display: "flex",
+				flexDirection: "column",
+				gap: 1,
+			}}
+		>
 			{Array.from({ length: 5 }).map((_, index) => (
-				<div key={index} className="flex gap-3">
-					<Skeleton className="mt-1.5 size-2 shrink-0 rounded-full" />
+				<Box
+					key={index}
+					sx={{
+						display: "flex",
+						gap: 1.5,
+					}}
+				>
+					<Skeleton
+						variant="circular"
+						width={8}
+						height={8}
+						sx={{
+							mt: 1.5,
+							flexShrink: 0,
+						}}
+					/>
 
-					<div className="min-w-0 flex-1">
-						<div className="space-y-1">
-							<Skeleton className="h-4 w-[85%]" />
-							<Skeleton className="h-3 w-20" />
-						</div>
-					</div>
-				</div>
+					<Box
+						sx={{
+							minWidth: 0,
+							flex: 1,
+						}}
+					>
+						<Box
+							sx={{
+								display: "flex",
+								flexDirection: "column",
+								gap: 0.5,
+							}}
+						>
+							<Skeleton variant="rounded" width="85%" height={16} />
+
+							<Skeleton variant="rounded" width={80} height={12} />
+						</Box>
+					</Box>
+				</Box>
 			))}
-		</div>
+		</Box>
 	);
 }
 

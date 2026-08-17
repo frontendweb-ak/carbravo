@@ -1,3 +1,4 @@
+pnpm exec rg '@base-ui/react|@radix-ui/react-slot|class-variance-authority|tailwind-merge' src
 # CarBravo Incentives Frontend
 
 Production-grade frontend application for the **CarBravo Incentives Authoring Platform**.

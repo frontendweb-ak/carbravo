@@ -1,20 +1,39 @@
+import Box from "@mui/material/Box";
+import { useTheme } from "@mui/material/styles";
 import { useNavigation } from "react-router-dom";
 
 function NavigationLoader() {
 	const navigation = useNavigation();
+	const theme = useTheme();
 
 	if (navigation.state === "idle") {
 		return null;
 	}
 
 	return (
-		<div
+		<Box
 			role="progressbar"
 			aria-label="Loading page"
-			className="fixed inset-x-0 top-0 z-[9999] h-0.5 overflow-hidden bg-primary/20"
+			sx={{
+				position: "fixed",
+				top: 0,
+				left: 0,
+				right: 0,
+				zIndex: 9999,
+				height: 2,
+				overflow: "hidden",
+				backgroundColor: `${theme.palette.primary.main}33`, // 20% opacity
+			}}
 		>
-			<div className="h-full w-1/3 animate-pulse bg-brand-teal" />
-		</div>
+			<Box
+				sx={{
+					height: "100%",
+					width: "33%",
+					backgroundColor: theme.palette.brandTeal.main,
+					animation: "navigation-loader 1s ease-in-out infinite",
+				}}
+			/>
+		</Box>
 	);
 }
 

@@ -1,5 +1,5 @@
+@layer theme, base, mui, components, utilities;
 @import "tailwindcss";
-
 :root {
 	--radius: 0.5rem;
 
