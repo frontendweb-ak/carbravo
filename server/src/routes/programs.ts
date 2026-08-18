@@ -25,7 +25,6 @@ export const programs = new Hono();
  * GET /api/programs
  */
 const PROGRAM_STATUSES = ["DRAFT", "ACTIVE", "EXPIRED"] as const;
-
 const PROGRAM_TYPES = ["CUSTOMER_CASH", "APR", "BONUS_CASH"] as const;
 
 function parseNonNegativeInt(
@@ -82,7 +81,6 @@ programs.get("/programs", async (c) => {
   );
 
   const page = parseNonNegativeInt(c.req.query("page"), 0, "page");
-
   const size = parseNonNegativeInt(c.req.query("size"), 25, "size");
 
   if (size < 1 || size > 100) {
@@ -104,7 +102,6 @@ programs.get("/programs", async (c) => {
   }
 
   let list = db.programs.filter((program) => program.deletedAt === null);
-
   if (status) {
     list = list.filter((program) => program.status === status);
   }

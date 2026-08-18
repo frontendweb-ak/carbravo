@@ -60,14 +60,8 @@ function ProgramContextHeader({
 	return (
 		<Box
 			className={className}
-			sx={{
-				py: 1.75,
-			}}
+			sx={{ pt: 1.25, backgroundColor: "background.default" }}
 		>
-			{/* ============================================================
-			    HEADER
-			============================================================ */}
-
 			<Container
 				maxWidth={false}
 				sx={{
@@ -77,23 +71,24 @@ function ProgramContextHeader({
 					px: { xs: 2, sm: 3, lg: 4 },
 				}}
 			>
+				{/* HEADER */}
 				<Stack
 					sx={{
-						direction: "row",
+						flexDirection: "row",
 						alignItems: "center",
 						justifyContent: "space-between",
 						gap: 2,
-						mb: 2,
+						minHeight: 42,
+						mb: 0.75,
 					}}
 				>
 					{/* Left */}
-
 					<Stack
 						sx={{
-							direction: "row",
+							flexDirection: "row",
 							alignItems: "center",
-							gap: 1.5,
-							minWidth: 0,
+							gap: 1.75,
+							flexShrink: 0,
 						}}
 					>
 						<Link
@@ -104,13 +99,14 @@ function ProgramContextHeader({
 							}}
 						>
 							<Typography
-								variant="body2"
 								sx={{
+									fontSize: 13,
+									lineHeight: 1,
 									fontWeight: 700,
-									color: "text.secondary",
-									transition: "color 150ms",
+									color: "#607984",
+									transition: "color 150ms ease",
 									"&:hover": {
-										color: "text.primary",
+										color: "#244B5A",
 									},
 								}}
 							>
@@ -119,79 +115,83 @@ function ProgramContextHeader({
 						</Link>
 
 						{/* Vertical separator */}
-
 						<Box
 							sx={{
-								width: 1,
-								height: 24,
-								backgroundColor: "divider",
+								width: "1px",
+								height: 26,
+								backgroundColor: "#D7E0E3",
 								flexShrink: 0,
 							}}
 						/>
 
 						{/* Program name */}
-
 						<Typography
 							variant="h5"
 							noWrap
 							sx={{
 								minWidth: 0,
-								fontWeight: 700,
-								color: "brandTeal.main",
+								fontSize: 18,
+								lineHeight: 1,
+								fontWeight: 800,
+								color: "#244B5A",
 							}}
 						>
 							{name}
 						</Typography>
 
 						{/* Type */}
-
 						<Typography
-							variant="caption"
 							sx={{
 								flexShrink: 0,
+								fontSize: 11,
+								lineHeight: 1,
 								fontWeight: 500,
-								color: "text.secondary",
+								color: "#8A9BA3",
 							}}
 						>
 							{type}
 						</Typography>
 
 						<Typography
-							variant="caption"
 							sx={{
 								flexShrink: 0,
-								color: "text.secondary",
+								fontSize: 11,
+								lineHeight: 1,
+								color: "#A0ADB3",
 							}}
 						>
 							·
 						</Typography>
 
 						<Typography
-							variant="caption"
 							sx={{
 								flexShrink: 0,
-								color: "text.secondary",
+								fontSize: 11,
+								lineHeight: 1,
+								color: "#8A9BA3",
 							}}
 						>
 							{number}
 						</Typography>
 
 						{/* Revision */}
-
 						<Box
 							sx={{
+								display: "inline-flex",
+								alignItems: "center",
 								flexShrink: 0,
-								px: 1.5,
-								py: 0.5,
-								borderRadius: 1.5,
-								backgroundColor: "action.hover",
+								height: 26,
+								px: 1.25,
+								borderRadius: "7px",
+								backgroundColor: "#E7EFF1",
 							}}
 						>
 							<Typography
-								variant="caption"
 								sx={{
-									fontWeight: 600,
-									color: "text.primary",
+									fontSize: 11,
+									lineHeight: 1,
+									fontWeight: 700,
+									color: "#244B5A",
 								}}
 							>
 								Rev: {revision}
@@ -199,35 +199,48 @@ function ProgramContextHeader({
 						</Box>
 
 						{/* Status */}
-
-						<StatusBadge status={status} />
+						<Box
+							sx={{
+								flexShrink: 0,
+								display: "flex",
+								alignItems: "center",
+							}}
+						>
+							<StatusBadge status={status} />
+						</Box>
 					</Stack>
 
 					{/* Right */}
-
 					<Stack
 						sx={{
 							direction: "row",
 							alignItems: "center",
-							gap: 2,
+							gap: 1.75,
 							flexShrink: 0,
 						}}
 					>
 						{saved && (
-							<Stack sx={{ direction: "row", alignItems: "center", gap: 0.75 }}>
+							<Stack
+								sx={{
+									direction: "row",
+									alignItems: "center",
+									gap: 0.5,
+								}}
+							>
 								<CheckIcon
 									aria-hidden
 									sx={{
-										fontSize: 18,
-										color: "success.main",
+										fontSize: 16,
+										color: "#5E9E3D",
 									}}
 								/>
 
 								<Typography
-									variant="body2"
 									sx={{
-										fontWeight: 500,
-										color: "success.main",
+										fontSize: 12,
+										lineHeight: 1,
+										fontWeight: 600,
+										color: "#5E9E3D",
 										whiteSpace: "nowrap",
 									}}
 								>
@@ -242,6 +255,29 @@ function ProgramContextHeader({
 								variant="outlined"
 								disabled={saveDisabled}
 								onClick={onSave}
+								sx={{
+									height: 36,
+									minWidth: 99,
+									px: 1.75,
+									borderRadius: "10px",
+
+									backgroundColor: "#FFFFFF",
+									borderColor: "#CFDCE0",
+
+									color: "#355666",
+
+									fontSize: 12,
+									fontWeight: 700,
+									textTransform: "none",
+
+									boxShadow: "0 1px 2px rgba(16, 42, 56, 0.03)",
+
+									"&:hover": {
+										backgroundColor: "#FFFFFF",
+										borderColor: "#B9C9CE",
+										boxShadow: "0 1px 2px rgba(16, 42, 56, 0.03)",
+									},
+								}}
 							>
 								{saveLabel}
 							</Button>
@@ -249,15 +285,12 @@ function ProgramContextHeader({
 					</Stack>
 				</Stack>
 
-				{/* ============================================================
-				    REVISION NAVIGATION
-				============================================================ */}
-
+				{/* REVISION NAVIGATION */}
 				<Stack
 					sx={{
-						direction: "row",
+						flexDirection: "row",
 						alignItems: "center",
-						pb: 2,
+						pb: 1.5,
 						justifyContent: "space-between",
 						gap: 2,
 					}}
@@ -267,8 +300,8 @@ function ProgramContextHeader({
 							role="tablist"
 							aria-label="Program revisions"
 							sx={{
-								gap: 1,
-								direction: "row",
+								gap: 0.75,
+								flexDirection: "row",
 								alignItems: "center",
 							}}
 						>
@@ -286,28 +319,37 @@ function ProgramContextHeader({
 										color={active ? "inherit" : "primary"}
 										sx={{
 											minWidth: 0,
-											borderRadius: 999,
-											px: 2,
-											py: 0.75,
-											fontSize: 12,
+											height: 32,
+
+											borderRadius: "18px",
+
+											px: 1.75,
+											py: 0,
+
+											fontSize: 11,
 											fontWeight: 700,
+											lineHeight: 1,
+
 											textTransform: "none",
 
 											...(active
 												? {
-														backgroundColor: "foreground",
-														color: "background.default",
+														backgroundColor: "#244B57",
+														color: "#FFFFFF",
+														border: "1px solid #244B57",
+
 														"&:hover": {
-															backgroundColor: "foreground",
+															backgroundColor: "#244B57",
 														},
 													}
 												: {
-														backgroundColor: "background.paper",
-														color: "text.secondary",
-														borderColor: "divider",
+														backgroundColor: "#FFFFFF",
+														color: "#607984",
+														borderColor: "#D4E0E3",
+
 														"&:hover": {
-															backgroundColor: "action.hover",
-															borderColor: "divider",
+															backgroundColor: "#FFFFFF",
+															borderColor: "#C4D2D6",
 														},
 													}),
 										}}
@@ -317,7 +359,7 @@ function ProgramContextHeader({
 											sx={{
 												display: "inline-flex",
 												alignItems: "center",
-												gap: 1,
+												gap: 0.75,
 											}}
 										>
 											<span>{tab.label}</span>
@@ -325,7 +367,9 @@ function ProgramContextHeader({
 											<Box
 												component="span"
 												sx={{
-													color: active ? "text.disabled" : "text.secondary",
+													color: active ? "rgba(255,255,255,0.72)" : "#8A9BA3",
+													fontSize: 10,
+													fontWeight: 600,
 												}}
 											>
 												{tab.subtitle}
@@ -340,28 +384,30 @@ function ProgramContextHeader({
 					)}
 
 					{/* Active revision notice */}
-
 					{status === "ACTIVE" && (
 						<Stack
 							sx={{
-								gap: 1,
+								gap: 0.75,
 								alignItems: "center",
-								direction: "row",
+								flexDirection: "row",
+								minHeight: 30,
 								borderRadius: 999,
-								backgroundColor: "action.hover",
-								px: 2,
-								py: 1,
+								backgroundColor: "#E7ECEE",
+								px: 1.5,
+								py: 0.5,
 							}}
 						>
-							<Typography component="span" variant="caption">
+							<Typography component="span" sx={{ fontSize: 12, lineHeight: 1 }}>
 								🔒
 							</Typography>
 
 							<Typography
-								variant="body2"
 								sx={{
-									color: "text.secondary",
-									fontWeight: 500,
+									fontSize: 11,
+									lineHeight: 1.2,
+									color: "#637780",
+									fontWeight: 600,
+									whiteSpace: "nowrap",
 								}}
 							>
 								This revision is active and posted — read-only. Clone or revise
@@ -372,10 +418,7 @@ function ProgramContextHeader({
 				</Stack>
 			</Container>
 
-			{/* ============================================================
-			    DIVIDER
-			============================================================ */}
-
+			{/* DIVIDER */}
 			<Container
 				maxWidth={false}
 				sx={{
@@ -385,10 +428,15 @@ function ProgramContextHeader({
 					px: { xs: 2, sm: 3, lg: 4 },
 				}}
 			>
-				<Divider />
+				<Divider
+					sx={{
+						borderColor: "#DCE4E6",
+					}}
+				/>
 			</Container>
 		</Box>
 	);
 }
 
 export { ProgramContextHeader };
+

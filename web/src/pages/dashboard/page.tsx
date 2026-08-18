@@ -27,13 +27,7 @@ function DashboardPage() {
 	const formattedDate = formatLongDate(new Date());
 
 	return (
-		<Box
-			sx={{
-				minHeight: "calc(100vh - 64px)",
-				backgroundColor: "background.default",
-				py: 6,
-			}}
-		>
+		<Box sx={{ backgroundColor: "background.default" }}>
 			<DashboardHeader
 				userName="Alex Chen"
 				rightContent={
@@ -63,22 +57,15 @@ function DashboardPage() {
 					display: "grid",
 					gap: 4,
 					alignItems: "start",
-					gridTemplateColumns: {
-						xs: "1fr",
-						lg: "1.52fr 1fr",
-					},
+					gridTemplateColumns: { xs: "1fr", lg: "1.52fr 1fr" },
 				}}
 			>
-				<Box>
-					<ExpiringPrograms programs={expiringQuery.data?.items ?? []} />
-				</Box>
-
-				<Stack spacing={5}>
+				<ExpiringPrograms programs={expiringQuery.data?.items ?? []} />
+				<Stack spacing={4}>
 					<RecentActivity
 						loading={activityQuery.isLoading}
 						items={activityQuery.data?.items ?? []}
 					/>
-
 					<QuickActions
 						reviewCount={statusCounts.review}
 						onNewProgram={() => navigate("/programs/new")}

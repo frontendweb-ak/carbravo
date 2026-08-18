@@ -1,6 +1,4 @@
-// src/components/ui/filter-tabs.tsx
-
-import Badge from "@mui/material/Badge";
+import Box from "@mui/material/Box";
 import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
 import type { ReactNode } from "react";
@@ -26,23 +24,81 @@ function FilterTabs<T extends string>({
 	return (
 		<Tabs
 			value={value}
-			onChange={(_, newValue) => onValueChange(newValue)}
+			onChange={(_, newValue) => {
+				onValueChange(newValue as T);
+			}}
 			variant="scrollable"
-			scrollButtons="auto"
+			scrollButtons={false}
+			sx={{
+				height: 30,
+				borderRadius: "15px",
+
+				fontSize: 12,
+				fontWeight: selected ? 700 : 600,
+				lineHeight: 1,
+
+				backgroundColor: selected ? "brandTeal.main" : "background.paper",
+
+				color: selected ? "#FFFFFF" : "text.secondary",
+
+				border: "1px solid",
+				borderColor: selected ? "brandTeal.main" : "divider",
+
+				boxShadow: "none",
+
+				"& .MuiChip-label": {
+					px: 1.5,
+					display: "flex",
+					alignItems: "center",
+					gap: 0.5,
+				},
+
+				"&:hover": {
+					backgroundColor: selected ? "brandTeal.main" : "action.hover",
+				},
+			}}
 		>
 			{items.map((item) => (
 				<Tab
 					key={item.value}
 					value={item.value}
 					disabled={item.disabled}
+					disableRipple
 					label={
-						item.count !== undefined ? (
-							<Badge badgeContent={item.count} color="primary" showZero>
+						<Box
+							component="span"
+							sx={{
+								display: "inline-flex",
+								alignItems: "center",
+								gap: "6px",
+								whiteSpace: "nowrap",
+							}}
+						>
+							<Box
+								component="span"
+								sx={{
+									display: "inline-flex",
+									alignItems: "center",
+								}}
+							>
 								{item.label}
-							</Badge>
-						) : (
-							item.label
-						)
+							</Box>
+
+							{item.count !== undefined && (
+								<Box
+									component="span"
+									sx={{
+										fontSize: 11,
+										fontWeight: 500,
+										lineHeight: 1,
+										color: "inherit",
+										opacity: 0.7,
+									}}
+								>
+									{item.count}
+								</Box>
+							)}
+						</Box>
 					}
 				/>
 			))}

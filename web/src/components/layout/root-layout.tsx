@@ -11,6 +11,8 @@ function RootLayout() {
 		<Box
 			sx={{
 				minHeight: "100vh",
+				display: "flex",
+				flexDirection: "column",
 				backgroundColor: "background.default",
 				color: "text.primary",
 			}}
@@ -20,11 +22,12 @@ function RootLayout() {
 			<Container
 				maxWidth={false}
 				sx={{
+					flex: 1,
 					width: "100%",
-					maxWidth: 1325,
+					maxWidth: 1340,
 					mx: "auto",
 					px: { xs: 2, sm: 3, lg: 4 },
-					minHeight: "calc(100vh - 64px)",
+					py: 6,
 				}}
 			>
 				<Outlet />

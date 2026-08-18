@@ -1,4 +1,5 @@
-import { type FilterTab, FilterTabs, Input, PageState } from "@/components/ui";
+import { PageState, StatusChips, type StatusChipOption } from "@/components/ui";
+import { useDashboardSummary } from "@/features/dashboard";
 import {
 	useCloneProgram,
 	useProgramFilters,
@@ -6,21 +7,45 @@ import {
 } from "@/features/program";
 import type { ProgramStatusDto } from "@/features/program/api/programs.api";
 import { ProgramPagination } from "@/features/program/components";
+import { ProgramHeader } from "@/features/program/components/program-header";
 import { ProgramList } from "@/features/program/components/program-list";
-import Button from "@mui/material/Button";
+
+import { Box, Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 
 type ProgramStatusTab = "all" | ProgramStatusDto;
+
+const statusOptions = [
+	{
+		value: "DRAFT",
+		label: "Draft",
+	},
+	{
+		value: "ACTIVE",
+		label: "Active",
+	},
+	{
+		value: "EXPIRED",
+		label: "Expired",
+	},
+] as const satisfies ReadonlyArray<{
+	value: ProgramStatusDto;
+	label: string;
+}>;
+
 export default function ProgramsPage() {
 	const navigate = useNavigate();
+
 	const { filters, setStatus, setSearch, setPage } = useProgramFilters();
 
-	const { data, isLoading, isFetching, isError, refetch } =
-		usePrograms(filters);
+	const summaryQuery = useDashboardSummary();
 
-	const programs = data?.items ?? [];
-	const pagination = data?.pagination;
-	const statusCounts = data?.statusCounts;
+	const programsQuery = usePrograms(filters);
+
+	const cloneProgram = useCloneProgram();
+
+	const programs = programsQuery.data?.items ?? [];
+	const pagination = programsQuery.data?.pagination;
 
 	const hasActiveFilters =
 		Boolean(filters.search) ||
@@ -30,116 +55,105 @@ export default function ProgramsPage() {
 		Boolean(filters.dateTo) ||
 		filters.pendingApproval === true;
 
-	const handleCreate = () => {
-		navigate("/programs/new/setup");
+	const summaryCounts = summaryQuery.data?.counts ?? [];
+
+	const getStatusCount = (status: ProgramStatusDto) =>
+		summaryCounts.find((item) => item.status === status)?.total ?? 0;
+
+	const totalCount = summaryCounts.reduce(
+		(total, item) => total + item.total,
+		0,
+	);
+
+	const statusTabs: StatusChipOption<ProgramStatusTab>[] = [
+		{
+			value: "all",
+			label: "All",
+			count: totalCount,
+		},
+		...statusOptions.map((option) => ({
+			value: option.value,
+			label: option.label,
+			count: getStatusCount(option.value),
+		})),
+	];
+
+	const handleStatusChange = (value: ProgramStatusTab) => {
+		setStatus(value === "all" ? undefined : value);
+		setPage(0);
 	};
 
-	const cloneProgram = useCloneProgram();
-
 	const handleClone = (programId: number) => {
-		console.log("ProgramId", programId);
 		cloneProgram.mutate(programId, {
-			onSuccess: (data) => {
-				if (data.programId) {
-					navigate(`/programs/${data.programId}`);
+			onSuccess: ({ programId }) => {
+				if (programId) {
+					navigate(`/programs/${programId}`);
 				}
 			},
 		});
 	};
 
-	const statusTabs = [
-		{
-			value: "all",
-			label: "All",
-			count: statusCounts?.all ?? 0,
-		},
-		{
-			value: "DRAFT",
-			label: "Draft",
-			count: statusCounts?.draft ?? 0,
-		},
-		{
-			value: "ACTIVE",
-			label: "Active",
-			count: statusCounts?.active ?? 0,
-		},
-		{
-			value: "EXPIRED",
-			label: "Expired",
-			count: statusCounts?.expired ?? 0,
-		},
-	] satisfies FilterTab<ProgramStatusTab>[];
-
 	return (
-		<main className="min-h-[calc(100vh-60px)] bg-background">
-			<div className="flex items-center justify-between gap-4">
-				<h1 className="text-2xl font-bold text-foreground">Programs</h1>
-				<div className="relative w-full max-w-70">
-					<Input
-						value={filters.search ?? ""}
-						// leftIcon={<Search />}
-						onChange={(event) => setSearch(event.target.value)}
-						placeholder="Search programs, codes, vehicles..."
-						aria-label="Search programs, codes, vehicles"
-						className="h-9 pl-8 bg-white"
-					/>
-				</div>
-			</div>
+		<Box
+			sx={{
+				backgroundColor: "background.default",
+			}}
+		>
+			<ProgramHeader search={filters.search ?? ""} onSearchChange={setSearch} />
 
-			{/* Status tabs */}
-			<div className="mt-6">
-				<FilterTabs
-					items={statusTabs}
-					value={filters.status ?? "all"}
-					onValueChange={(value) =>
-						setStatus(value === "all" ? undefined : value)
-					}
+			<StatusChips
+				sx={{
+					mt: 3,
+					mb: 3,
+				}}
+				options={statusTabs}
+				value={filters.status ?? "all"}
+				onChange={handleStatusChange}
+			/>
+
+			<PageState
+				status={
+					programsQuery.isLoading
+						? "loading"
+						: programsQuery.isError
+							? "error"
+							: programs.length === 0
+								? "empty"
+								: "ready"
+				}
+				onRetry={programsQuery.refetch}
+				emptyTitle="No programs found"
+				emptyDescription={
+					hasActiveFilters
+						? "Try changing your filters or search criteria."
+						: "Create your first incentive program to get started."
+				}
+				emptyAction={
+					!hasActiveFilters ? (
+						<Button onClick={() => navigate("/programs/new/setup")}>
+							Create program
+						</Button>
+					) : undefined
+				}
+			>
+				<ProgramList
+					programs={programs}
+					isFetching={programsQuery.isFetching}
+					onProgramClick={(programId) => navigate(`/programs/${programId}`)}
+					onClone={handleClone}
 				/>
-			</div>
 
-			{/* Content */}
-			<div className="mt-5">
-				<PageState
-					status={
-						isLoading
-							? "loading"
-							: isError
-								? "error"
-								: programs.length === 0
-									? "empty"
-									: "ready"
-					}
-					onRetry={refetch}
-					emptyTitle="No programs found"
-					emptyDescription={
-						hasActiveFilters
-							? "Try changing your filters or search criteria."
-							: "Create your first incentive program to get started."
-					}
-					emptyAction={
-						!hasActiveFilters ? (
-							<Button onClick={handleCreate}>Create program</Button>
-						) : undefined
-					}
-				>
-					<ProgramList
-						programs={programs}
-						isFetching={isFetching}
-						onProgramClick={(programId) => navigate(`/programs/${programId}`)}
-						onClone={handleClone}
+				<Box sx={{ mt: 3 }}>
+					<ProgramPagination
+						page={pagination?.page ?? 0}
+						size={pagination?.size ?? filters.size ?? 20}
+						totalElements={pagination?.totalElements ?? 0}
+						totalPages={pagination?.totalPages ?? 0}
+						disabled={programsQuery.isFetching}
+						onPageChange={setPage}
 					/>
-					<div className="mt-5">
-						<ProgramPagination
-							page={pagination?.page ?? 0}
-							size={pagination?.size ?? filters.size ?? 20}
-							totalElements={pagination?.totalElements ?? 0}
-							totalPages={pagination?.totalPages ?? 0}
-							disabled={isFetching}
-							onPageChange={setPage}
-						/>
-					</div>
-				</PageState>
-			</div>
-		</main>
+				</Box>
+			</PageState>
+		</Box>
 	);
 }

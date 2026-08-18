@@ -66,8 +66,10 @@ export function mapProgram(dto: ProgramListItemDto): Program {
 		type: dto.programType ?? null,
 
 		revision: mapRevision(dto.currentRevision),
-
 		hasDraft: dto.hasDraft ?? false,
+
+		vehicles: dto.vehicles ?? [],
+		geography: dto.geography ?? [],
 
 		deliveryStartDate: dto.deliveryStartDate ?? null,
 		deliveryEndDate: dto.deliveryEndDate ?? null,
@@ -175,6 +177,9 @@ export function mapProgramDetail(dto: ProgramDetailDto): ProgramDetail {
 		draftRevision: mapRevision(dto.draftRevision),
 
 		hasDraft: dto.draftRevision != null,
+
+		vehicles: dto.vehicles ?? [],
+		geography: dto.geography ?? [],
 
 		deliveryStartDate: dto.deliveryStartDate ?? null,
 		deliveryEndDate: dto.deliveryEndDate ?? null,

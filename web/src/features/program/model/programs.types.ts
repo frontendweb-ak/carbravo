@@ -23,7 +23,10 @@ export interface ProgramRevision {
 	isSubmitted: boolean;
 	approved: boolean;
 }
-
+export interface ProgramVehicle {
+	vehicleCatalogId: number;
+	label: string;
+}
 export interface Program {
 	id: number;
 	identifier: string;
@@ -33,8 +36,10 @@ export interface Program {
 	type: ProgramType | null;
 
 	revision: ProgramRevision | null;
-
 	hasDraft: boolean;
+
+	vehicles: ProgramVehicle[];
+	geography: string[];
 
 	deliveryStartDate: string | null;
 	deliveryEndDate: string | null;

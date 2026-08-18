@@ -41,6 +41,10 @@ export interface RevisionRefDto {
 	isSubmitted?: boolean;
 	approved?: boolean;
 }
+export interface ProgramVehicleDto {
+	vehicleCatalogId: number;
+	label: string;
+}
 
 export interface ProgramSummaryDto {
 	programId?: number;
@@ -56,6 +60,12 @@ export interface ProgramSummaryDto {
 
 	deliveryStartDate?: string;
 	deliveryEndDate?: string;
+
+	effectiveStartDate?: string;
+	effectiveEndDate?: string;
+
+	vehicles?: ProgramVehicleDto[];
+	geography?: string[];
 
 	updatedAt?: string;
 }
@@ -86,7 +96,6 @@ export interface ProgramStatusCountsDto {
 export interface ListProgramsResponseDto {
 	content?: ProgramListItemDto[];
 	pagination?: PaginationDto;
-
 }
 
 /* -------------------------------------------------------------------------- */
@@ -132,6 +141,7 @@ export const programsApi = {
 		const response = await http.get<ListProgramsResponseDto>("/programs", {
 			params,
 		});
+		console.log("res", response.data);
 		return response.data;
 	},
 

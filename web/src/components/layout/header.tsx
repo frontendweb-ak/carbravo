@@ -31,7 +31,7 @@ function Header() {
 				maxWidth={false}
 				sx={{
 					width: "100%",
-					maxWidth: 1325,
+					maxWidth: 1340,
 					mx: "auto",
 					px: { xs: 2, sm: 3, lg: 4 },
 				}}

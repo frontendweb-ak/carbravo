@@ -48,9 +48,9 @@ export const tokens = {
 		state: {
 			success: "rgb(108, 174, 64)",
 			successForeground: "rgb(252, 252, 252)",
-			successSoft: "rgb(237, 247, 231)",
-			successSoftForeground: "rgb(67, 111, 39)",
-			successSoftBorder: "rgb(207, 231, 193)",
+			successSoft: "rgb(220,234,207)",
+			successSoftForeground: "rgb(94,143,31)",
+			successSoftBorder: "rgb(220,234,207)",
 
 			warning: "rgb(218, 149, 11)",
 			warningForeground: "rgb(45, 31, 10)",
@@ -66,9 +66,9 @@ export const tokens = {
 
 			info: "rgb(0, 134, 179)",
 			infoForeground: "rgb(252, 252, 252)",
-			infoSoft: "rgb(231, 245, 250)",
-			infoSoftForeground: "rgb(0, 105, 140)",
-			infoSoftBorder: "rgb(184, 222, 235)",
+			infoSoft: "rgb(217,233,236)", // #D9E9EC
+			infoSoftForeground: "rgb(31,135,160)", // #1F87A0
+			infoSoftBorder: "rgb(217,233,236)",
 		},
 	},
 
