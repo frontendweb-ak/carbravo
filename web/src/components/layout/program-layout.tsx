@@ -251,11 +251,8 @@ function ProgramLayoutContent({
 					width: "100%",
 					maxWidth: 1360,
 					mx: "auto",
-					px: {
-						xs: 2,
-						sm: 3,
-						lg: 4,
-					},
+					mt: 4,
+					px: { xs: 2, sm: 3, lg: 4 },
 				}}
 			>
 				{isHistoryList ? (
@@ -264,12 +261,7 @@ function ProgramLayoutContent({
 					 * History list
 					 * ---------------------------------------------------
 					 */
-					<Box
-						component="main"
-						sx={{
-							minWidth: 0,
-						}}
-					>
+					<Box component="main" sx={{ minWidth: 0 }}>
 						{revisionHistory ? (
 							<ProgramRevisionHistory
 								history={revisionHistory}
@@ -307,18 +299,15 @@ function ProgramLayoutContent({
 									lg: "245px minmax(0, 1fr)",
 								},
 								alignItems: "start",
-								gap: 2.5,
+								gap: 5,
 							}}
 						>
 							<Box
 								component="aside"
 								sx={{
 									position: "sticky",
-									top: 160,
-									display: {
-										xs: "none",
-										lg: "block",
-									},
+									top: 130,
+									display: { xs: "none", lg: "block" },
 								}}
 							>
 								<ProgramSectionSidebar
@@ -330,12 +319,7 @@ function ProgramLayoutContent({
 								/>
 							</Box>
 
-							<Box
-								component="main"
-								sx={{
-									minWidth: 0,
-								}}
-							>
+							<Box component="main" sx={{ minWidth: 0 }}>
 								<Outlet />
 							</Box>
 						</Box>

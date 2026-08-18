@@ -27,20 +27,14 @@ function Card({
 
 	const cardSx: SxProps<Theme> = [
 		{
+			p: 4,
 			borderRadius: 2,
 			overflow: "hidden",
 			backgroundColor: "background.paper",
 			transition: "border-color 150ms ease, box-shadow 150ms ease",
 		},
 
-		...(variant === "flat"
-			? [
-					{
-						border: 0,
-						boxShadow: "none",
-					},
-				]
-			: []),
+		...(variant === "flat" ? [{ border: 0, boxShadow: "none" }] : []),
 
 		...(interactive
 			? [
@@ -97,3 +91,4 @@ function Card({
 }
 
 export { Card };
+

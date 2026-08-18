@@ -30,31 +30,59 @@ function FilterTabs<T extends string>({
 			variant="scrollable"
 			scrollButtons={false}
 			sx={{
-				height: 30,
-				borderRadius: "15px",
+				minHeight: 32,
 
-				fontSize: 12,
-				fontWeight: selected ? 700 : 600,
-				lineHeight: 1,
-
-				backgroundColor: selected ? "brandTeal.main" : "background.paper",
-
-				color: selected ? "#FFFFFF" : "text.secondary",
-
-				border: "1px solid",
-				borderColor: selected ? "brandTeal.main" : "divider",
-
-				boxShadow: "none",
-
-				"& .MuiChip-label": {
-					px: 1.5,
-					display: "flex",
-					alignItems: "center",
-					gap: 0.5,
+				"& .MuiTabs-flexContainer": {
+					gap: 0.75,
 				},
 
-				"&:hover": {
-					backgroundColor: selected ? "brandTeal.main" : "action.hover",
+				"& .MuiTabs-indicator": {
+					display: "none",
+				},
+
+				"& .MuiTab-root": {
+					minWidth: "unset",
+					minHeight: 32,
+					height: 32,
+
+					px: 1.75,
+					py: 0,
+
+					borderRadius: "16px",
+
+					fontSize: 12,
+					fontWeight: 600,
+					textTransform: "none",
+
+					backgroundColor: "background.paper",
+					color: "text.secondary",
+
+					border: "1px solid",
+					borderColor: "divider",
+
+					boxShadow: "0 1px 2px rgba(0,0,0,0.02)",
+
+					opacity: 1,
+
+					"&.Mui-selected": {
+						backgroundColor: "brandTeal.main",
+						color: "#fff",
+						borderColor: "transparent",
+						fontWeight: 700,
+						boxShadow: "none",
+					},
+
+					"&:hover": {
+						backgroundColor: "action.hover",
+					},
+
+					"&.Mui-selected:hover": {
+						backgroundColor: "brandTeal.main",
+					},
+
+					"&.Mui-disabled": {
+						opacity: 0.45,
+					},
 				},
 			}}
 		>
@@ -107,3 +135,4 @@ function FilterTabs<T extends string>({
 }
 
 export { FilterTabs };
+

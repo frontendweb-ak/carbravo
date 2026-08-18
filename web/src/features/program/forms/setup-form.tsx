@@ -791,11 +791,11 @@ export function SetupForm({
 		<FormProvider {...form}>
 			<Stack
 				component="form"
-				spacing={2.5}
+				spacing={4}
+				noValidate
 				onSubmit={(event) => {
 					event.preventDefault();
 				}}
-				noValidate
 			>
 				{/* ============================================================ */}
 				{/* PROGRAM DETAILS                                              */}
@@ -808,68 +808,47 @@ export function SetupForm({
 					<Box
 						sx={{
 							display: "grid",
-							gridTemplateColumns:
-								{
-									xs: "1fr",
-									lg: "repeat(2, minmax(0, 1fr))",
-								},
-							gap: 2.5,
+							gridTemplateColumns: {
+								xs: "1fr",
+								lg: "repeat(2, minmax(0, 1fr))",
+							},
+							gap: 4,
 						}}
 					>
 						<FormInput
-							control={
-								form.control
-							}
+							control={form.control}
 							name="programName"
 							label="Program Name"
 							required
 							placeholder="e.g. Summer Finance Event"
-							disabled={
-								!canEdit
-							}
+							disabled={!canEdit}
 						/>
 
 						<FormInput
-							control={
-								form.control
-							}
+							control={form.control}
 							name="programNumber"
 							label="Program Number"
 							required
 							placeholder="4821"
-							disabled={
-								!canEdit
-							}
+							disabled={!canEdit}
 						/>
 
 						<FormInput
-							control={
-								form.control
-							}
+							control={form.control}
 							name="incentiveCodes"
 							label="Incentive Codes"
 							required
 							placeholder="GMF-APR-2027-06"
-							disabled={
-								!canEdit
-							}
+							disabled={!canEdit}
 						/>
 
 						<FormSelect
-							control={
-								form.control
-							}
+							control={form.control}
 							name="country"
 							label="Country"
 							required
-						
-							options={
-								COUNTRY_OPTIONS
-							}
-							
-							disabled={
-								!canEdit
-							}
+							options={COUNTRY_OPTIONS}
+							disabled={!canEdit}
 						/>
 					</Box>
 				</ProgramSection>
@@ -885,62 +864,45 @@ export function SetupForm({
 					<Box
 						sx={{
 							display: "grid",
-							gridTemplateColumns:
-								{
-									xs: "1fr",
-									lg: "repeat(3, minmax(0, 1fr))",
-								},
+							gridTemplateColumns: {
+								xs: "1fr",
+								lg: "repeat(3, minmax(0, 1fr))",
+							},
 							columnGap: 2.5,
 							rowGap: 2.5,
 						}}
 					>
 						<FormDateInput
-							control={
-								form.control
-							}
+							control={form.control}
 							name="deliveryStart"
 							label="Delivery Start"
 							required
-							disabled={
-								!canEdit
-							}
+							disabled={!canEdit}
 						/>
 
 						<FormDateInput
-							control={
-								form.control
-							}
+							control={form.control}
 							name="deliveryEnd"
 							label="Delivery End"
 							required
-							disabled={
-								!canEdit
-							}
+							disabled={!canEdit}
 						/>
 
 						<Box />
 
 						<FormDateInput
-							control={
-								form.control
-							}
+							control={form.control}
 							name="firstVisibleDate"
 							label="First Visible — Date"
 							required
-							disabled={
-								!canEdit
-							}
+							disabled={!canEdit}
 						/>
 
 						<FormTimeInput
-							control={
-								form.control
-							}
+							control={form.control}
 							name="firstVisibleTime"
 							label="First Visible — Time"
-							disabled={
-								!canEdit
-							}
+							disabled={!canEdit}
 						/>
 
 						<Box />
@@ -954,16 +916,9 @@ export function SetupForm({
 							borderRadius: 2,
 						}}
 					>
-						First-visible may
-						precede delivery
-						start — it
-						controls when
-						downstream
-						services expose
-						the program, which
-						can differ from
-						when it becomes
-						active.
+						First-visible may precede delivery start — it controls when
+						downstream services expose the program, which can differ from when
+						it becomes active.
 					</Alert>
 				</ProgramSection>
 
@@ -971,17 +926,14 @@ export function SetupForm({
 				{/* PROGRAM CONFIGURATION                                         */}
 				{/* ============================================================ */}
 
-				<ProgramSection
-					title="Program configuration"
-				>
+				<ProgramSection title="Program configuration">
 					<Box
 						sx={{
 							display: "grid",
-							gridTemplateColumns:
-								{
-									xs: "1fr",
-									lg: "repeat(12, minmax(0, 1fr))",
-								},
+							gridTemplateColumns: {
+								xs: "1fr",
+								lg: "repeat(12, minmax(0, 1fr))",
+							},
 							columnGap: 2.5,
 							rowGap: 2,
 						}}
@@ -990,27 +942,19 @@ export function SetupForm({
 
 						<Box
 							sx={{
-								gridColumn:
-									{
-										xs: "span 1",
-										lg: "span 5",
-									},
+								gridColumn: {
+									xs: "span 1",
+									lg: "span 5",
+								},
 							}}
 						>
 							<FormChoiceChipGroup
-								control={
-									form.control
-								}
+								control={form.control}
 								name="programType"
 								label="Program Type"
 								required
-								options={
-									PROGRAM_TYPE_OPTIONS
-								}
-								
-								disabled={
-									!canEdit
-								}
+								options={PROGRAM_TYPE_OPTIONS}
+								disabled={!canEdit}
 							/>
 						</Box>
 
@@ -1018,27 +962,19 @@ export function SetupForm({
 
 						<Box
 							sx={{
-								gridColumn:
-									{
-										xs: "span 1",
-										lg: "span 3",
-									},
+								gridColumn: {
+									xs: "span 1",
+									lg: "span 3",
+								},
 							}}
 						>
 							<FormChoiceChipGroup
-								control={
-									form.control
-								}
+								control={form.control}
 								name="purchaseType"
 								label="Purchase Type"
 								required
-								options={
-									PURCHASE_TYPE_OPTIONS
-								}
-							
-								disabled={
-									!canEdit
-								}
+								options={PURCHASE_TYPE_OPTIONS}
+								disabled={!canEdit}
 							/>
 						</Box>
 
@@ -1046,33 +982,25 @@ export function SetupForm({
 
 						<Box
 							sx={{
-								gridColumn:
-									{
-										xs: "span 1",
-										lg: "span 4",
-									},
+								gridColumn: {
+									xs: "span 1",
+									lg: "span 4",
+								},
 							}}
 						>
 							<FormInput
-								control={
-									form.control
-								}
+								control={form.control}
 								name="mileageMaximum"
 								label="Mileage Maximum"
 								type="number"
 								placeholder="59999"
 								rightElement={
-									<Typography
-										variant="caption"
-										color="text.secondary"
-									>
+									<Typography variant="caption" color="text.secondary">
 										mi
 									</Typography>
 								}
 								description="Vehicles above this odometer reading are excluded."
-								disabled={
-									!canEdit
-								}
+								disabled={!canEdit}
 							/>
 						</Box>
 
@@ -1080,27 +1008,19 @@ export function SetupForm({
 
 						<Box
 							sx={{
-								gridColumn:
-									{
-										xs: "span 1",
-										lg: "span 12",
-									},
+								gridColumn: {
+									xs: "span 1",
+									lg: "span 12",
+								},
 							}}
 						>
 							<FormChoiceChipGroup
-								control={
-									form.control
-								}
+								control={form.control}
 								name="conditionTier"
 								label="Condition Tier"
 								required
-								options={
-									CONDITION_TIER_OPTIONS
-								}
-								
-								disabled={
-									!canEdit
-								}
+								options={CONDITION_TIER_OPTIONS}
+								disabled={!canEdit}
 							/>
 						</Box>
 
@@ -1108,58 +1028,44 @@ export function SetupForm({
 
 						<Box
 							sx={{
-								gridColumn:
-									{
-										xs: "span 1",
-										lg: "span 12",
-									},
+								gridColumn: {
+									xs: "span 1",
+									lg: "span 12",
+								},
 							}}
 						>
 							<FormChoiceChipGroup
-								control={
-									form.control
-								}
+								control={form.control}
 								name="creditTiers"
 								label="Credit Tier"
 								selectionMode="multiple"
-								options={
-									CREDIT_TIER_OPTIONS
-								}
-								
+								color="info"
+								options={CREDIT_TIER_OPTIONS}
 								description="Credit qualifications this incentive applies to. Select one or more."
-								disabled={
-									!canEdit
-								}
+								disabled={!canEdit}
+								borderRadius={5}
 							/>
 						</Box>
 
 						{/* Finance Terms */}
 
-						{purchaseType ===
-							"FINANCE" && (
+						{purchaseType === "FINANCE" && (
 							<Box
 								sx={{
-									gridColumn:
-										{
-											xs: "span 1",
-											lg: "span 12",
-										},
+									gridColumn: {
+										xs: "span 1",
+										lg: "span 12",
+									},
 								}}
 							>
 								<FormChoiceChipGroup
-									control={
-										form.control
-									}
+									control={form.control}
 									name="financeTerms"
 									label="Terms (Months)"
 									selectionMode="multiple"
-									options={
-										FINANCE_TERM_OPTIONS
-									}
-									
-									disabled={
-										!canEdit
-									}
+									options={FINANCE_TERM_OPTIONS}
+									disabled={!canEdit}
+									color="info"
 								/>
 							</Box>
 						)}
@@ -1168,24 +1074,19 @@ export function SetupForm({
 
 						<Box
 							sx={{
-								gridColumn:
-									{
-										xs: "span 1",
-										lg: "span 12",
-									},
+								gridColumn: {
+									xs: "span 1",
+									lg: "span 12",
+								},
 							}}
 						>
 							<FormInput
-								control={
-									form.control
-								}
+								control={form.control}
 								name="contact"
 								label="Contact"
 								required
 								placeholder="Program owner name"
-								disabled={
-									!canEdit
-								}
+								disabled={!canEdit}
 							/>
 						</Box>
 					</Box>
@@ -1202,53 +1103,40 @@ export function SetupForm({
 					<Box
 						sx={{
 							display: "grid",
-							gridTemplateColumns:
-								{
-									xs: "1fr",
-									lg: "repeat(3, minmax(0, 1fr))",
-								},
+							gridTemplateColumns: {
+								xs: "1fr",
+								lg: "repeat(3, minmax(0, 1fr))",
+							},
 							gap: 2,
 						}}
 					>
 						<FlagCard>
 							<FormCheckbox
-								control={
-									form.control
-								}
+								control={form.control}
 								name="flags.vinException"
 								label="VIN Exception"
 								description="Conditional — appears below the line, not against net price."
-								disabled={
-									!canEdit
-								}
+								disabled={!canEdit}
 							/>
 						</FlagCard>
 
 						<FlagCard>
 							<FormCheckbox
-								control={
-									form.control
-								}
+								control={form.control}
 								name="flags.topOfDeal"
 								label="Top of Deal"
 								description="Program headlines the deal stack."
-								disabled={
-									!canEdit
-								}
+								disabled={!canEdit}
 							/>
 						</FlagCard>
 
 						<FlagCard>
 							<FormCheckbox
-								control={
-									form.control
-								}
+								control={form.control}
 								name="flags.noAddOns"
 								label="No add-ons"
 								description="Program cannot be combined with dealer add-ons."
-								disabled={
-									!canEdit
-								}
+								disabled={!canEdit}
 							/>
 						</FlagCard>
 					</Box>

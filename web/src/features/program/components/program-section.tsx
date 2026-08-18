@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
-import { Box, Card, CardContent, Stack, Typography } from "@mui/material";
+import { Card } from "@/components/ui";
+import { Box, CardContent, Stack, Typography } from "@mui/material";
 
 interface ProgramSectionProps {
 	title: ReactNode;
@@ -16,12 +17,7 @@ function ProgramSection({
 	children,
 }: ProgramSectionProps) {
 	return (
-		<Card
-			variant="outlined"
-			sx={{
-				borderRadius: 3,
-			}}
-		>
+		<Card variant="outlined" sx={{ p: 2.5 }}>
 			<CardContent
 				sx={{
 					p: 3,
@@ -65,3 +61,4 @@ function ProgramSection({
 }
 
 export { ProgramSection };
+
