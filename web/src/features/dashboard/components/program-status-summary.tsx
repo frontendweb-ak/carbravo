@@ -20,7 +20,7 @@ function ProgramStatusSummary({
 	loading = false,
 }: ProgramStatusSummaryProps) {
 	return (
-		<Grid container spacing={2}>
+		<Grid container spacing={4}>
 			<Grid size={{ xs: 12, sm: 6, lg: 2.4 }}>
 				<ProgramStatusCard
 					label="Draft"
@@ -70,3 +70,4 @@ function ProgramStatusSummary({
 }
 
 export { ProgramStatusSummary };
+

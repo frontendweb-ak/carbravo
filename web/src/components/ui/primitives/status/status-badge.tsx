@@ -1,11 +1,12 @@
-import Chip from "@mui/material/Chip";
+import type { ReactNode } from "react";
 
 import {
 	STATUS_CONFIG,
 	type ProgramWorkflowStatus,
 } from "@/config/constants/status";
-import { alpha, useTheme } from "@mui/material/styles";
-import type { ReactNode } from "react";
+
+import { Badge } from "../badge";
+import { getStatusBadgeTone } from "../badge/badge.utils";
 
 export interface StatusBadgeProps {
 	status: ProgramWorkflowStatus;
@@ -13,39 +14,10 @@ export interface StatusBadgeProps {
 }
 
 function StatusBadge({ status, children }: StatusBadgeProps) {
-	const theme = useTheme();
-
-	const config = STATUS_CONFIG[status];
-
-	const colorMap = {
-		DRAFT: theme.palette.status.draft,
-		REVIEW: theme.palette.status.review,
-		APPROVED: theme.palette.status.approved,
-		ACTIVE: theme.palette.status.active,
-		EXPIRED: theme.palette.status.expired,
-	};
-
-	const color = colorMap[status];
 	return (
-		<Chip
-			label={children ?? config.label}
-			size="small"
-			sx={{
-				height: 24,
-				fontSize: 12,
-				fontWeight: 600,
-
-				backgroundColor: alpha(color, 0.12),
-				color,
-
-				border: `1px solid ${alpha(color, 0.2)}`,
-				borderRadius: 1,
-
-				"& .MuiChip-label": {
-					px: 1,
-				},
-			}}
-		/>
+		<Badge tone={getStatusBadgeTone(status)}>
+			{children ?? STATUS_CONFIG[status].label}
+		</Badge>
 	);
 }
 

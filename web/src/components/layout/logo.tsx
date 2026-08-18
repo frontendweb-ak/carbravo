@@ -1,7 +1,7 @@
 import Box from "@mui/material/Box";
 import Divider from "@mui/material/Divider";
-import Typography from "@mui/material/Typography";
 import type { ImgHTMLAttributes } from "react";
+import { Typography } from "../ui";
 
 export interface LogoProps extends Omit<
 	ImgHTMLAttributes<HTMLImageElement>,
@@ -35,14 +35,11 @@ function Logo({ size = 28, alt = "CarBravo", style, ...props }: LogoProps) {
 			<Divider
 				orientation="vertical"
 				flexItem
-				sx={{
-					height: 24,
-					alignSelf: "center",
-					borderColor: "divider",
-				}}
+				sx={{ height: 24, alignSelf: "center", borderColor: "divider" }}
 			/>
 
 			<Typography
+				component="span"
 				sx={{
 					fontSize: 12,
 					fontWeight: 700,
@@ -50,6 +47,7 @@ function Logo({ size = 28, alt = "CarBravo", style, ...props }: LogoProps) {
 					textTransform: "uppercase",
 					color: "text.secondary",
 					lineHeight: 1,
+					textDecoration: "none",
 				}}
 			>
 				Incentives
@@ -59,3 +57,4 @@ function Logo({ size = 28, alt = "CarBravo", style, ...props }: LogoProps) {
 }
 
 export { Logo };
+

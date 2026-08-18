@@ -1,15 +1,33 @@
 import { STATUS_CONFIG, type ProgramWorkflowStatus } from "@/config/constants";
-import { Box } from "@mui/material";
+import Box from "@mui/material/Box";
+
+export type StatusDotTone =
+	| ProgramWorkflowStatus
+	| "primary"
+	| "success"
+	| "warning"
+	| "error"
+	| "info"
+	| "neutral";
 
 interface StatusDotProps {
-	status: ProgramWorkflowStatus;
+	status?: ProgramWorkflowStatus;
+	tone?: StatusDotTone;
 	className?: string;
 }
 
-export function StatusDot({ status, className }: StatusDotProps) {
-	const normalized = status.toUpperCase() as keyof typeof STATUS_CONFIG;
-
-	const config = STATUS_CONFIG[normalized];
+function StatusDot({ status, tone, className }: StatusDotProps) {
+	const color = tone
+		? tone === "DRAFT" ||
+			tone === "REVIEW" ||
+			tone === "APPROVED" ||
+			tone === "ACTIVE" ||
+			tone === "EXPIRED"
+			? STATUS_CONFIG[tone].color
+			: `${tone}.main`
+		: status
+			? STATUS_CONFIG[status].color
+			: "text.secondary";
 
 	return (
 		<Box
@@ -19,9 +37,12 @@ export function StatusDot({ status, className }: StatusDotProps) {
 				width: 8,
 				height: 8,
 				borderRadius: "50%",
-				backgroundColor: config.color,
+				backgroundColor: color,
 				flexShrink: 0,
 			}}
 		/>
 	);
 }
+
+export { StatusDot };
+

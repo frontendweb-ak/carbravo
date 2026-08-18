@@ -1,14 +1,28 @@
+// src/config/theme/mui.d.ts
+
 import "@mui/material/styles";
 
 declare module "@mui/material/styles" {
-	interface Palette {
-		brandTeal: {
-			main: string;
-		};
+	interface PaletteColor {
+		soft: string;
+		softForeground: string;
+		softBorder: string;
+	}
 
+	interface SimplePaletteColorOptions {
+		soft?: string;
+		softForeground?: string;
+		softBorder?: string;
+	}
+
+	interface Palette {
 		muted: {
 			main: string;
 			foreground: string;
+		};
+
+		brandTeal: {
+			main: string;
 		};
 
 		status: {
@@ -19,15 +33,9 @@ declare module "@mui/material/styles" {
 			expired: string;
 		};
 
-		accent: {
-			main: string;
-			contrastText: string;
-		};
+		accent: PaletteColor;
 
-		popover: {
-			main: string;
-			contrastText: string;
-		};
+		popover: PaletteColor;
 
 		surfaceInput: {
 			main: string;
@@ -35,34 +43,29 @@ declare module "@mui/material/styles" {
 	}
 
 	interface PaletteOptions {
-		brandTeal?: {
-			main?: string;
+		muted?: {
+			main: string;
+			foreground: string;
 		};
 
-		muted?: {
-			main?: string;
-			foreground?: string;
+		brandTeal?: {
+			main: string;
 		};
 
 		status?: {
-			draft?: string;
-			review?: string;
-			approved?: string;
-			active?: string;
-			expired?: string;
-		};
-		accent?: {
-			main?: string;
-			contrastText?: string;
+			draft: string;
+			review: string;
+			approved: string;
+			active: string;
+			expired: string;
 		};
 
-		popover?: {
-			main?: string;
-			contrastText?: string;
-		};
+		accent?: SimplePaletteColorOptions;
+
+		popover?: SimplePaletteColorOptions;
 
 		surfaceInput?: {
-			main?: string;
+			main: string;
 		};
 	}
 }

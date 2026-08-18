@@ -1,20 +1,19 @@
 // src/components/ui/date-time-input.tsx
 
-import { forwardRef } from "react";
-
-import TextField from "@mui/material/TextField";
+import EventAvailableIcon from "@mui/icons-material/EventAvailable";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
+import { forwardRef } from "react";
+import { pickerTextFieldSx } from "./picker-styles";
 
-import CalendarClock from "@mui/icons-material/EventAvailable";
 export interface DateTimeInputProps {
 	value?: Date | null;
 	onChange?: (value: Date | null) => void;
 	disabled?: boolean;
-	label?: string;
-	placeholder?: string;
 	error?: boolean;
 	helperText?: string;
 	fullWidth?: boolean;
+	minDateTime?: Date;
+	maxDateTime?: Date;
 }
 
 const DateTimeInput = forwardRef<HTMLInputElement, DateTimeInputProps>(
@@ -23,11 +22,11 @@ const DateTimeInput = forwardRef<HTMLInputElement, DateTimeInputProps>(
 			value,
 			onChange,
 			disabled,
-			label,
-			placeholder,
 			error,
 			helperText,
 			fullWidth = true,
+			minDateTime,
+			maxDateTime,
 		},
 		ref,
 	) => {
@@ -36,19 +35,20 @@ const DateTimeInput = forwardRef<HTMLInputElement, DateTimeInputProps>(
 				value={value}
 				onChange={onChange}
 				disabled={disabled}
+				minDateTime={minDateTime}
+				maxDateTime={maxDateTime}
 				format="dd-MM-yyyy HH:mm"
 				slots={{
-					openPickerIcon: CalendarClock,
+					openPickerIcon: EventAvailableIcon,
 				}}
 				slotProps={{
 					textField: {
 						inputRef: ref,
-						label,
-
 						error,
 						helperText,
 						fullWidth,
-					} satisfies React.ComponentProps<typeof TextField>,
+						sx: pickerTextFieldSx,
+					},
 				}}
 			/>
 		);

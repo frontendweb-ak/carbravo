@@ -1,6 +1,7 @@
 // src/config/theme/palette.ts
 
 import type { PaletteOptions } from "@mui/material/styles";
+
 import { tokens, type ColorMode } from "./tokens";
 
 function createPalette(mode: ColorMode): PaletteOptions {
@@ -20,21 +21,33 @@ function createPalette(mode: ColorMode): PaletteOptions {
 		success: {
 			main: t.state.success,
 			contrastText: t.state.successForeground,
+			soft: t.state.successSoft,
+			softForeground: t.state.successSoftForeground,
+			softBorder: t.state.successSoftBorder,
 		},
 
 		warning: {
 			main: t.state.warning,
 			contrastText: t.state.warningForeground,
+			soft: t.state.warningSoft,
+			softForeground: t.state.warningSoftForeground,
+			softBorder: t.state.warningSoftBorder,
 		},
 
 		error: {
 			main: t.state.destructive,
 			contrastText: t.state.destructiveForeground,
+			soft: t.state.destructiveSoft,
+			softForeground: t.state.destructiveSoftForeground,
+			softBorder: t.state.destructiveSoftBorder,
 		},
 
 		info: {
 			main: t.state.info,
 			contrastText: t.state.infoForeground,
+			soft: t.state.infoSoft,
+			softForeground: t.state.infoSoftForeground,
+			softBorder: t.state.infoSoftBorder,
 		},
 
 		muted: {

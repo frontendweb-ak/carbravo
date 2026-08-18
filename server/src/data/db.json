@@ -156,10 +156,7 @@
         "programName": "Summer Finance Event",
         "programTypeCode": "APR",
         "purchaseType": "FINANCE",
-        "customerTypeCodes": [
-          "STANDARD",
-          "LOYALTY"
-        ],
+        "customerTypeCodes": ["STANDARD", "LOYALTY"],
         "contactName": "Jordan Smith",
         "contactEmail": "jsmith@example.com",
         "contactPhone": "555-1000",
@@ -175,15 +172,8 @@
         "deliveryEndDate": "2026-08-20",
         "effectiveStartDate": "2026-07-01",
         "effectiveEndDate": "2026-08-20",
-        "financeTerms": [
-          36,
-          48,
-          60
-        ],
-        "creditTiers": [
-          "A_PLUS",
-          "A1"
-        ]
+        "financeTerms": [36, 48, 60],
+        "creditTiers": ["A_PLUS", "A1"]
       },
       "vehicles": [
         {
@@ -215,11 +205,7 @@
         }
       ],
       "values": {
-        "financeTerms": [
-          36,
-          48,
-          60
-        ],
+        "financeTerms": [36, 48, 60],
         "components": [
           {
             "componentId": 1,
@@ -278,9 +264,7 @@
         "programName": "EV Bonus Cash",
         "programTypeCode": "BONUS_CASH",
         "purchaseType": "CASH",
-        "customerTypeCodes": [
-          "STANDARD"
-        ],
+        "customerTypeCodes": ["STANDARD"],
         "contactName": "Jamie Smith",
         "contactEmail": "jamie.smith@carbravo.example",
         "contactPhone": "555-0101",
@@ -382,9 +366,7 @@
         "programName": "Cadillac Loyalty APR",
         "programTypeCode": "APR",
         "purchaseType": "FINANCE",
-        "customerTypeCodes": [
-          "LOYALTY"
-        ],
+        "customerTypeCodes": ["LOYALTY"],
         "contactName": null,
         "contactEmail": null,
         "contactPhone": null,
@@ -400,13 +382,8 @@
         "deliveryEndDate": "2026-08-28",
         "effectiveStartDate": "2026-06-01",
         "effectiveEndDate": "2026-08-28",
-        "financeTerms": [
-          36,
-          48
-        ],
-        "creditTiers": [
-          "A_PLUS"
-        ]
+        "financeTerms": [36, 48],
+        "creditTiers": ["A_PLUS"]
       },
       "vehicles": [
         {
@@ -431,10 +408,7 @@
         }
       ],
       "values": {
-        "financeTerms": [
-          36,
-          48
-        ],
+        "financeTerms": [36, 48],
         "components": [
           {
             "componentId": 3,
@@ -490,9 +464,7 @@
         "programName": "Non-GM Certified Cash",
         "programTypeCode": "CUSTOMER_CASH",
         "purchaseType": "FINANCE",
-        "customerTypeCodes": [
-          "STANDARD"
-        ],
+        "customerTypeCodes": ["STANDARD"],
         "contactName": "hello worlddfsdf",
         "contactEmail": null,
         "contactPhone": null,
@@ -508,13 +480,8 @@
         "deliveryEndDate": "2026-09-30",
         "effectiveStartDate": null,
         "effectiveEndDate": null,
-        "financeTerms": [
-          "36",
-          "48"
-        ],
-        "creditTiers": [
-          "A_PLUS"
-        ]
+        "financeTerms": ["36", "48"],
+        "creditTiers": ["A_PLUS"]
       },
       "vehicles": [
         {
@@ -638,9 +605,7 @@
         "programName": "Northeast APR Special",
         "programTypeCode": "APR",
         "purchaseType": "FINANCE",
-        "customerTypeCodes": [
-          "STANDARD"
-        ],
+        "customerTypeCodes": ["STANDARD"],
         "contactName": null,
         "contactEmail": null,
         "contactPhone": null,
@@ -656,14 +621,8 @@
         "deliveryEndDate": "2026-12-31",
         "effectiveStartDate": null,
         "effectiveEndDate": null,
-        "financeTerms": [
-          48,
-          60
-        ],
-        "creditTiers": [
-          "A1",
-          "A2"
-        ]
+        "financeTerms": [48, 60],
+        "creditTiers": ["A1", "A2"]
       },
       "vehicles": [
         {
@@ -688,10 +647,7 @@
         }
       ],
       "values": {
-        "financeTerms": [
-          48,
-          60
-        ],
+        "financeTerms": [48, 60],
         "components": [
           {
             "componentId": 5,
@@ -747,9 +703,7 @@
         "programName": "Northeast APR Special",
         "programTypeCode": "APR",
         "purchaseType": "FINANCE",
-        "customerTypeCodes": [
-          "STANDARD"
-        ],
+        "customerTypeCodes": ["STANDARD"],
         "contactName": "John Smith",
         "contactEmail": "john@example.com",
         "contactPhone": "555-0100",
@@ -765,21 +719,10 @@
         "deliveryEndDate": "2026-12-31",
         "effectiveStartDate": "2026-08-01",
         "effectiveEndDate": "2026-12-31",
-        "financeTerms": [
-          36,
-          48,
-          60
-        ],
-        "creditTiers": [
-          "A_PLUS",
-          "A1"
-        ]
+        "financeTerms": [36, 48, 60],
+        "creditTiers": ["A_PLUS", "A1"]
       },
-      "vehicles": [
-        1001,
-        1002,
-        2001
-      ],
+      "vehicles": [1001, 1002, 2001],
       "geography": [
         {
           "geoRuleId": 12,
@@ -884,7 +827,7 @@
       "programId": 8,
       "majorRevision": 1,
       "minorRevision": 0,
-      "status": "DRAFT",
+      "status": "EXPIRED",
       "isMinorRevision": false,
       "createdAt": "2026-08-14T16:50:21.402Z",
       "createdBy": "demo.user",
@@ -940,7 +883,7 @@
       "programId": 9,
       "majorRevision": 1,
       "minorRevision": 0,
-      "status": "DRAFT",
+      "status": "ACTIVE",
       "isMinorRevision": false,
       "createdAt": "2026-08-17T06:17:16.010Z",
       "createdBy": "demo.user",
@@ -963,9 +906,7 @@
         "programName": "Summer Finance Event",
         "programTypeCode": "APR",
         "purchaseType": "FINANCE",
-        "customerTypeCodes": [
-          "STANDARD"
-        ],
+        "customerTypeCodes": ["STANDARD"],
         "contactName": "Jordan Smith",
         "contactEmail": null,
         "contactPhone": null,
@@ -981,17 +922,8 @@
         "deliveryEndDate": "2026-08-20",
         "effectiveStartDate": null,
         "effectiveEndDate": null,
-        "financeTerms": [
-          36,
-          48,
-          60,
-          "36",
-          "48"
-        ],
-        "creditTiers": [
-          "A_PLUS",
-          "A1"
-        ]
+        "financeTerms": [36, 48, 60, "36", "48"],
+        "creditTiers": ["A_PLUS", "A1"]
       },
       "vehicles": [
         {
@@ -1023,11 +955,7 @@
         }
       ],
       "values": {
-        "financeTerms": [
-          36,
-          48,
-          60
-        ],
+        "financeTerms": [36, 48, 60],
         "components": [
           {
             "componentId": 1,

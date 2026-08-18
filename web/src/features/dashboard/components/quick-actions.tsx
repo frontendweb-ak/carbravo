@@ -1,11 +1,13 @@
-import Plus from "@mui/icons-material/Add";
-import AssignmentTurnedInIcon from "@mui/icons-material/AssignmentTurnedIn";
-import Search from "@mui/icons-material/Search";
+import AddIcon from "@mui/icons-material/Add";
+import AssignmentTurnedInOutlinedIcon from "@mui/icons-material/AssignmentTurnedInOutlined";
+import SearchIcon from "@mui/icons-material/Search";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
-import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
+
+import { Card } from "@/components/ui";
+
 export interface QuickActionsProps {
 	onNewProgram?: () => void;
 	onBrowsePrograms?: () => void;
@@ -20,29 +22,37 @@ function QuickActions({
 	reviewCount = 0,
 }: QuickActionsProps) {
 	return (
-		<Paper
+		<Card
+			variant="flat"
 			elevation={0}
 			sx={(theme) => ({
-				p: 2.5,
-				borderRadius: 3,
+				width: "100%",
+				maxWidth: 504,
+				p: 4,
+				borderRadius: "18px",
 				backgroundColor: theme.palette.brandTeal.main,
 				color: "#fff",
+				boxShadow: "0 8px 20px rgba(24, 67, 76, 0.16)",
 			})}
 		>
 			<Typography
-				variant="subtitle1"
 				sx={{
+					fontSize: 16,
 					fontWeight: 700,
+					lineHeight: 1.25,
+					letterSpacing: 0,
 				}}
 			>
 				Quick actions
 			</Typography>
 
 			<Typography
-				variant="body2"
 				sx={{
 					mt: 0.5,
-					opacity: 0.7,
+					fontSize: 13,
+					fontWeight: 400,
+					lineHeight: 1.35,
+					color: "rgba(255,255,255,0.72)",
 				}}
 			>
 				Start or manage incentive programs
@@ -50,19 +60,40 @@ function QuickActions({
 
 			<Box
 				sx={{
-					mt: 2,
+					mt: 4,
 					display: "flex",
 					flexDirection: "column",
-					gap: 1,
+					gap: 2,
 				}}
 			>
 				<Button
 					fullWidth
 					variant="contained"
-					startIcon={<Plus />}
+					startIcon={<AddIcon />}
 					onClick={onNewProgram}
 					sx={{
+						minHeight: 44,
+						height: 44,
+						px: 2,
+						borderRadius: "11px",
 						justifyContent: "flex-start",
+						backgroundColor: "#6DBB3F",
+						color: "#fff",
+						fontSize: 14,
+						fontWeight: 700,
+						lineHeight: 1,
+
+						"& .MuiButton-startIcon": {
+							marginLeft: 0,
+							marginRight: 1,
+							"& svg": {
+								fontSize: 16,
+							},
+						},
+
+						"&:hover": {
+							backgroundColor: "#6DBB3F",
+						},
 					}}
 				>
 					New program
@@ -71,17 +102,32 @@ function QuickActions({
 				<Button
 					fullWidth
 					variant="outlined"
-					startIcon={<Search />}
+					startIcon={<SearchIcon />}
 					onClick={onBrowsePrograms}
 					sx={{
+						minHeight: 44,
+						height: 44,
+						px: 2,
+						borderRadius: "11px",
 						justifyContent: "flex-start",
-						borderColor: "rgba(255,255,255,0.2)",
+						border: "1px solid rgba(255,255,255,0.20)",
 						backgroundColor: "rgba(255,255,255,0.08)",
 						color: "#fff",
+						fontSize: 14,
+						fontWeight: 700,
+						lineHeight: 1,
+
+						"& .MuiButton-startIcon": {
+							marginLeft: 0,
+							marginRight: 1,
+							"& svg": {
+								fontSize: 15,
+							},
+						},
 
 						"&:hover": {
-							borderColor: "rgba(255,255,255,0.2)",
-							backgroundColor: "rgba(255,255,255,0.16)",
+							borderColor: "rgba(255,255,255,0.20)",
+							backgroundColor: "rgba(255,255,255,0.14)",
 						},
 					}}
 				>
@@ -93,14 +139,21 @@ function QuickActions({
 					variant="outlined"
 					onClick={onReviewQueue}
 					sx={{
+						minHeight: 47,
+						height: 47,
+						px: 2,
+						borderRadius: "11px",
 						justifyContent: "space-between",
-						borderColor: "rgba(255,255,255,0.2)",
+						border: "1px solid rgba(255,255,255,0.20)",
 						backgroundColor: "rgba(255,255,255,0.08)",
 						color: "#fff",
+						fontSize: 14,
+						fontWeight: 700,
+						lineHeight: 1,
 
 						"&:hover": {
-							borderColor: "rgba(255,255,255,0.2)",
-							backgroundColor: "rgba(255,255,255,0.16)",
+							borderColor: "rgba(255,255,255,0.20)",
+							backgroundColor: "rgba(255,255,255,0.14)",
 						},
 					}}
 				>
@@ -111,8 +164,13 @@ function QuickActions({
 							gap: 1,
 						}}
 					>
-						<AssignmentTurnedInIcon />
-						Review queue
+						<AssignmentTurnedInOutlinedIcon
+							sx={{
+								fontSize: 15,
+							}}
+						/>
+
+						<Box component="span">Review queue</Box>
 					</Box>
 
 					{reviewCount > 0 && (
@@ -121,19 +179,22 @@ function QuickActions({
 							size="small"
 							sx={{
 								height: 22,
-								backgroundColor: "rgba(255,255,255,0.2)",
+								minWidth: 25,
+								borderRadius: "11px",
+								backgroundColor: "rgba(255,255,255,0.20)",
 								color: "#fff",
-								fontWeight: 600,
+								fontSize: 12,
+								fontWeight: 700,
 
 								"& .MuiChip-label": {
-									px: 1,
+									px: 0.8,
 								},
 							}}
 						/>
 					)}
 				</Button>
 			</Box>
-		</Paper>
+		</Card>
 	);
 }
 

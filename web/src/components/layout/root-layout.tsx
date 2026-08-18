@@ -21,7 +21,7 @@ function RootLayout() {
 				maxWidth={false}
 				sx={{
 					width: "100%",
-					maxWidth: 1360,
+					maxWidth: 1325,
 					mx: "auto",
 					px: { xs: 2, sm: 3, lg: 4 },
 					minHeight: "calc(100vh - 64px)",

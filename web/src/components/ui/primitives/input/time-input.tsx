@@ -2,16 +2,15 @@
 
 import { forwardRef } from "react";
 
-import TextField from "@mui/material/TextField";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";
+import { pickerTextFieldSx } from "./picker-styles";
 
-import Clock3 from "@mui/icons-material/AccessTime";
 export interface TimeInputProps {
 	value?: Date | null;
 	onChange?: (value: Date | null) => void;
 	disabled?: boolean;
 	label?: string;
-	placeholder?: string;
 	error?: boolean;
 	helperText?: string;
 	fullWidth?: boolean;
@@ -19,16 +18,7 @@ export interface TimeInputProps {
 
 const TimeInput = forwardRef<HTMLInputElement, TimeInputProps>(
 	(
-		{
-			value,
-			onChange,
-			disabled,
-			label,
-			placeholder,
-			error,
-			helperText,
-			fullWidth = true,
-		},
+		{ value, onChange, disabled, label, error, helperText, fullWidth = true },
 		ref,
 	) => {
 		return (
@@ -38,17 +28,17 @@ const TimeInput = forwardRef<HTMLInputElement, TimeInputProps>(
 				disabled={disabled}
 				format="HH:mm"
 				slots={{
-					openPickerIcon: Clock3,
+					openPickerIcon: AccessTimeIcon,
 				}}
 				slotProps={{
 					textField: {
 						inputRef: ref,
 						label,
-
 						error,
 						helperText,
 						fullWidth,
-					} satisfies React.ComponentProps<typeof TextField>,
+						sx: pickerTextFieldSx,
+					},
 				}}
 			/>
 		);

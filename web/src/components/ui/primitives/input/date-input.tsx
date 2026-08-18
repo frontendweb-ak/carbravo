@@ -1,22 +1,19 @@
-// src/components/ui/date-input.tsx
-
-
-import CalendarDays from "@mui/icons-material/CalendarMonth";
+import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { forwardRef } from "react";
 
-import TextField from "@mui/material/TextField";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-
 import { displayToIso, isoToDisplay } from "@/utils";
+import { pickerTextFieldSx } from "./picker-styles";
 
 export interface DateInputProps {
 	value?: string;
 	onChange?: (value: string) => void;
 	disabled?: boolean;
-	label?: string;
-	placeholder?: string;
 	error?: boolean;
 	helperText?: string;
+	fullWidth?: boolean;
+	minDate?: Date;
+	maxDate?: Date;
 }
 
 const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
@@ -25,39 +22,46 @@ const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
 			value,
 			onChange,
 			disabled,
-			label,
-			placeholder = "DD-MM-YYYY",
 			error,
 			helperText,
+			fullWidth = true,
+			minDate,
+			maxDate,
 		},
 		ref,
 	) => {
+		const pickerValue = value ? new Date(displayToIso(value)) : null;
+
 		return (
 			<DatePicker
+				value={pickerValue}
 				disabled={disabled}
+				minDate={minDate}
+				maxDate={maxDate}
 				format="dd-MM-yyyy"
-				value={value ? new Date(displayToIso(value)) : null}
 				onChange={(date) => {
 					if (!date) {
 						onChange?.("");
 						return;
 					}
 
-					const iso = date.toISOString().split("T")[0];
-					onChange?.(isoToDisplay(iso));
+					const year = date.getFullYear();
+					const month = String(date.getMonth() + 1).padStart(2, "0");
+					const day = String(date.getDate()).padStart(2, "0");
+
+					onChange?.(isoToDisplay(`${year}-${month}-${day}`));
 				}}
 				slots={{
-					openPickerIcon: CalendarDays,
+					openPickerIcon: CalendarMonthIcon,
 				}}
 				slotProps={{
 					textField: {
 						inputRef: ref,
-						label,
 						error,
 						helperText,
-
-						fullWidth: true,
-					} satisfies React.ComponentProps<typeof TextField>,
+						fullWidth,
+						sx: pickerTextFieldSx,
+					},
 				}}
 			/>
 		);
@@ -67,4 +71,3 @@ const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
 DateInput.displayName = "DateInput";
 
 export { DateInput };
-

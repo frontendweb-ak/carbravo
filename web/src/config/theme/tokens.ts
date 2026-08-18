@@ -48,15 +48,27 @@ export const tokens = {
 		state: {
 			success: "rgb(108, 174, 64)",
 			successForeground: "rgb(252, 252, 252)",
+			successSoft: "rgb(237, 247, 231)",
+			successSoftForeground: "rgb(67, 111, 39)",
+			successSoftBorder: "rgb(207, 231, 193)",
 
 			warning: "rgb(218, 149, 11)",
 			warningForeground: "rgb(45, 31, 10)",
+			warningSoft: "rgb(255, 245, 218)",
+			warningSoftForeground: "rgb(150, 95, 0)",
+			warningSoftBorder: "rgb(246, 220, 163)",
 
 			destructive: "rgb(215, 51, 55)",
 			destructiveForeground: "rgb(252, 252, 252)",
+			destructiveSoft: "rgb(253, 235, 235)",
+			destructiveSoftForeground: "rgb(180, 43, 47)",
+			destructiveSoftBorder: "rgb(244, 198, 199)",
 
 			info: "rgb(0, 134, 179)",
 			infoForeground: "rgb(252, 252, 252)",
+			infoSoft: "rgb(231, 245, 250)",
+			infoSoftForeground: "rgb(0, 105, 140)",
+			infoSoftBorder: "rgb(184, 222, 235)",
 		},
 	},
 
@@ -107,15 +119,27 @@ export const tokens = {
 		state: {
 			success: "rgb(116, 178, 76)",
 			successForeground: "rgb(8, 13, 5)",
+			successSoft: "rgb(29, 48, 24)",
+			successSoftForeground: "rgb(153, 204, 120)",
+			successSoftBorder: "rgb(57, 87, 46)",
 
 			warning: "rgb(235, 169, 65)",
 			warningForeground: "rgb(30, 20, 6)",
+			warningSoft: "rgb(57, 43, 23)",
+			warningSoftForeground: "rgb(246, 193, 103)",
+			warningSoftBorder: "rgb(91, 70, 39)",
 
 			destructive: "rgb(232, 88, 84)",
 			destructiveForeground: "rgb(252, 252, 252)",
+			destructiveSoft: "rgb(61, 29, 30)",
+			destructiveSoftForeground: "rgb(247, 139, 136)",
+			destructiveSoftBorder: "rgb(99, 48, 49)",
 
 			info: "rgb(66, 164, 207)",
 			infoForeground: "rgb(252, 252, 252)",
+			infoSoft: "rgb(24, 49, 60)",
+			infoSoftForeground: "rgb(117, 203, 235)",
+			infoSoftBorder: "rgb(43, 83, 100)",
 		},
 	},
 

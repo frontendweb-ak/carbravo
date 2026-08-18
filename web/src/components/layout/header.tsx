@@ -31,7 +31,7 @@ function Header() {
 				maxWidth={false}
 				sx={{
 					width: "100%",
-					maxWidth: 1360,
+					maxWidth: 1325,
 					mx: "auto",
 					px: { xs: 2, sm: 3, lg: 4 },
 				}}
@@ -53,9 +53,17 @@ function Header() {
 							gap: 6,
 						}}
 					>
-						<Box component={NavLink} to="/dashboard" aria-label="CarBravo">
+						<NavLink
+							to="/dashboard"
+							style={{
+								display: "flex",
+								alignItems: "center",
+								textDecoration: "none",
+								color: "inherit",
+							}}
+						>
 							<Logo size={28} />
-						</Box>
+						</NavLink>
 
 						{/* Navigation */}
 						<Box
@@ -73,17 +81,11 @@ function Header() {
 					</Box>
 
 					{/* Right */}
-					<Box
-						sx={{
-							display: "flex",
-							alignItems: "center",
-							gap: 4,
-						}}
-					>
+					<Box sx={{ display: "flex", alignItems: "center", gap: 4 }}>
 						<Button
 							type="button"
 							variant="contained"
-							startIcon={<AddIcon size={16} />}
+							startIcon={<AddIcon />}
 							onClick={() => navigate("/programs/new")}
 						>
 							New Program

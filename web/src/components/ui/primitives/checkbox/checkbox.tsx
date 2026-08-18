@@ -1,17 +1,41 @@
 // src/components/ui/primitives/checkbox/checkbox.tsx
 
+import Box from "@mui/material/Box";
 import MuiCheckbox, {
 	type CheckboxProps as MuiCheckboxProps,
 } from "@mui/material/Checkbox";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import { Typography } from "../typography";
 
-import { forwardRef } from "react";
+export interface CheckboxProps extends Omit<MuiCheckboxProps, "checkedIcon"> {
+	label?: string;
+	description?: string;
+}
 
-export interface CheckboxProps extends MuiCheckboxProps {}
+function Checkbox({ label, description, ...props }: CheckboxProps) {
+	if (!label) {
+		return <MuiCheckbox {...props} />;
+	}
 
-const Checkbox = forwardRef<HTMLButtonElement, CheckboxProps>((props, ref) => (
-	<MuiCheckbox ref={ref} size="small" disableRipple {...props} />
-));
+	return (
+		<FormControlLabel
+			control={<MuiCheckbox {...props} />}
+			label={
+				<Box>
+					<Typography variant="body" weight="bold">
+						{label}
+					</Typography>
 
-Checkbox.displayName = "Checkbox";
+					{description && (
+						<Typography variant="caption" color="secondary">
+							{description}
+						</Typography>
+					)}
+				</Box>
+			}
+		/>
+	);
+}
 
 export { Checkbox };
+

@@ -1,7 +1,6 @@
 // src/config/theme/components/inputs.ts
 
 import { alpha, type Components, type Theme } from "@mui/material/styles";
-import { radii } from "../shape";
 
 /**
  * CarBravo input sizes.
@@ -49,23 +48,19 @@ declare module "@mui/material/Select" {
 export const MuiOutlinedInput: Components<Theme>["MuiOutlinedInput"] = {
 	styleOverrides: {
 		root: ({ theme }) => ({
-			borderRadius: radii.md,
+			borderRadius: theme.shape.borderRadius,
 			backgroundColor: theme.palette.background.paper,
-
 			fontSize: theme.typography.pxToRem(14),
-
 			transition: theme.transitions.create(
 				["border-color", "box-shadow", "background-color"],
 				{
 					duration: 150,
 				},
 			),
-
 			"& .MuiOutlinedInput-notchedOutline": {
 				borderColor: theme.palette.surfaceInput.main,
 				borderWidth: 1,
 			},
-
 			"&:hover .MuiOutlinedInput-notchedOutline": {
 				borderColor: alpha(theme.palette.primary.main, 0.6),
 			},
@@ -97,9 +92,7 @@ export const MuiOutlinedInput: Components<Theme>["MuiOutlinedInput"] = {
 		input: ({ theme }) => ({
 			height: "1.35em",
 			padding: "8.5px 12px",
-
 			color: theme.palette.text.primary,
-
 			"&::placeholder": {
 				color: theme.palette.text.secondary,
 				opacity: 1,

@@ -41,7 +41,7 @@ function DashboardPage() {
 						Signed in as{" "}
 						<Box
 							component="strong"
-							sx={{								color: "text.primary",								fontWeight: 600,							}}
+							sx={{ color: "text.primary", fontWeight: 600 }}
 						>
 							Admin
 						</Box>
@@ -61,10 +61,11 @@ function DashboardPage() {
 				sx={{
 					mt: 6,
 					display: "grid",
-					gap: 5,
+					gap: 4,
+					alignItems: "start",
 					gridTemplateColumns: {
 						xs: "1fr",
-						lg: "minmax(0,1.7fr) minmax(320px,1fr)",
+						lg: "1.52fr 1fr",
 					},
 				}}
 			>
@@ -80,15 +81,9 @@ function DashboardPage() {
 
 					<QuickActions
 						reviewCount={statusCounts.review}
-						onNewProgram={() => {
-							navigate("/programs/new");
-						}}
-						onBrowsePrograms={() => {
-							navigate("/programs");
-						}}
-						onReviewQueue={() => {
-							// TODO
-						}}
+						onNewProgram={() => navigate("/programs/new")}
+						onBrowsePrograms={() => navigate("/programs")}
+						onReviewQueue={() => navigate('/programs?status="REVIEW"')}
 					/>
 				</Stack>
 			</Box>

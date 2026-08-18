@@ -12,8 +12,7 @@ import {
 	type Path,
 } from "react-hook-form";
 
-import { Input, type InputProps } from "../primitives";
-import { FormField } from "./form-field";
+import { FormField, Input, type InputProps } from "../primitives";
 
 export type FormInputProps<T extends FieldValues> = Omit<
 	InputProps,
