@@ -1,3 +1,4 @@
+import { Typography } from "@/components/ui";
 import CheckIcon from "@mui/icons-material/Check";
 import {
 	Box,
@@ -6,7 +7,6 @@ import {
 	LinearProgress,
 	Paper,
 	Stack,
-	Typography,
 } from "@mui/material";
 import type { ReactNode } from "react";
 
@@ -44,22 +44,28 @@ function ProgramSectionSidebar({
 		<Paper
 			variant="outlined"
 			sx={{
-				width: "100%",
-				minWidth: 0,
-				borderRadius: 4,
-				p: 1.5,
-				boxShadow: 1,
+				width: 246,
+				maxWidth: "100%",
+				px: 2.5,
+				py: 4,
+				borderRadius: "16px",
+				borderColor: "#DCE4E7",
+				backgroundColor: "#FFFFFF",
+				boxShadow: "0 1px 3px rgba(16, 42, 56, 0.06)",
+				overflow: "hidden",
 			}}
 		>
 			{/* Header */}
-			<Box sx={{ px: 1, pb: 1.5 }}>
+			<Box sx={{ px: 1.25, pt: 0.5, pb: 0.75, mb: 2 }}>
 				<Typography
-					variant="overline"
-					color="text.secondary"
+					weight="bold"
+					color="secondary"
 					sx={{
-						fontSize: 11,
-						fontWeight: 700,
-						letterSpacing: "0.08em",
+						lineHeight: 1.2,
+						color: "#81939C",
+						textTransform: "uppercase",
+						letterSpacing: "0.04em",
+						whiteSpace: "nowrap",
 					}}
 				>
 					{title}
@@ -67,7 +73,7 @@ function ProgramSectionSidebar({
 			</Box>
 
 			{/* Sections */}
-			<Stack component="nav" aria-label="Program sections" spacing={0.5}>
+			<Stack component="nav" aria-label="Program sections" spacing={1}>
 				{sections.map((section) => {
 					const isActive = activeSection === section.id;
 
@@ -84,21 +90,29 @@ function ProgramSectionSidebar({
 							aria-current={isActive ? "step" : undefined}
 							sx={{
 								width: "100%",
+								minHeight: 37,
+
 								display: "flex",
 								alignItems: "center",
 								justifyContent: "flex-start",
+
 								gap: 1,
-								borderRadius: 2,
-								px: 1,
-								py: 0.75,
+
+								p: 2,
+
+								borderRadius: "9px",
+
 								textAlign: "left",
-								color: "text.primary",
-								fontSize: "0.875rem",
-								fontWeight: 600,
-								transition: "background-color 150ms ease",
+
+								color: "#294957",
+
+								transition:
+									"background-color 120ms ease, border-color 120ms ease",
+
+								border: "1px solid transparent",
 
 								"&:hover": {
-									backgroundColor: "action.hover",
+									backgroundColor: isActive ? "#EAF3FD" : "#F7F9FA",
 								},
 
 								"&.Mui-disabled": {
@@ -107,51 +121,53 @@ function ProgramSectionSidebar({
 								},
 
 								...(isActive && {
-									backgroundColor: (theme) => theme.palette.action.selected,
-									color: "primary.main",
-
-									outline: (theme) =>
-										`1px solid ${theme.palette.primary.main}33`,
+									backgroundColor: "#EAF3FD",
+									borderColor: "#C9E0F8",
 								}),
 							}}
 						>
-							{/* Section indicator */}
+							{/* Number */}
 							<Box
 								sx={{
-									width: 24,
-									height: 24,
+									width: 22,
+									height: 22,
+
 									flexShrink: 0,
+
 									display: "flex",
 									alignItems: "center",
 									justifyContent: "center",
-									borderRadius: 1.5,
+
+									borderRadius: "6px",
+
 									fontSize: 11,
+									lineHeight: 1,
 									fontWeight: 700,
 
-									...(!isCompleted &&
-										!isWarning && {
-											backgroundColor: "action.hover",
-											color: "text.secondary",
-										}),
-
-									...(isWarning &&
-										!isCompleted && {
-											backgroundColor: (theme) =>
-												`${theme.palette.warning.main}1A`,
-											color: "warning.main",
-										}),
-
-									...(isCompleted &&
-										!isActive && {
-											backgroundColor: (theme) =>
-												`${theme.palette.success.main}1A`,
-											color: "success.main",
-										}),
-
 									...(isActive && {
-										backgroundColor: "primary.main",
-										color: "primary.contrastText",
+										backgroundColor: "#1976B9",
+										color: "#FFFFFF",
 									}),
+
+									...(!isActive &&
+										!isCompleted &&
+										!isWarning && {
+											backgroundColor: "#E8EEF0",
+											color: "#91A2AA",
+										}),
+
+									...(!isActive &&
+										isWarning &&
+										!isCompleted && {
+											backgroundColor: "#FFF0D8",
+											color: "#C57A00",
+										}),
+
+									...(!isActive &&
+										isCompleted && {
+											backgroundColor: "#E5F2E0",
+											color: "#5E9E3D",
+										}),
 								}}
 							>
 								{isCompleted && !isActive ? (
@@ -169,11 +185,16 @@ function ProgramSectionSidebar({
 
 							{/* Label */}
 							<Typography
-								variant="body2"
 								sx={{
 									minWidth: 0,
 									flex: 1,
-									fontWeight: 600,
+
+									fontSize: 13,
+									lineHeight: 1.2,
+									fontWeight: 700,
+
+									color: isActive ? "#155D91" : "#294957",
+
 									overflow: "hidden",
 									textOverflow: "ellipsis",
 									whiteSpace: "nowrap",
@@ -188,17 +209,20 @@ function ProgramSectionSidebar({
 								sx={{
 									width: 8,
 									height: 8,
+
 									flexShrink: 0,
+
 									borderRadius: "50%",
-									backgroundColor: "divider",
+
+									backgroundColor: "#D2DDE1",
 
 									...(isWarning &&
 										!isCompleted && {
-											backgroundColor: "warning.main",
+											backgroundColor: "#E4A22A",
 										}),
 
 									...(isCompleted && {
-										backgroundColor: "success.main",
+										backgroundColor: "#69A94B",
 									}),
 								}}
 							/>
@@ -208,27 +232,47 @@ function ProgramSectionSidebar({
 			</Stack>
 
 			{/* Divider */}
-			<Divider sx={{ my: 1.5 }} />
+			<Divider
+				sx={{
+					my: 1.25,
+					mx: 0.5,
+					borderColor: "#DCE4E7",
+				}}
+			/>
 
 			{/* Completion */}
-			<Box sx={{ px: 1 }}>
+			<Box
+				sx={{
+					px: 1.25,
+					pb: 0.5,
+				}}
+			>
 				<Box
 					sx={{
 						display: "flex",
 						alignItems: "center",
 						justifyContent: "space-between",
+
 						mb: 0.5,
 					}}
 				>
-					<Typography variant="caption" color="text.secondary">
+					<Typography
+						sx={{
+							fontSize: 11,
+							lineHeight: 1.2,
+							fontWeight: 600,
+							color: "#8A9BA3",
+						}}
+					>
 						Completeness
 					</Typography>
 
 					<Typography
-						variant="caption"
 						sx={{
+							fontSize: 11,
+							lineHeight: 1.2,
 							fontWeight: 700,
-							color: "text.primary",
+							color: "#294957",
 						}}
 					>
 						{normalizedCompletion}%
@@ -241,12 +285,15 @@ function ProgramSectionSidebar({
 					aria-label="Program completeness"
 					sx={{
 						height: 6,
-						borderRadius: 999,
-						backgroundColor: "action.hover",
+
+						borderRadius: "999px",
+
+						backgroundColor: "#E7ECEE",
 
 						"& .MuiLinearProgress-bar": {
-							borderRadius: 999,
-							backgroundColor: "primary.main",
+							borderRadius: "999px",
+							backgroundColor: "#1976B9",
+
 							transition: "transform 300ms ease",
 						},
 					}}
