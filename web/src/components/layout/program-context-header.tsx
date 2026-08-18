@@ -1,17 +1,12 @@
-import CheckIcon from "@mui/icons-material/Check";
-import {
-	Box,
-	Button,
-	Container,
-	Divider,
-	Stack,
-	Typography,
-} from "@mui/material";
+// src/features/program/components/program-context-header.tsx
+
+import { Box, Container, Divider, Stack, Typography } from "@mui/material";
 import type { ReactNode } from "react";
-import { Link } from "react-router-dom";
 
 import type { ProgramWorkflowStatus } from "@/config/constants";
-import { StatusBadge } from "../ui";
+import { ProgramIdentityHeader } from "@/features/program/components/program-identity-header";
+import { RevisionChips } from "@/features/program/components/revision-chips";
+import { SaveStatus } from "@/features/program/components/save-status";
 
 export interface ProgramRevisionTab {
 	id: "current" | "active" | "history";
@@ -26,13 +21,17 @@ export interface ProgramContextHeaderProps {
 	number?: ReactNode;
 	revision?: ReactNode;
 	status?: ProgramWorkflowStatus;
+
 	saved?: boolean;
 	saveLabel?: ReactNode;
 	onSave?: () => void;
+
 	backHref?: string;
 	backLabel?: ReactNode;
+
 	hideSave?: boolean;
 	saveDisabled?: boolean;
+
 	className?: string;
 
 	revisionTabs?: ProgramRevisionTab[];
@@ -46,21 +45,28 @@ function ProgramContextHeader({
 	number = "—",
 	revision = "1.0",
 	status = "DRAFT",
+
 	saved = true,
 	saveLabel = "Save draft",
 	onSave,
+
 	backHref = "/programs",
 	backLabel = "← Programs",
+
 	hideSave = false,
 	saveDisabled = false,
+
+	className,
 	revisionTabs = [],
 	onRevisionChange,
-	className,
 }: ProgramContextHeaderProps) {
 	return (
 		<Box
 			className={className}
-			sx={{ pt: 1.25, backgroundColor: "background.default" }}
+			sx={{
+				pt: 1.25,
+				backgroundColor: "background.default",
+			}}
 		>
 			<Container
 				maxWidth={false}
@@ -68,336 +74,134 @@ function ProgramContextHeader({
 					width: "100%",
 					maxWidth: 1360,
 					mx: "auto",
-					px: { xs: 2, sm: 3, lg: 4 },
+
+					px: {
+						xs: 2,
+						sm: 3,
+						lg: 4,
+					},
 				}}
 			>
-				{/* HEADER */}
-				<Stack
+				{/* =====================================================
+				    HEADER
+				===================================================== */}
+
+				<Box
 					sx={{
-						flexDirection: "row",
+						display: "grid",
+
+						/*
+						 * LEFT:
+						 *   takes available space
+						 *   but is allowed to shrink
+						 *
+						 * RIGHT:
+						 *   always keeps its natural width
+						 */
+						gridTemplateColumns: "minmax(0, 1fr) auto",
+
 						alignItems: "center",
-						justifyContent: "space-between",
-						gap: 2,
+
+						columnGap: 2,
+
 						minHeight: 42,
+
 						mb: 0.75,
 					}}
 				>
-					{/* Left */}
-					<Stack
+					{/* Identity */}
+
+					<Box
 						sx={{
-							flexDirection: "row",
-							alignItems: "center",
-							gap: 1.75,
-							flexShrink: 0,
+							minWidth: 0,
+							overflow: "hidden",
 						}}
 					>
-						<Link
-							to={backHref}
-							style={{
-								flexShrink: 0,
-								textDecoration: "none",
-							}}
-						>
-							<Typography
-								sx={{
-									fontSize: 13,
-									lineHeight: 1,
-									fontWeight: 700,
-									color: "#607984",
-									transition: "color 150ms ease",
-									"&:hover": {
-										color: "#244B5A",
-									},
-								}}
-							>
-								{backLabel}
-							</Typography>
-						</Link>
-
-						{/* Vertical separator */}
-						<Box
-							sx={{
-								width: "1px",
-								height: 26,
-								backgroundColor: "#D7E0E3",
-								flexShrink: 0,
-							}}
+						<ProgramIdentityHeader
+							backHref={backHref}
+							backLabel={backLabel}
+							name={name}
+							type={type}
+							number={number}
+							revision={revision}
+							status={status}
 						/>
+					</Box>
 
-						{/* Program name */}
-						<Typography
-							variant="h5"
-							noWrap
-							sx={{
-								minWidth: 0,
-								fontSize: 18,
-								lineHeight: 1,
-								fontWeight: 800,
-								color: "#244B5A",
-							}}
-						>
-							{name}
-						</Typography>
+					{/* Save status */}
 
-						{/* Type */}
-						<Typography
-							sx={{
-								flexShrink: 0,
-								fontSize: 11,
-								lineHeight: 1,
-								fontWeight: 500,
-								color: "#8A9BA3",
-							}}
-						>
-							{type}
-						</Typography>
-
-						<Typography
-							sx={{
-								flexShrink: 0,
-								fontSize: 11,
-								lineHeight: 1,
-								color: "#A0ADB3",
-							}}
-						>
-							·
-						</Typography>
-
-						<Typography
-							sx={{
-								flexShrink: 0,
-								fontSize: 11,
-								lineHeight: 1,
-								color: "#8A9BA3",
-							}}
-						>
-							{number}
-						</Typography>
-
-						{/* Revision */}
-						<Box
-							sx={{
-								display: "inline-flex",
-								alignItems: "center",
-								flexShrink: 0,
-								height: 26,
-								px: 1.25,
-								borderRadius: "7px",
-								backgroundColor: "#E7EFF1",
-							}}
-						>
-							<Typography
-								sx={{
-									fontSize: 11,
-									lineHeight: 1,
-									fontWeight: 700,
-									color: "#244B5A",
-								}}
-							>
-								Rev: {revision}
-							</Typography>
-						</Box>
-
-						{/* Status */}
-						<Box
-							sx={{
-								flexShrink: 0,
-								display: "flex",
-								alignItems: "center",
-							}}
-						>
-							<StatusBadge status={status} />
-						</Box>
-					</Stack>
-
-					{/* Right */}
-					<Stack
+					<Box
 						sx={{
-							direction: "row",
-							alignItems: "center",
-							gap: 1.75,
 							flexShrink: 0,
 						}}
 					>
-						{saved && (
-							<Stack
-								sx={{
-									direction: "row",
-									alignItems: "center",
-									gap: 0.5,
-								}}
-							>
-								<CheckIcon
-									aria-hidden
-									sx={{
-										fontSize: 16,
-										color: "#5E9E3D",
-									}}
-								/>
+						<SaveStatus
+							saved={saved}
+							hideSave={hideSave}
+							saveDisabled={saveDisabled}
+							saveLabel={String(saveLabel ?? "Save draft")}
+							onSave={onSave}
+						/>
+					</Box>
+				</Box>
 
-								<Typography
-									sx={{
-										fontSize: 12,
-										lineHeight: 1,
-										fontWeight: 600,
-										color: "#5E9E3D",
-										whiteSpace: "nowrap",
-									}}
-								>
-									All changes saved
-								</Typography>
-							</Stack>
-						)}
+				{/* =====================================================
+				    REVISION NAVIGATION
+				===================================================== */}
 
-						{!hideSave && (
-							<Button
-								type="button"
-								variant="outlined"
-								disabled={saveDisabled}
-								onClick={onSave}
-								sx={{
-									height: 36,
-									minWidth: 99,
-									px: 1.75,
-									borderRadius: "10px",
-
-									backgroundColor: "#FFFFFF",
-									borderColor: "#CFDCE0",
-
-									color: "#355666",
-
-									fontSize: 12,
-									fontWeight: 700,
-									textTransform: "none",
-
-									boxShadow: "0 1px 2px rgba(16, 42, 56, 0.03)",
-
-									"&:hover": {
-										backgroundColor: "#FFFFFF",
-										borderColor: "#B9C9CE",
-										boxShadow: "0 1px 2px rgba(16, 42, 56, 0.03)",
-									},
-								}}
-							>
-								{saveLabel}
-							</Button>
-						)}
-					</Stack>
-				</Stack>
-
-				{/* REVISION NAVIGATION */}
 				<Stack
+					direction="row"
 					sx={{
-						flexDirection: "row",
+						width: "100%",
 						alignItems: "center",
-						pb: 1.5,
 						justifyContent: "space-between",
 						gap: 2,
+						pb: 1.5,
 					}}
 				>
 					{revisionTabs.length > 0 ? (
-						<Stack
-							role="tablist"
-							aria-label="Program revisions"
-							sx={{
-								gap: 0.75,
-								flexDirection: "row",
-								alignItems: "center",
-							}}
-						>
-							{revisionTabs.map((tab) => {
-								const active = tab.active ?? false;
-
-								return (
-									<Button
-										key={tab.id}
-										type="button"
-										role="tab"
-										aria-selected={active}
-										onClick={() => onRevisionChange?.(tab.id)}
-										variant={active ? "contained" : "outlined"}
-										color={active ? "inherit" : "primary"}
-										sx={{
-											minWidth: 0,
-											height: 32,
-
-											borderRadius: "18px",
-
-											px: 1.75,
-											py: 0,
-
-											fontSize: 11,
-											fontWeight: 700,
-											lineHeight: 1,
-
-											textTransform: "none",
-
-											...(active
-												? {
-														backgroundColor: "#244B57",
-														color: "#FFFFFF",
-														border: "1px solid #244B57",
-
-														"&:hover": {
-															backgroundColor: "#244B57",
-														},
-													}
-												: {
-														backgroundColor: "#FFFFFF",
-														color: "#607984",
-														borderColor: "#D4E0E3",
-
-														"&:hover": {
-															backgroundColor: "#FFFFFF",
-															borderColor: "#C4D2D6",
-														},
-													}),
-										}}
-									>
-										<Box
-											component="span"
-											sx={{
-												display: "inline-flex",
-												alignItems: "center",
-												gap: 0.75,
-											}}
-										>
-											<span>{tab.label}</span>
-
-											<Box
-												component="span"
-												sx={{
-													color: active ? "rgba(255,255,255,0.72)" : "#8A9BA3",
-													fontSize: 10,
-													fontWeight: 600,
-												}}
-											>
-												{tab.subtitle}
-											</Box>
-										</Box>
-									</Button>
-								);
-							})}
-						</Stack>
+						<RevisionChips
+							options={revisionTabs.map((tab) => ({
+								id: tab.id,
+								label: tab.label,
+								subtitle: tab.subtitle,
+								active: tab.active,
+							}))}
+							onChange={onRevisionChange}
+						/>
 					) : (
 						<Box />
 					)}
 
 					{/* Active revision notice */}
+
 					{status === "ACTIVE" && (
 						<Stack
+							direction="row"
 							sx={{
-								gap: 0.75,
 								alignItems: "center",
-								flexDirection: "row",
+
 								minHeight: 30,
-								borderRadius: 999,
-								backgroundColor: "#E7ECEE",
+
+								gap: 0.75,
+
 								px: 1.5,
 								py: 0.5,
+
+								borderRadius: 999,
+
+								backgroundColor: "#E7ECEE",
+
+								flexShrink: 0,
 							}}
 						>
-							<Typography component="span" sx={{ fontSize: 12, lineHeight: 1 }}>
+							<Typography
+								component="span"
+								sx={{
+									fontSize: 12,
+									lineHeight: 1,
+								}}
+							>
 								🔒
 							</Typography>
 
@@ -418,14 +222,20 @@ function ProgramContextHeader({
 				</Stack>
 			</Container>
 
-			{/* DIVIDER */}
+			{/* Divider */}
+
 			<Container
 				maxWidth={false}
 				sx={{
 					width: "100%",
 					maxWidth: 1360,
 					mx: "auto",
-					px: { xs: 2, sm: 3, lg: 4 },
+
+					px: {
+						xs: 2,
+						sm: 3,
+						lg: 4,
+					},
 				}}
 			>
 				<Divider
@@ -439,4 +249,3 @@ function ProgramContextHeader({
 }
 
 export { ProgramContextHeader };
-
