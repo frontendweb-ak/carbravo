@@ -33,11 +33,7 @@ export function SummaryForm() {
 			<Box
 				component="form"
 				onSubmit={form.handleSubmit(onSubmit)}
-				sx={{
-					display: "flex",
-					flexDirection: "column",
-					gap: 2.5,
-				}}
+				sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}
 			>
 				<ProgramSection
 					title="10-Point dealer summary"

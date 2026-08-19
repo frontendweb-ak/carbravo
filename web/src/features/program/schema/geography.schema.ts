@@ -3,27 +3,42 @@ import { z } from "zod";
 export const geographyLevelSchema = z.enum([
 	"REGION",
 	"STATE",
-	"COUNTRY",
 	"DMA",
+	"COUNTY",
 ]);
 
 export const geographyRuleSchema = z.object({
 	id: z.string(),
 	level: geographyLevelSchema,
-	value: z.string().min(1),
+	code: z.string().min(1),
+	name: z.string().min(1),
 });
 
-export const geographyFormSchema = z
-	.object({
-		currentRule: z.object({ level: geographyLevelSchema, value: z.string() }),
-		included: z.array(geographyRuleSchema),
-		excluded: z.array(geographyRuleSchema),
-	})
-	// .refine((values) => values.included.length > 0, {
-	// 	path: ["included"],
-	// 	message: "At least one include rule is required.",
-	// });
+export const geographyCurrentRuleSchema = z.object({
+	level: geographyLevelSchema,
+
+	/**
+	 * Parent selections used only while
+	 * navigating the geography hierarchy.
+	 */
+	region: z.string(),
+	state: z.string(),
+	dma: z.string(),
+
+	/**
+	 * Final selected geography.
+	 */
+	code: z.string(),
+	name: z.string(),
+});
+
+export const geographyFormSchema = z.object({
+	currentRule: geographyCurrentRuleSchema,
+	included: z.array(geographyRuleSchema),
+	excluded: z.array(geographyRuleSchema),
+});
 
 export type GeographyLevel = z.infer<typeof geographyLevelSchema>;
 export type GeographyRule = z.infer<typeof geographyRuleSchema>;
+export type GeographyCurrentRule = z.infer<typeof geographyCurrentRuleSchema>;
 export type GeographyFormValues = z.infer<typeof geographyFormSchema>;

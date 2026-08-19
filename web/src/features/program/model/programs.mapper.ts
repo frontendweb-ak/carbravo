@@ -159,9 +159,9 @@ export function mapProgramDetail(dto: ProgramDetailDto): ProgramDetail {
 		);
 	}
 
-	if (!dto.programType) {
-		throw new Error(`Program ${dto.programId} response is missing programType`);
-	}
+	// if (!dto.programType) {
+	// 	throw new Error(`Program ${dto.programId} response is missing programType`);
+	// }
 
 	return {
 		id: dto.programId,
@@ -170,7 +170,7 @@ export function mapProgramDetail(dto: ProgramDetailDto): ProgramDetail {
 		name: dto.programName ?? "Untitled program",
 
 		status: dto.programStatus,
-		type: dto.programType,
+		type: dto.programType ?? null,
 
 		revision: mapRevision(dto.activeRevision),
 		activeRevision: mapRevision(dto.activeRevision),

@@ -13,6 +13,7 @@ export interface SidebarProgramSection {
 	requiredForSubmission?: boolean;
 	completed?: boolean;
 	status?: ProgramSectionStatus;
+	disabled?: boolean;
 }
 
 export interface ProgramSectionSidebarProps {
@@ -60,13 +61,14 @@ function ProgramSectionSidebar({
 			<Stack component="nav" aria-label="Program sections">
 				{sections.map((section) => {
 					const isActive = activeSection === section.id;
+					const isDisabled = disabled || section.disabled;
 					const isCompleted =
 						section.completed === true || section.status === "completed";
 					const isWarning = section.status === "warning";
 					return (
 						<ButtonBase
 							key={section.id}
-							disabled={disabled}
+							disabled={isDisabled}
 							onClick={() => onSectionChange?.(section.id)}
 							aria-current={isActive ? "step" : undefined}
 							sx={{
@@ -204,3 +206,4 @@ function ProgramSectionSidebar({
 }
 
 export { ProgramSectionSidebar };
+

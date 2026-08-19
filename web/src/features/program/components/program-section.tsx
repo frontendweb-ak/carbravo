@@ -45,7 +45,7 @@ function ProgramSection({
 					>
 						{typeof title === "string" ? (
 							<Typography
-								variant="body"
+								variant="h5"
 								weight="bold"
 								color="default"
 								sx={{
@@ -92,3 +92,4 @@ function ProgramSection({
 }
 
 export { ProgramSection };
+

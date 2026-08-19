@@ -1,15 +1,10 @@
-import { Box, Container, Paper, Typography } from "@mui/material";
-import { Outlet, useLocation, useNavigate } from "react-router-dom";
-
 import type { ProgramWorkflowStatus } from "@/config/constants";
-
 import { ProgramSectionSidebar } from "@/features/program";
-
 import { PROGRAM_SIDE_MENU } from "@/features/program/constants";
-
 import { useProgramEditor } from "@/features/program/editor/program-editor-context";
-
 import type { ProgramRevisionHistoryState } from "@/features/program/model/revisions.types";
+import { Box, Container, Paper, Typography } from "@mui/material";
+import { Navigate, Outlet, useLocation, useNavigate } from "react-router-dom";
 
 import {
 	getProgramRevisionSelection,
@@ -59,7 +54,9 @@ export function ProgramLayoutContent({
 		PROGRAM_SIDE_MENU.find((section) =>
 			location.pathname.endsWith(`/${section.id}`),
 		)?.id ?? "setup";
-
+	if (mode === "new" && activeSection !== "setup") {
+		return <Navigate to="/programs/new/setup" replace />;
+	}
 	/*
 	 * Runtime sidebar state.
 	 */
@@ -72,6 +69,7 @@ export function ProgramLayoutContent({
 			...menuSection,
 			status: runtimeSection?.status ?? "pending",
 			completed: runtimeSection?.status === "completed",
+			disabled: mode === "new" && menuSection.id !== "setup",
 		};
 	});
 
@@ -92,13 +90,16 @@ export function ProgramLayoutContent({
 	const revisionReadOnly = isReadOnly || revisionSelection.view !== "current";
 
 	const handleSectionChange = (sectionId: string) => {
-		if (!programId) {
-			// A new program must be created from Setup first.
+		if (mode === "new") {
 			if (sectionId !== "setup") {
 				return;
 			}
 
 			navigate("/programs/new/setup");
+			return;
+		}
+
+		if (!programId) {
 			return;
 		}
 
@@ -300,7 +301,7 @@ export function ProgramLayoutContent({
 									activeSection={activeSection}
 									onSectionChange={handleSectionChange}
 									completion={completion}
-									disabled={false}
+									// disabled={mode === "new"}
 								/>
 							</Box>
 

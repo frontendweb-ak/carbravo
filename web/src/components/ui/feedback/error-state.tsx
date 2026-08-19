@@ -11,6 +11,9 @@ export interface ErrorStateProps {
 	description?: ReactNode;
 	onRetry?: () => void;
 	retryLabel?: ReactNode;
+
+	// NEW
+	fullPage?: boolean;
 }
 
 function ErrorState({
@@ -18,31 +21,37 @@ function ErrorState({
 	description = "Something went wrong while loading this information.",
 	onRetry,
 	retryLabel = "Try again",
+	fullPage = false,
 }: ErrorStateProps) {
 	return (
 		<Box
 			role="alert"
 			sx={{
-				minHeight: 160,
+				minHeight: fullPage ? "calc(100vh - 120px)" : 160,
+				width: "100%",
 				px: 3,
 				py: 4,
+
 				display: "flex",
 				flexDirection: "column",
 				alignItems: "center",
 				justifyContent: "center",
+
 				textAlign: "center",
 			}}
 		>
 			<Box
 				sx={(theme) => ({
-					width: 40,
-					height: 40,
+					width: 48,
+					height: 48,
 					mb: 2,
 					borderRadius: "50%",
+
 					display: "flex",
 					alignItems: "center",
 					justifyContent: "center",
-					backgroundColor: theme.palette.error.main + "14",
+
+					bgcolor: theme.palette.error.main + "14",
 					color: theme.palette.error.main,
 				})}
 			>
@@ -50,7 +59,7 @@ function ErrorState({
 			</Box>
 
 			<Typography
-				variant="subtitle2"
+				variant="h6"
 				sx={{
 					fontWeight: 600,
 				}}
@@ -62,8 +71,9 @@ function ErrorState({
 				variant="body2"
 				color="text.secondary"
 				sx={{
-					mt: 0.5,
+					mt: 1,
 					maxWidth: 480,
+					lineHeight: 1.6,
 				}}
 			>
 				{description}

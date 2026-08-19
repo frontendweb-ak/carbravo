@@ -14,5 +14,4 @@ export const vehiclesFormSchema = z.object({
 });
 
 export type VehicleFilterRow = z.infer<typeof vehicleFilterRowSchema>;
-
 export type VehiclesFormValues = z.infer<typeof vehiclesFormSchema>;

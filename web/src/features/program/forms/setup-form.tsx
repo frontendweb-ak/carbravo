@@ -203,9 +203,7 @@ export function SetupForm({
 					/* ====================================================== */
 
 					const currentProgramId = persistenceRef.current.programId;
-
 					const currentRevisionId = persistenceRef.current.revisionId;
-
 					if (currentProgramId == null || currentRevisionId == null) {
 						throw new Error(
 							"Cannot save setup without programId and revisionId.",
@@ -224,9 +222,7 @@ export function SetupForm({
 
 					if (mode === "new" && versionAtStart === changeVersionRef.current) {
 						const createdProgramId = persistenceRef.current.programId;
-
 						const createdRevisionId = persistenceRef.current.revisionId;
-
 						if (createdProgramId != null && createdRevisionId != null) {
 							onCreated?.({
 								programId: createdProgramId,
@@ -234,10 +230,6 @@ export function SetupForm({
 							});
 						}
 					}
-
-					/* ====================================================== */
-					/* CHANGES DURING REQUEST                                */
-					/* ====================================================== */
 
 					if (
 						changeVersionRef.current !== versionAtStart &&

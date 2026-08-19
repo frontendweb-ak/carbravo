@@ -7,50 +7,70 @@ import {
 	GeographyTargeting,
 } from "@/features/program/components/geography";
 
+import {
+	useProgramGeography,
+	useUpdateProgramGeography,
+} from "../hooks/use-geography";
+
 import { geographyDefaultValues } from "../constants";
 
+import { useEffect } from "react";
+import {
+	geographyFormToRequest,
+	geographyResponseToForm,
+} from "../model/geography.mapper";
 import {
 	type GeographyFormValues,
 	type GeographyRule,
 	geographyFormSchema,
 } from "../schema";
 
+export interface GeographyFormProps {
+	programId?: number;
+	revisionId?: number;
+}
+
 function createRuleId() {
 	return crypto.randomUUID();
 }
 
-export function GeographyForm() {
+export function GeographyForm({ programId, revisionId }: GeographyFormProps) {
+	const isEdit = programId != null && revisionId != null;
+	const geographyQuery = useProgramGeography(programId, revisionId);
+	const updateGeography = useUpdateProgramGeography();
+
 	const form = useForm<GeographyFormValues>({
 		resolver: zodResolver(geographyFormSchema),
 		defaultValues: geographyDefaultValues,
 		mode: "onBlur",
 	});
 
-	const included =
-		useWatch({
-			control: form.control,
-			name: "included",
-		}) ?? [];
+	const included = useWatch({ control: form.control, name: "included" }) ?? [];
+	const excluded = useWatch({ control: form.control, name: "excluded" }) ?? [];
 
-	const excluded =
-		useWatch({
-			control: form.control,
-			name: "excluded",
-		}) ?? [];
+	/*
+	 * Load existing geography.
+	 */
+	useEffect(() => {
+		if (!isEdit || !geographyQuery.data) {
+			return;
+		}
+
+		form.reset(geographyResponseToForm(geographyQuery.data));
+	}, [isEdit, geographyQuery.data, form]);
 
 	const addRule = (mode: "include" | "exclude") => {
 		const currentRule = form.getValues("currentRule");
 
-		if (!currentRule.value) {
-			// Replace with your MUI toast/snackbar service.
-			console.warn("Pick a geography value to add.");
+		if (!currentRule.code) {
 			return;
 		}
 
 		const rule: GeographyRule = {
 			id: createRuleId(),
 			level: currentRule.level,
-			value: currentRule.value,
+			code: currentRule.code,
+			name: currentRule.name,
 		};
 
 		if (mode === "include") {
@@ -65,32 +85,51 @@ export function GeographyForm() {
 			});
 		}
 
-		form.setValue("currentRule.value", "", {
+		form.setValue("currentRule.code", "", {
+			shouldDirty: true,
+			shouldValidate: false,
+		});
+
+		form.setValue("currentRule.name", "", {
 			shouldDirty: true,
 			shouldValidate: false,
 		});
 	};
 
 	const removeIncluded = (index: number) => {
-		const next = included.filter((_, currentIndex) => currentIndex !== index);
-
-		form.setValue("included", next, {
-			shouldDirty: true,
-			shouldValidate: true,
-		});
+		form.setValue(
+			"included",
+			included.filter((_, i) => i !== index),
+			{
+				shouldDirty: true,
+				shouldValidate: true,
+			},
+		);
 	};
 
 	const removeExcluded = (index: number) => {
-		const next = excluded.filter((_, currentIndex) => currentIndex !== index);
-
-		form.setValue("excluded", next, {
-			shouldDirty: true,
-			shouldValidate: true,
-		});
+		form.setValue(
+			"excluded",
+			excluded.filter((_, i) => i !== index),
+			{
+				shouldDirty: true,
+				shouldValidate: true,
+			},
+		);
 	};
 
-	const onSubmit = (values: GeographyFormValues) => {
-		console.log("GEOGRAPHY SUBMIT", values);
+	const onSubmit = async (values: GeographyFormValues) => {
+		if (programId == null || revisionId == null) {
+			return;
+		}
+
+		await updateGeography.mutateAsync({
+			programId,
+			revisionId,
+			payload: geographyFormToRequest(values),
+		});
+
+		form.reset(values);
 	};
 
 	return (
@@ -112,8 +151,6 @@ export function GeographyForm() {
 					onRemoveInclude={removeIncluded}
 					onRemoveExclude={removeExcluded}
 				/>
-
-
 			</Stack>
 		</FormProvider>
 	);

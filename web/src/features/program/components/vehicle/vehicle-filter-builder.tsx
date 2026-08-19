@@ -1,14 +1,9 @@
 import type { ComponentProps, ReactNode } from "react";
 
-import {
-	Box,
-	Button,
-	Card,
-	CardContent,
-	Stack,
-	Typography,
-} from "@mui/material";
+import { Box, Stack } from "@mui/material";
 
+import { Button } from "@/components/ui";
+import { ProgramSection } from "../program-section";
 import {
 	FilterSelectCard,
 	type FilterSelectCardProps,
@@ -23,16 +18,15 @@ export interface VehicleFilterBuilderProps extends Omit<
 	"children"
 > {
 	columns: VehicleFilterColumn[];
-	onAddRow?: () => void;
-	addRowLabel?: ReactNode;
 	onCancelEdit?: () => void;
 	disabled?: boolean;
 	editing?: boolean;
+	addRowLabel?: ReactNode;
 }
 
 function VehicleFilterBuilder({
 	columns,
-	onAddRow,
+
 	onCancelEdit,
 	addRowLabel = "Add row",
 	disabled = false,
@@ -40,75 +34,54 @@ function VehicleFilterBuilder({
 	...props
 }: VehicleFilterBuilderProps) {
 	return (
-		<Card variant="outlined" {...props}>
-			<CardContent>
-				<Stack spacing={3}>
-					{/* Header */}
-					<Box>
-						<Typography variant="h6" sx={{ fontWeight: 700 }}>
-							Add Vehicles
-						</Typography>
+		<ProgramSection
+			title="Add Vehicles"
+			description="Author one row with model year, make, model, fuel and segment. Use
+							* for wildcard values and search to find options quickly."
+		>
+			<Stack spacing={4}>
+				{/* Columns */}
+				<Box
+					sx={{
+						display: "grid",
+						gap: 3,
+						gridTemplateColumns: {
+							xs: "1fr",
+							sm: "repeat(2, 1fr)",
+							lg: "repeat(3, 1fr)",
+							xl: "repeat(5, 1fr)",
+						},
+					}}
+				>
+					{columns.map((column) => (
+						<FilterSelectCard
+							key={column.id}
+							{...column}
+							allowAny
+							disabled={disabled || column.disabled}
+						/>
+					))}
+				</Box>
 
-						<Typography variant="body2" color="text.secondary">
-							Author one row with model year, make, model, fuel and segment. Use
-							* for wildcard values and search to find options quickly.
-						</Typography>
-					</Box>
-
-					{/* Columns */}
-					<Box
-						sx={{
-							display: "grid",
-							gap: 2,
-							gridTemplateColumns: {
-								xs: "1fr",
-								sm: "repeat(2, 1fr)",
-								lg: "repeat(3, 1fr)",
-								xl: "repeat(5, 1fr)",
-							},
-						}}
-					>
-						{columns.map((column) => (
-							<FilterSelectCard
-								key={column.id}
-								{...column}
-								allowAny
-								disabled={disabled || column.disabled}
-							/>
-						))}
-					</Box>
-
-					{/* Footer */}
-					<Stack
-  direction="row"
-  spacing={2}
-  sx={{
-    justifyContent: "flex-end",
-  }}
->
-						{editing && onCancelEdit && (
-							<Button
-								type="button"
-								variant="outlined"
-								onClick={onCancelEdit}
-								disabled={disabled}
-							>
-								Cancel Edit
-							</Button>
-						)}
-
+				{/* Footer */}
+				<Stack direction="row" spacing={2} sx={{ justifyContent: "flex-end" }}>
+					{editing && onCancelEdit && (
 						<Button
 							type="button"
-							variant="contained"
-							onClick={onAddRow}
-							disabled={disabled || !onAddRow}
+							variant="outline"
+							onClick={onCancelEdit}
+							disabled={disabled}
 						>
-							{editing ? "Update Row" : addRowLabel}
+							Cancel Edit
 						</Button>
-					</Stack>
+					)}
+
+					<Button type="submit" size="small" disabled={disabled}>
+						{editing ? "Update Row" : addRowLabel}
+					</Button>
 				</Stack>
-			</CardContent>
-		</Card>
+			</Stack>
+		</ProgramSection>
 	);
 }
 

@@ -69,6 +69,7 @@ function ProgramContextHeader({
 }: ProgramContextHeaderProps) {
 	const theme = useTheme();
 	const { palette } = theme;
+
 	return (
 		<Box
 			className={className}
@@ -211,3 +212,4 @@ function ProgramContextHeader({
 }
 
 export { ProgramContextHeader };
+

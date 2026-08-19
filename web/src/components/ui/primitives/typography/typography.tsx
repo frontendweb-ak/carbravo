@@ -40,11 +40,8 @@ export interface TypographyProps extends Omit<
 	"variant" | "color"
 > {
 	children?: ReactNode;
-
 	variant?: AppTypographyVariant;
-
 	weight?: AppTypographyWeight;
-
 	color?: AppTypographyColor;
 }
 

@@ -53,6 +53,7 @@ export interface ProgramEditorContextValue {
 	) => void;
 	saveCurrentSection: () => Promise<void>;
 	registerSaveHandler: (handler: (() => Promise<void>) | null) => void;
+	setSectionSaving: (saving: boolean) => void;
 	isSaving: boolean;
 	isReadOnly: boolean;
 }
@@ -254,6 +255,9 @@ export function ProgramEditorProvider({
 	const [isSaving, setIsSaving] = useState(false);
 	const saveHandlerRef = useRef<(() => Promise<void>) | null>(null);
 
+	const setSectionSaving = useCallback((saving: boolean) => {
+		setIsSaving(saving);
+	}, []);
 	/* ---------------------------------------------------------------------- */
 	/* Program identity                                                       */
 	/* ---------------------------------------------------------------------- */
@@ -393,9 +397,10 @@ export function ProgramEditorProvider({
 			updateSectionStatus,
 
 			/* Saving */
+			isSaving,
 			saveCurrentSection,
 			registerSaveHandler,
-			isSaving,
+			setSectionSaving,
 
 			/* Permissions */
 			isReadOnly,
@@ -418,6 +423,7 @@ export function ProgramEditorProvider({
 			updateSectionStatus,
 			saveCurrentSection,
 			registerSaveHandler,
+			setSectionSaving,
 			isSaving,
 			isReadOnly,
 		],

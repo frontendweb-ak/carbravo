@@ -351,27 +351,24 @@ vehicles.put(
 		await writeDb(db);
 
 		return c.json({
-			programId: program.id,
+      programId: program.id,
+      revisionId: revision.id,
+      vehicles: revision.vehicles.map((revisionVehicle) => {
+        const vehicle = db.vehicles.find(
+          (item) => item.vehicleCatalogId === revisionVehicle.vehicleCatalogId,
+        );
+        return {
+          vehicleCatalogId: revisionVehicle.vehicleCatalogId,
+          label: vehicle
+            ? vehicleLabel(vehicle)
+            : `Vehicle ${revisionVehicle.vehicleCatalogId}`,
+        };
+      }),
 
-			revisionId: revision.id,
-
-			vehicles: revision.vehicles.map((revisionVehicle) => {
-				const vehicle = db.vehicles.find(
-					(item) => item.vehicleCatalogId === revisionVehicle.vehicleCatalogId,
-				);
-				return {
-					vehicleCatalogId: revisionVehicle.revisionVehicleId,
-					label: vehicle
-						? vehicleLabel(vehicle)
-						: `Vehicle ${revisionVehicle.vehicleCatalogId}`,
-				};
-			}),
-
-			approval: {
-				isSubmitted: revision.approval.isSubmitted,
-
-				approved: revision.approval.approved,
-			},
-		});
+      approval: {
+        isSubmitted: revision.approval.isSubmitted,
+        approved: revision.approval.approved,
+      },
+    });
 	},
 );

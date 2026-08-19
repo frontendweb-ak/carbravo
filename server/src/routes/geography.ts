@@ -6,13 +6,7 @@ import { currentUser, requireRole } from "../lib/auth.js";
 import { badRequest, notFound } from "../lib/errors.js";
 import { getProgramOrThrow } from "../lib/programs.js";
 
-import {
-	type GeoLevel,
-	type GeoRule,
-	getNextId,
-	readDb,
-	writeDb,
-} from "../store.js";
+import { type GeoRule, getNextId, readDb, writeDb } from "../store.js";
 
 export const geography = new Hono();
 

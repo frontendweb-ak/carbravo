@@ -35,11 +35,12 @@ function PageState({
 }: PageStateProps) {
 	switch (status) {
 		case "loading":
-			return <PageLoader message={loadingMessage} />;
+			return <PageLoader fullPage message={loadingMessage} />;
 
 		case "error":
 			return (
 				<ErrorState
+					fullPage
 					title={errorTitle}
 					description={errorDescription}
 					onRetry={onRetry}
@@ -61,3 +62,4 @@ function PageState({
 }
 
 export { PageState };
+

@@ -13,27 +13,6 @@ export interface InputProps extends Omit<OutlinedInputProps, "size"> {
 	success?: boolean;
 }
 
-const sizeStyles: Record<
-	InputSize,
-	{
-		height: number;
-		fontSize: string;
-	}
-> = {
-	sm: {
-		height: 32,
-		fontSize: "0.8125rem",
-	},
-	default: {
-		height: 36,
-		fontSize: "0.875rem",
-	},
-	lg: {
-		height: 40,
-		fontSize: "1rem",
-	},
-};
-
 const Input = forwardRef<HTMLInputElement, InputProps>(
 	(
 		{
@@ -46,7 +25,8 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
 		},
 		ref,
 	) => {
-		const dimensions = sizeStyles[size];
+		const muiSize: OutlinedInputProps["size"] =
+			size === "sm" ? "small" : size === "lg" ? "lg" : "medium";
 
 		return (
 			<OutlinedInput
@@ -54,53 +34,23 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
 				inputRef={ref}
 				error={error}
 				disabled={disabled}
+				size={muiSize}
 				sx={[
 					(theme: Theme) => ({
-						width: "100%",
-						height: dimensions.height,
-
-						backgroundColor: theme.palette.background.paper,
-
-						borderRadius: 1,
-
-						fontSize: dimensions.fontSize,
-						color: theme.palette.text.primary,
-
-						"& .MuiOutlinedInput-input": {
-							width: "100%",
-							height: "100%",
-							padding: "0 12px",
-							boxSizing: "border-box",
+						"& .MuiOutlinedInput-input[readonly]": {
+							cursor: "default",
 						},
 
-						"& .MuiOutlinedInput-input::placeholder": {
-							color: theme.palette.text.secondary,
-							opacity: 1,
+						"&.Mui-disabled": {
+							backgroundColor: theme.palette.action.disabledBackground,
 						},
-
 						"& .MuiInputAdornment-root": {
 							color: theme.palette.text.secondary,
 						},
-
-						"& .MuiOutlinedInput-notchedOutline": {
-							borderColor: theme.palette.divider,
-							borderWidth: 1,
-						},
-
-						"&:hover .MuiOutlinedInput-notchedOutline": {
-							borderColor: theme.palette.text.secondary,
-						},
-
-						"&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-							borderColor: theme.palette.primary.main,
-							borderWidth: 1,
-						},
-
 						...(error && {
 							"& .MuiOutlinedInput-notchedOutline": {
 								borderColor: theme.palette.error.main,
 							},
-
 							"&:hover .MuiOutlinedInput-notchedOutline": {
 								borderColor: theme.palette.error.main,
 							},
@@ -109,7 +59,6 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
 								borderColor: theme.palette.error.main,
 							},
 						}),
-
 						...(success &&
 							!error && {
 								"& .MuiOutlinedInput-notchedOutline": {
@@ -124,14 +73,6 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
 									borderColor: theme.palette.success.main,
 								},
 							}),
-
-						"& .MuiOutlinedInput-input[readonly]": {
-							cursor: "default",
-						},
-
-						"&.Mui-disabled": {
-							backgroundColor: theme.palette.action.disabledBackground,
-						},
 					}),
 					...(Array.isArray(sx) ? sx : [sx]),
 				]}
@@ -143,3 +84,4 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
 Input.displayName = "Input";
 
 export { Input };
+

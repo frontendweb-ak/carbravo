@@ -1,4 +1,11 @@
+import type {
+	GeographyCountiesParams,
+	GeographyDmasParams,
+	GeographySearchParams,
+	GeographyStatesParams,
+} from "@/features/program/api/geography.api";
 import type { ListProgramsParams } from "@/features/program/api/programs.api";
+import type { SearchVehiclesParams } from "@/features/program/api/vehicles.api";
 
 export const queryKeys = {
 	dashboard: {
@@ -33,25 +40,36 @@ export const queryKeys = {
 			["programs", programId, "revisions", revisionId, "setup"] as const,
 	},
 	vehicles: {
+		all: ["vehicles"] as const,
 		years: () => ["vehicles", "years"] as const,
 		makes: (year: number) => ["vehicles", "makes", year] as const,
 		models: (year: number, make: string) =>
 			["vehicles", "models", year, make] as const,
-		search: (params: Record<string, unknown>) =>
+		search: (params: SearchVehiclesParams) =>
 			["vehicles", "search", params] as const,
-		selected: (programId: number, revisionId: number) =>
+		byRevision: (programId: number, revisionId: number) =>
 			["programs", programId, "revisions", revisionId, "vehicles"] as const,
+		segments: () => ["vehicles", "segments"] as const,
 	},
 	geography: {
-		regions: () => ["geography", "regions"] as const,
-		states: (region?: string) => ["geography", "states", region] as const,
-		dmas: (state: string, region?: string) =>
-			["geography", "dmas", state, region] as const,
-		counties: (state: string, dma?: string) =>
-			["geography", "counties", state, dma] as const,
-		search: (term: string) => ["geography", "search", term] as const,
-		rules: (programId: number, revisionId: number) =>
-			["programs", programId, "revisions", revisionId, "geography"] as const,
+		all: ["geography"] as const,
+		regions: () => [...queryKeys.geography.all, "regions"] as const,
+		states: (params?: GeographyStatesParams) =>
+			[...queryKeys.geography.all, "states", params] as const,
+		dmas: (params?: GeographyDmasParams) =>
+			[...queryKeys.geography.all, "dmas", params] as const,
+		counties: (params?: GeographyCountiesParams) =>
+			[...queryKeys.geography.all, "counties", params] as const,
+		search: (params?: GeographySearchParams) =>
+			[...queryKeys.geography.all, "search", params] as const,
+		byRevision: (programId: number, revisionId: number) =>
+			[
+				...queryKeys.geography.all,
+				"program",
+				programId,
+				"revision",
+				revisionId,
+			] as const,
 	},
 	values: {
 		byRevision: (programId: number, revisionId: number) =>

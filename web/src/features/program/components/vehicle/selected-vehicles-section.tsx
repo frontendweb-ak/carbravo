@@ -102,3 +102,4 @@ function formatPreviewRow(row: VehicleFilterRow) {
 }
 
 export { SelectedVehiclesSection };
+

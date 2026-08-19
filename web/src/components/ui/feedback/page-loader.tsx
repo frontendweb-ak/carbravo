@@ -4,15 +4,20 @@ import Typography from "@mui/material/Typography";
 
 export interface PageLoaderProps {
 	message?: string;
+	fullPage?: boolean;
 }
 
-function PageLoader({ message = "Loading..." }: PageLoaderProps) {
+function PageLoader({
+	message = "Loading...",
+	fullPage = true,
+}: PageLoaderProps) {
 	return (
 		<Box
 			role="status"
 			aria-live="polite"
 			sx={{
-				minHeight: 384, // 24rem = min-h-96
+				minHeight: fullPage ? "calc(100vh - 120px)" : 160,
+				width: "100%",
 				display: "flex",
 				alignItems: "center",
 				justifyContent: "center",
@@ -25,7 +30,7 @@ function PageLoader({ message = "Loading..." }: PageLoaderProps) {
 					gap: 1.5,
 				}}
 			>
-				<CircularProgress size={16} />
+				<CircularProgress size={18} />
 
 				<Typography variant="body2" color="text.secondary">
 					{message}
@@ -36,3 +41,4 @@ function PageLoader({ message = "Loading..." }: PageLoaderProps) {
 }
 
 export { PageLoader };
+

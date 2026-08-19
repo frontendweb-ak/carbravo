@@ -1,16 +1,8 @@
-import {
-	Box,
-	Card,
-	Checkbox,
-	Divider,
-	FormControlLabel,
-	Stack,
-	TextField,
-	Typography,
-} from "@mui/material";
+import { Box, Divider, Stack } from "@mui/material";
 import type { ReactNode } from "react";
 import { useMemo, useState } from "react";
 
+import { Card, Checkbox, Input, Typography } from "@/components/ui";
 import { type OptionGroupAccessors, resolveOption } from "@/utils";
 
 export interface FilterSelectCardProps<T> extends OptionGroupAccessors<T> {
@@ -162,34 +154,33 @@ function FilterSelectCard<T>({
 	};
 
 	return (
-		<Card variant="outlined">
+		<Card sx={{ p: 0.5 }} variant="outlined">
 			<Box
 				sx={{
 					display: "flex",
 					justifyContent: "space-between",
 					alignItems: "center",
 					p: 2,
-					pb: 1,
+					pb: 1.5,
 				}}
 			>
 				<Typography
-  variant="subtitle2"
-  sx={{
-    fontWeight: 700,
-    textTransform: "uppercase",
-  }}
->
-  {title}
-</Typography>
-				<Typography variant="caption" color="text.secondary">
+					variant="caption"
+					weight="bold"
+					color="muted"
+					sx={{ textTransform: "uppercase" }}
+				>
+					{title}
+				</Typography>
+				<Typography variant="caption" color="secondary">
 					{isAnySelected ? "Any" : `${selectedValues.length} selected`}
 				</Typography>
 			</Box>
 
 			{searchable && (
 				<Box sx={{ px: 2, pb: 1 }}>
-					<TextField
-						size="small"
+					<Input
+						size="sm"
 						fullWidth
 						type="search"
 						value={search}
@@ -242,7 +233,7 @@ function FilterSelectCard<T>({
 							minHeight: 80,
 						}}
 					>
-						<Typography variant="caption" color="text.secondary">
+						<Typography variant="caption" color="secondary">
 							{loadingMessage}
 						</Typography>
 					</Box>
@@ -255,7 +246,7 @@ function FilterSelectCard<T>({
 							minHeight: 80,
 						}}
 					>
-						<Typography variant="caption" color="text.secondary">
+						<Typography variant="caption" color="secondary">
 							{emptyMessage}
 						</Typography>
 					</Box>
@@ -299,23 +290,15 @@ function FilterCheckboxRow({
 	onCheckedChange,
 }: FilterCheckboxRowProps) {
 	return (
-		<FormControlLabel
+		<Checkbox
+			checked={checked}
 			disabled={disabled}
-			control={<Checkbox checked={checked} onChange={onCheckedChange} />}
-			label={
-				<Box>
-					<Typography variant="body2">{label}</Typography>
-
-					{description && (
-						<Typography variant="caption" color="text.secondary">
-							{description}
-						</Typography>
-					)}
-				</Box>
-			}
+			onChange={onCheckedChange}
+			variant="compact"
+			label={typeof label === "string" ? label : undefined}
+			description={typeof description === "string" ? description : undefined}
 		/>
 	);
 }
 
 export { FilterSelectCard };
-

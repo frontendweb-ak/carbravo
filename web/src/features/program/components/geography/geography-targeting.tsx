@@ -1,13 +1,13 @@
 import { Button, Card, FormSelect } from "@/components/ui";
-import AddIcon from "@mui/icons-material/Add";
-import RemoveIcon from "@mui/icons-material/Remove";
+import Plus from "@mui/icons-material/Add";
+import Minimize from "@mui/icons-material/Minimize";
 import { Box, CardContent, Stack, Typography } from "@mui/material";
-import { type Control, type UseFormSetValue, useWatch } from "react-hook-form";
-import {
-	GEOGRAPHY_LEVEL_OPTIONS,
-	GEOGRAPHY_VALUE_OPTIONS,
-} from "../../constants/geography";
-import type { GeographyFormValues, GeographyLevel } from "../../schema";
+import type { Control, UseFormSetValue } from "react-hook-form";
+
+import { GEOGRAPHY_LEVEL_OPTIONS } from "../../constants/geography";
+import type { GeographyFormValues } from "../../schema";
+
+import { GeographyValueSelect } from "./geography-value-select";
 
 interface GeographyTargetingProps {
 	control: Control<GeographyFormValues>;
@@ -60,7 +60,7 @@ export function GeographyTargeting({
 							variant="success"
 							soft
 							onClick={() => onAdd("include")}
-							startIcon={<AddIcon />}
+							startIcon={<Plus />}
 						>
 							Include
 						</Button>
@@ -70,7 +70,7 @@ export function GeographyTargeting({
 							variant="danger"
 							soft
 							onClick={() => onAdd("exclude")}
-							startIcon={<RemoveIcon />}
+							startIcon={<Minimize />}
 						>
 							Exclude
 						</Button>
@@ -78,28 +78,5 @@ export function GeographyTargeting({
 				</Stack>
 			</CardContent>
 		</Card>
-	);
-}
-
-interface GeographyValueSelectProps {
-	control: Control<GeographyFormValues>;
-	setValue: UseFormSetValue<GeographyFormValues>;
-}
-
-export function GeographyValueSelect({ control }: GeographyValueSelectProps) {
-	const level = useWatch({
-		control,
-		name: "currentRule.level",
-	});
-
-	const options = GEOGRAPHY_VALUE_OPTIONS[level as GeographyLevel] ?? [];
-
-	return (
-		<FormSelect
-			control={control}
-			name="currentRule.value"
-			label="Value"
-			options={options}
-		/>
 	);
 }
