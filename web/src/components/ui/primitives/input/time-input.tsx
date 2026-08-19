@@ -1,29 +1,38 @@
-// src/components/ui/time-input.tsx
+// src/components/ui/primitives/time-input/time-input.tsx
 
 import { forwardRef } from "react";
 
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";
+
 import { pickerTextFieldSx } from "./picker-styles";
 
 export interface TimeInputProps {
 	value?: Date | null;
 	onChange?: (value: Date | null) => void;
+
 	disabled?: boolean;
-	label?: string;
 	error?: boolean;
 	helperText?: string;
+
 	fullWidth?: boolean;
 }
 
 const TimeInput = forwardRef<HTMLInputElement, TimeInputProps>(
 	(
-		{ value, onChange, disabled, label, error, helperText, fullWidth = true },
+		{
+			value,
+			onChange,
+			disabled = false,
+			error = false,
+			helperText,
+			fullWidth = true,
+		},
 		ref,
 	) => {
 		return (
 			<TimePicker
-				value={value}
+				value={value ?? null}
 				onChange={onChange}
 				disabled={disabled}
 				format="HH:mm"
@@ -33,7 +42,7 @@ const TimeInput = forwardRef<HTMLInputElement, TimeInputProps>(
 				slotProps={{
 					textField: {
 						inputRef: ref,
-						label,
+						label: undefined,
 						error,
 						helperText,
 						fullWidth,
@@ -48,4 +57,3 @@ const TimeInput = forwardRef<HTMLInputElement, TimeInputProps>(
 TimeInput.displayName = "TimeInput";
 
 export { TimeInput };
-

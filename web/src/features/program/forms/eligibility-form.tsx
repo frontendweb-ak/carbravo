@@ -1,12 +1,14 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Box, Button, Stack } from "@mui/material";
+import { Box } from "@mui/material";
 import { FormProvider, useForm } from "react-hook-form";
 
 import {
+	Button,
 	FormCheckbox,
 	FormChoiceChipGroup,
 	FormSelect,
 	FormTextarea,
+	Typography,
 } from "@/components/ui";
 
 import { ProgramSection } from "../components";
@@ -66,15 +68,45 @@ export function EligibilityForm() {
 						<Box
 							sx={{
 								display: "flex",
-								alignItems: "flex-end",
-								pb: 0.0625,
+								flexDirection: "column",
+								justifyContent: "flex-end",
+								minWidth: 0,
 							}}
 						>
-							<FormCheckbox
-								control={form.control}
-								name="tierRate"
-								label="Apply tier-based rate structure (TBD)"
-							/>
+							<Typography
+								variant="overline"
+								sx={{ mb: 0.75, color: "text.secondary" }}
+							>
+								Tier rate
+							</Typography>
+
+							<Box
+								sx={{
+									minHeight: 40,
+									display: "flex",
+									alignItems: "center",
+								}}
+							>
+								<FormCheckbox
+									control={form.control}
+									name="tierRate"
+									variant="inline"
+									label={
+										<>
+											Apply tier-based rate structure{" "}
+											<Box
+												component="span"
+												sx={{
+													color: "warning.main",
+													fontWeight: 700,
+												}}
+											>
+												(TBD)
+											</Box>
+										</>
+									}
+								/>
+							</Box>
 						</Box>
 					</Box>
 				</ProgramSection>
@@ -86,9 +118,38 @@ export function EligibilityForm() {
 				<ProgramSection
 					title="Customer type"
 					description="Who is eligible for this program."
+					headerAction={
+						<Button
+							type="button"
+							variant="outline"
+							size="small"
+							onClick={() => {
+								const allValues = CUSTOMER_TYPE_OPTIONS.map(
+									(option) => option.value,
+								);
+
+								const currentValues = form.getValues("customerTypeCodes");
+
+								form.setValue(
+									"customerTypeCodes",
+									currentValues.length === allValues.length ? [] : allValues,
+									{
+										shouldDirty: true,
+										shouldValidate: false,
+									},
+								);
+							}}
+						>
+							{form.watch("customerTypeCodes").length ===
+							CUSTOMER_TYPE_OPTIONS.length
+								? "Clear all"
+								: "Select all"}
+						</Button>
+					}
 				>
 					<FormChoiceChipGroup
 						control={form.control}
+						borderRadius={5}
 						name="customerTypeCodes"
 						label="Customer type"
 						required
@@ -111,24 +172,10 @@ export function EligibilityForm() {
 						label="Footnotes"
 						required
 						placeholder="Enter disclaimer or conditions..."
-						rows={5}
 						maxLength={2000}
+						showCounter
 					/>
 				</ProgramSection>
-
-				{/* =========================================================
-				    FORM ACTION
-				========================================================= */}
-
-	<Stack direction="row" sx={{justifyContent:"flex-end"}}>
-					<Button
-						type="submit"
-						variant="contained"
-						disabled={form.formState.isSubmitting}
-					>
-						Save Eligibility
-					</Button>
-				</Stack>
 			</Box>
 		</FormProvider>
 	);

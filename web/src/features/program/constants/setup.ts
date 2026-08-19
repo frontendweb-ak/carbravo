@@ -45,9 +45,9 @@ export const CONDITION_TIER_OPTIONS = [
 	{ value: "USED_AS_IS", label: "Used — As-Is" },
 ];
 export const CREDIT_TIER_OPTIONS = [
-	{ value: "A_PLUS", label: "✓ A+ — Excellent Credit" },
-	{ value: "A1", label: "✓ A1 — Very Good Credit" },
-	{ value: "A2", label: "✓ A2 — Good Credit" },
+	{ value: "A_PLUS", label: "A+ — Excellent Credit" },
+	{ value: "A1", label: "A1 — Very Good Credit" },
+	{ value: "A2", label: "A2 — Good Credit" },
 	{ value: "B", label: "B — Fair Credit" },
 ];
 

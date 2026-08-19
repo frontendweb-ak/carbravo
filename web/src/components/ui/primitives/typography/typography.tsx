@@ -28,6 +28,7 @@ export type AppTypographyColor =
 	| "primary"
 	| "secondary"
 	| "muted"
+	| "inverse"
 	| "success"
 	| "warning"
 	| "error"
@@ -39,8 +40,11 @@ export interface TypographyProps extends Omit<
 	"variant" | "color"
 > {
 	children?: ReactNode;
+
 	variant?: AppTypographyVariant;
+
 	weight?: AppTypographyWeight;
+
 	color?: AppTypographyColor;
 }
 
@@ -142,7 +146,8 @@ const colorMap: Record<AppTypographyColor, MuiTypographyProps["color"]> = {
 	default: "text.primary",
 	primary: "primary.main",
 	secondary: "text.secondary",
-	muted: "text.secondary",
+	muted: "text.muted",
+	inverse: "text.inverse",
 	success: "success.main",
 	warning: "warning.main",
 	error: "error.main",
@@ -158,7 +163,7 @@ function Typography({
 	sx,
 	...props
 }: TypographyProps) {
-	const config = variantMap[variant] ?? variantMap.body;
+	const config = variantMap[variant];
 
 	return (
 		<MuiTypography
@@ -168,6 +173,8 @@ function Typography({
 			color={colorMap[color]}
 			sx={[
 				{
+					fontFamily: "font.family",
+
 					...(weight && {
 						fontWeight: weightMap[weight],
 					}),
@@ -263,6 +270,7 @@ function Typography({
 						letterSpacing: "-0.02em",
 					}),
 				},
+
 				...(Array.isArray(sx) ? sx : [sx]),
 			]}
 		/>
@@ -270,3 +278,4 @@ function Typography({
 }
 
 export { Typography };
+

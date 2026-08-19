@@ -2,7 +2,7 @@ import { Card, Typography } from "@/components/ui";
 import CheckIcon from "@mui/icons-material/Check";
 import { Box, ButtonBase, Divider, Stack, useTheme } from "@mui/material";
 import type { ReactNode } from "react";
-import { ProgramCompleteness } from "./program-completeness";
+import { ProgramCompleteness } from "../program-completeness";
 
 export type ProgramSectionStatus = "pending" | "warning" | "completed";
 
@@ -204,4 +204,3 @@ function ProgramSectionSidebar({
 }
 
 export { ProgramSectionSidebar };
-

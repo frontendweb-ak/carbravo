@@ -1,5 +1,3 @@
-// src/config/theme/mui.d.ts
-
 import "@mui/material/styles";
 
 declare module "@mui/material/styles" {
@@ -15,7 +13,32 @@ declare module "@mui/material/styles" {
 		softBorder?: string;
 	}
 
+	interface TypeText {
+		muted: string;
+		inverse: string;
+	}
+
 	interface Palette {
+		control: {
+			border: string;
+			borderStrong: string;
+
+			input: string;
+			inputBorder: string;
+
+			hover: string;
+			focus: string;
+			ring: string;
+
+			disabledBackground: string;
+			disabledForeground: string;
+			disabledBorder: string;
+
+			selectedBackground: string;
+			selectedForeground: string;
+			selectedBorder: string;
+		};
+
 		muted: {
 			main: string;
 			foreground: string;
@@ -34,7 +57,6 @@ declare module "@mui/material/styles" {
 		};
 
 		accent: PaletteColor;
-
 		popover: PaletteColor;
 
 		surfaceInput: {
@@ -43,6 +65,26 @@ declare module "@mui/material/styles" {
 	}
 
 	interface PaletteOptions {
+		control?: {
+			border: string;
+			borderStrong: string;
+
+			input: string;
+			inputBorder: string;
+
+			hover: string;
+			focus: string;
+			ring: string;
+
+			disabledBackground: string;
+			disabledForeground: string;
+			disabledBorder: string;
+
+			selectedBackground: string;
+			selectedForeground: string;
+			selectedBorder: string;
+		};
+
 		muted?: {
 			main: string;
 			foreground: string;

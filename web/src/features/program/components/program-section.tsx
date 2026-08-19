@@ -1,7 +1,10 @@
+// src/components/ui/program-section.tsx
+
 import type { ReactNode } from "react";
 
-import { Card } from "@/components/ui";
-import { Box, CardContent, Stack, Typography } from "@mui/material";
+import { Box, Stack } from "@mui/material";
+
+import { Card, Typography } from "@/components/ui";
 
 interface ProgramSectionProps {
 	title: ReactNode;
@@ -17,15 +20,14 @@ function ProgramSection({
 	children,
 }: ProgramSectionProps) {
 	return (
-		<Card variant="outlined" sx={{ p: 2.5 }}>
-			<CardContent
-				sx={{
-					p: 3,
-					"&:last-child": {
-						pb: 3,
-					},
-				}}
-			>
+		<Card
+			variant="outlined"
+			sx={{
+				width: "100%",
+				overflow: "hidden",
+			}}
+		>
+			<Box sx={{ p: 2.5 }}>
 				<Box
 					sx={{
 						display: "flex",
@@ -35,30 +37,58 @@ function ProgramSection({
 						mb: 3,
 					}}
 				>
-					<Stack spacing={0.5} sx={{ minWidth: 0 }}>
+					<Stack
+						spacing={0.25}
+						sx={{
+							minWidth: 0,
+						}}
+					>
 						{typeof title === "string" ? (
-							<Typography variant="h6" sx={{ fontWeight: 700 }}>
+							<Typography
+								variant="body"
+								weight="bold"
+								color="default"
+								sx={{
+									lineHeight: 1.4,
+								}}
+							>
 								{title}
 							</Typography>
 						) : (
 							title
 						)}
 
-						{description && (
-							<Typography variant="body2" color="text.secondary">
+						{description !== undefined && (
+							<Typography
+								variant="bodyMedium"
+								weight="regular"
+								color="secondary"
+								sx={{
+									lineHeight: 1.4,
+								}}
+							>
 								{description}
 							</Typography>
 						)}
 					</Stack>
 
-					{headerAction && <Box sx={{ flexShrink: 0 }}>{headerAction}</Box>}
+					{headerAction !== undefined && (
+						<Box
+							sx={{
+								flexShrink: 0,
+								display: "flex",
+								alignItems: "center",
+							}}
+						>
+							{headerAction}
+						</Box>
+					)}
 				</Box>
 
 				{children}
-			</CardContent>
+			</Box>
 		</Card>
 	);
 }
 
 export { ProgramSection };
-

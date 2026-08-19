@@ -1,4 +1,4 @@
-import type { ProgramRevisionTab } from "@/components/layout/program-context-header";
+import type { ProgramRevisionTab } from "@/features/program/components/layout/program-context-header";
 
 import type { ProgramDetail } from "../model/programs.types";
 import type {

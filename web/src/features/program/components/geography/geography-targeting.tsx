@@ -1,14 +1,8 @@
-import { FormSelect } from "@/components/ui";
-import {
-	Box,
-	Button,
-	Card,
-	CardContent,
-	Stack,
-	Typography,
-} from "@mui/material";
+import { Button, Card, FormSelect } from "@/components/ui";
+import AddIcon from "@mui/icons-material/Add";
+import RemoveIcon from "@mui/icons-material/Remove";
+import { Box, CardContent, Stack, Typography } from "@mui/material";
 import { type Control, type UseFormSetValue, useWatch } from "react-hook-form";
-
 import {
 	GEOGRAPHY_LEVEL_OPTIONS,
 	GEOGRAPHY_VALUE_OPTIONS,
@@ -63,18 +57,20 @@ export function GeographyTargeting({
 
 						<Button
 							type="button"
-							variant="outlined"
-							color="success"
+							variant="success"
+							soft
 							onClick={() => onAdd("include")}
+							startIcon={<AddIcon />}
 						>
 							Include
 						</Button>
 
 						<Button
 							type="button"
-							variant="outlined"
-							color="error"
+							variant="danger"
+							soft
 							onClick={() => onAdd("exclude")}
+							startIcon={<RemoveIcon />}
 						>
 							Exclude
 						</Button>

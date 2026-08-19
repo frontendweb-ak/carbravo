@@ -48,21 +48,25 @@ declare module "@mui/material/Select" {
 export const MuiOutlinedInput: Components<Theme>["MuiOutlinedInput"] = {
 	styleOverrides: {
 		root: ({ theme }) => ({
+			width: "100%",
+			minHeight: 36,
+
 			borderRadius: theme.shape.borderRadius,
 			backgroundColor: theme.palette.background.paper,
+
+			fontFamily: theme.typography.fontFamily,
 			fontSize: theme.typography.pxToRem(14),
+			color: theme.palette.text.primary,
+
 			transition: theme.transitions.create(
 				["border-color", "box-shadow", "background-color"],
 				{
 					duration: 150,
 				},
 			),
-			"& .MuiOutlinedInput-notchedOutline": {
-				borderColor: theme.palette.surfaceInput.main,
-				borderWidth: 1,
-			},
+
 			"&:hover .MuiOutlinedInput-notchedOutline": {
-				borderColor: alpha(theme.palette.primary.main, 0.6),
+				borderColor: theme.palette.text.secondary,
 			},
 
 			"&.Mui-focused .MuiOutlinedInput-notchedOutline": {
@@ -82,6 +86,15 @@ export const MuiOutlinedInput: Components<Theme>["MuiOutlinedInput"] = {
 			"&.Mui-disabled": {
 				backgroundColor: theme.palette.muted.main,
 				cursor: "not-allowed",
+
+				"& .MuiOutlinedInput-input": {
+					color: theme.palette.text.disabled,
+					WebkitTextFillColor: theme.palette.text.disabled,
+				},
+
+				"& .MuiOutlinedInput-notchedOutline": {
+					borderColor: theme.palette.divider,
+				},
 			},
 
 			"&.Mui-readOnly": {
@@ -89,10 +102,16 @@ export const MuiOutlinedInput: Components<Theme>["MuiOutlinedInput"] = {
 			},
 		}),
 
+		notchedOutline: ({ theme }) => ({
+			border: `1px solid ${theme.palette.surfaceInput.main}`,
+		}),
+
 		input: ({ theme }) => ({
-			height: "1.35em",
+			height: "auto",
 			padding: "8.5px 12px",
+			boxSizing: "border-box",
 			color: theme.palette.text.primary,
+
 			"&::placeholder": {
 				color: theme.palette.text.secondary,
 				opacity: 1,
@@ -100,6 +119,8 @@ export const MuiOutlinedInput: Components<Theme>["MuiOutlinedInput"] = {
 		}),
 
 		sizeSmall: {
+			minHeight: 32,
+
 			"& .MuiOutlinedInput-input": {
 				padding: "6px 10px",
 			},
@@ -112,15 +133,16 @@ export const MuiOutlinedInput: Components<Theme>["MuiOutlinedInput"] = {
 				size: "lg",
 			},
 			style: {
+				minHeight: 40,
+
 				"& .MuiOutlinedInput-input": {
-					padding: "11px 14px",
+					padding: "10px 14px",
 					fontSize: "1rem",
 				},
 			},
 		},
 	],
 };
-
 /**
  * InputLabel
  *
@@ -182,6 +204,8 @@ export const MuiTextField: Components<Theme>["MuiTextField"] = {
  */
 export const MuiSelect: Components<Theme>["MuiSelect"] = {
 	defaultProps: {
+		variant: "outlined",
+
 		MenuProps: {
 			slotProps: {
 				paper: {
@@ -197,11 +221,12 @@ export const MuiSelect: Components<Theme>["MuiSelect"] = {
 		select: {
 			display: "flex",
 			alignItems: "center",
-			minHeight: "1.35em",
+			boxSizing: "border-box",
 		},
 
 		icon: ({ theme }) => ({
 			color: theme.palette.text.secondary,
+			right: 10,
 		}),
 	},
 };

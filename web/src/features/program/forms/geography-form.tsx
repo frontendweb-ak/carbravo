@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button, Stack } from "@mui/material";
+import { Stack } from "@mui/material";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 
 import {
@@ -113,15 +113,7 @@ export function GeographyForm() {
 					onRemoveExclude={removeExcluded}
 				/>
 
-				<Stack direction="row" sx={{ justifyContent: "flex-end" }}>
-					<Button
-						type="submit"
-						variant="contained"
-						disabled={form.formState.isSubmitting}
-					>
-						{form.formState.isSubmitting ? "Saving..." : "Save Geography"}
-					</Button>
-				</Stack>
+
 			</Stack>
 		</FormProvider>
 	);

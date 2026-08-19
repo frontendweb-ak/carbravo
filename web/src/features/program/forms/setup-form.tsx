@@ -7,13 +7,7 @@ import {
 	FormTimeInput,
 } from "@/components/ui";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-	Alert,
-	Box,
-	Button,
-	Stack,
-	Typography,
-} from "@mui/material";
+import { Alert, Box, Button, Stack, Typography } from "@mui/material";
 import { useCallback, useEffect, useRef } from "react";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
@@ -40,43 +34,12 @@ import {
 } from "../model/setup.mapper";
 import { setupFormSchema } from "../schema";
 
-interface FlagCardProps {
-	children: React.ReactNode;
-}
-
-function FlagCard({ children }: FlagCardProps) {
-	return (
-		<Box
-			sx={{
-				border: 1,
-				borderColor: "divider",
-				borderRadius: 3,
-				px: 2,
-				py: 1.5,
-			}}
-		>
-			{children}
-		</Box>
-	);
-}
-
 interface SetupFormProps {
 	mode: "new" | "edit";
 	programId?: number;
 	revisionId?: number;
 	readOnly?: boolean;
-
-	/**
-	 * Called after a new program is created by the first
-	 * successful auto-save.
-	 *
-	 * The editor should normally update its route/context
-	 * with these IDs.
-	 */
-	onCreated?: (result: {
-		programId: number;
-		revisionId: number;
-	}) => void;
+	onCreated?: (result: { programId: number; revisionId: number }) => void;
 }
 
 type SetupFormInput = z.input<typeof setupFormSchema>;
@@ -91,52 +54,23 @@ export function SetupForm({
 	readOnly = false,
 	onCreated,
 }: SetupFormProps) {
-	const {
-		registerSaveHandler,
-		updateSectionStatus,
-	} = useProgramEditor();
-
-	/* ---------------------------------------------------------------------- */
-	/* Mode / permissions                                                     */
-	/* ---------------------------------------------------------------------- */
-
+	const { registerSaveHandler, updateSectionStatus } = useProgramEditor();
 	const isExistingRevision =
-		mode === "edit" &&
-		programId != null &&
-		revisionId != null;
+		mode === "edit" && programId != null && revisionId != null;
+	const canEdit = mode === "new" || (isExistingRevision && !readOnly);
 
-	const canEdit =
-		mode === "new" ||
-		(isExistingRevision && !readOnly);
-
-	/* ---------------------------------------------------------------------- */
-	/* API                                                                     */
-	/* ---------------------------------------------------------------------- */
-
+	// Api
 	const {
 		data: setup,
 		isLoading: isSetupLoading,
 		isError: isSetupError,
 		refetch: refetchSetup,
 	} = useProgramSetup(programId, revisionId);
+	const { mutateAsync: createProgramAsync } = useCreateProgram();
+	const { mutateAsync: updateSetupAsync } = useUpdateProgramSetup();
 
-	const {
-		mutateAsync: createProgramAsync,
-	} = useCreateProgram();
-
-	const {
-		mutateAsync: updateSetupAsync,
-	} = useUpdateProgramSetup();
-
-	/* ---------------------------------------------------------------------- */
-	/* Form                                                                    */
-	/* ---------------------------------------------------------------------- */
-
-	const form = useForm<
-		SetupFormInput,
-		unknown,
-		SetupFormOutput
-	>({
+	// Form
+	const form = useForm<SetupFormInput, unknown, SetupFormOutput>({
 		resolver: zodResolver(setupFormSchema),
 		defaultValues: setupDefaultValues,
 		mode: "onBlur",
@@ -148,82 +82,43 @@ export function SetupForm({
 		name: "purchaseType",
 	});
 
-	/* ---------------------------------------------------------------------- */
-	/* Persistence state                                                       */
-	/* ---------------------------------------------------------------------- */
-
+	// Persistence state
 	const persistenceRef = useRef<{
 		programId: number | undefined;
 		revisionId: number | undefined;
-	}>({
-		programId,
-		revisionId,
-	});
+	}>({ programId, revisionId });
 
 	useEffect(() => {
-		if (mode !== "edit") {
-			return;
-		}
-
-		persistenceRef.current = {
-			programId,
-			revisionId,
-		};
+		if (mode !== "edit") return;
+		persistenceRef.current = { programId, revisionId };
 	}, [mode, programId, revisionId]);
 
-	/* ---------------------------------------------------------------------- */
-	/* Lifecycle                                                               */
-	/* ---------------------------------------------------------------------- */
-
+	//  Lifecycle
 	const mountedRef = useRef(false);
-
 	useEffect(() => {
 		mountedRef.current = true;
-
 		return () => {
 			mountedRef.current = false;
 		};
 	}, []);
 
-	/* ---------------------------------------------------------------------- */
-	/* Hydration                                                               */
-	/* ---------------------------------------------------------------------- */
-
+	//  Hydration
 	const hydratedRef = useRef(false);
-
-	const hydratedRevisionRef = useRef<string | null>(
-		null,
-	);
-
+	const hydratedRevisionRef = useRef<string | null>(null);
 	useEffect(() => {
-		if (!isExistingRevision || !setup) {
-			return;
-		}
+		if (!isExistingRevision || !setup) return;
 
 		const hydrationKey = `${programId}:${revisionId}`;
-
-		if (
-			hydratedRevisionRef.current ===
-			hydrationKey
-		) {
+		if (hydratedRevisionRef.current === hydrationKey) {
 			return;
 		}
 
 		hydratedRevisionRef.current = hydrationKey;
-
 		hydratedRef.current = false;
-
-		const values =
-			mapSetupResponseToForm(setup);
-
+		const values = mapSetupResponseToForm(setup);
 		form.reset(values);
-
 		hydratedRef.current = true;
-
-		updateSectionStatus(
-			"setup",
-			"completed",
-		);
+		updateSectionStatus("setup", "completed");
 	}, [
 		isExistingRevision,
 		setup,
@@ -233,160 +128,73 @@ export function SetupForm({
 		updateSectionStatus,
 	]);
 
-	/* ---------------------------------------------------------------------- */
-	/* New program hydration                                                   */
-	/* ---------------------------------------------------------------------- */
-
+	// New program hydration
 	useEffect(() => {
-		if (mode !== "new") {
-			return;
-		}
-
+		if (mode !== "new") return;
 		hydratedRef.current = true;
 		hydratedRevisionRef.current = "new";
 	}, [mode]);
 
-	/* ---------------------------------------------------------------------- */
-	/* Autosave state                                                          */
-	/* ---------------------------------------------------------------------- */
-
-	const saveTimerRef = useRef<number | null>(
-		null,
-	);
-
+	// Autosave state
+	const saveTimerRef = useRef<number | null>(null);
 	const savingRef = useRef(false);
-
-	const pendingSaveRef =
-		useRef<SetupFormOutput | null>(null);
-
+	const pendingSaveRef = useRef<SetupFormOutput | null>(null);
 	const createInFlightRef = useRef(false);
-
 	const changeVersionRef = useRef(0);
+	const latestValuesRef = useRef<SetupFormOutput | null>(null);
 
-	const latestValuesRef =
-		useRef<SetupFormOutput | null>(null);
-
-	/* ---------------------------------------------------------------------- */
-	/* Section status                                                          */
-	/* ---------------------------------------------------------------------- */
-
-	const sectionStatusRef =
-		useRef<string | null>(null);
-
+	// Section status
+	const sectionStatusRef = useRef<string | null>(null);
 	const setSetupStatus = useCallback(
 		(status: "completed" | "warning") => {
-			if (!mountedRef.current) {
-				return;
-			}
-
-			if (
-				sectionStatusRef.current ===
-				status
-			) {
-				return;
-			}
-
+			if (!mountedRef.current) return;
+			if (sectionStatusRef.current === status) return;
 			sectionStatusRef.current = status;
-
-			updateSectionStatus(
-				"setup",
-				status,
-			);
+			updateSectionStatus("setup", status);
 		},
 		[updateSectionStatus],
 	);
 
-	/* ---------------------------------------------------------------------- */
-	/* Persistence                                                             */
-	/* ---------------------------------------------------------------------- */
-
+	// Persistence
 	const persistSetup = useCallback(
 		async (values: SetupFormOutput) => {
-			if (
-				!canEdit ||
-				!mountedRef.current
-			) {
+			if (!canEdit || !mountedRef.current) {
 				return;
 			}
 
 			pendingSaveRef.current = values;
-
 			if (savingRef.current) {
 				return;
 			}
-
 			savingRef.current = true;
-
 			try {
-				while (
-					mountedRef.current &&
-					pendingSaveRef.current != null
-				) {
-					const latestValues =
-						pendingSaveRef.current;
-
-					pendingSaveRef.current =
-						null;
-
-					const versionAtStart =
-						changeVersionRef.current;
-
-					const payload =
-						mapSetupFormToDto(
-							latestValues,
-						);
-
-					/* ====================================================== */
-					/* CREATE NEW PROGRAM                                     */
-					/* ====================================================== */
-
-					if (
-						mode === "new" &&
-						persistenceRef.current
-							.programId == null
-					) {
-						if (
-							createInFlightRef.current
-						) {
-							pendingSaveRef.current =
-								latestValues;
-
+				while (mountedRef.current && pendingSaveRef.current != null) {
+					const latestValues = pendingSaveRef.current;
+					pendingSaveRef.current = null;
+					const versionAtStart = changeVersionRef.current;
+					const payload = mapSetupFormToDto(latestValues);
+					// CREATE NEW PROGRAM
+					if (mode === "new" && persistenceRef.current.programId == null) {
+						if (createInFlightRef.current) {
+							pendingSaveRef.current = latestValues;
 							break;
 						}
-
-						createInFlightRef.current =
-							true;
-
+						createInFlightRef.current = true;
 						try {
-							const created =
-								await createProgramAsync(
-									{
-										programName:
-											latestValues.programName,
-									},
-								);
-
-							if (
-								created.programId ==
-									null ||
-								created.revisionId ==
-									null
-							) {
+							const created = await createProgramAsync({
+								programName: latestValues.programName,
+							});
+							if (created.programId == null || created.revisionId == null) {
 								throw new Error(
 									"Create program response did not contain programId and revisionId.",
 								);
 							}
-
-							persistenceRef.current =
-								{
-									programId:
-										created.programId,
-									revisionId:
-										created.revisionId,
-								};
+							persistenceRef.current = {
+								programId: created.programId,
+								revisionId: created.revisionId,
+							};
 						} finally {
-							createInFlightRef.current =
-								false;
+							createInFlightRef.current = false;
 						}
 					}
 
@@ -394,28 +202,19 @@ export function SetupForm({
 					/* UPDATE SETUP                                           */
 					/* ====================================================== */
 
-					const currentProgramId =
-						persistenceRef.current
-							.programId;
+					const currentProgramId = persistenceRef.current.programId;
 
-					const currentRevisionId =
-						persistenceRef.current
-							.revisionId;
+					const currentRevisionId = persistenceRef.current.revisionId;
 
-					if (
-						currentProgramId == null ||
-						currentRevisionId == null
-					) {
+					if (currentProgramId == null || currentRevisionId == null) {
 						throw new Error(
 							"Cannot save setup without programId and revisionId.",
 						);
 					}
 
 					await updateSetupAsync({
-						programId:
-							currentProgramId,
-						revisionId:
-							currentRevisionId,
+						programId: currentProgramId,
+						revisionId: currentRevisionId,
 						payload,
 					});
 
@@ -423,30 +222,15 @@ export function SetupForm({
 					/* NEW PROGRAM CREATED                                    */
 					/* ====================================================== */
 
-					if (
-						mode === "new" &&
-						versionAtStart ===
-							changeVersionRef.current
-					) {
-						const createdProgramId =
-							persistenceRef.current
-								.programId;
+					if (mode === "new" && versionAtStart === changeVersionRef.current) {
+						const createdProgramId = persistenceRef.current.programId;
 
-						const createdRevisionId =
-							persistenceRef.current
-								.revisionId;
+						const createdRevisionId = persistenceRef.current.revisionId;
 
-						if (
-							createdProgramId !=
-								null &&
-							createdRevisionId !=
-								null
-						) {
+						if (createdProgramId != null && createdRevisionId != null) {
 							onCreated?.({
-								programId:
-									createdProgramId,
-								revisionId:
-									createdRevisionId,
+								programId: createdProgramId,
+								revisionId: createdRevisionId,
 							});
 						}
 					}
@@ -456,52 +240,34 @@ export function SetupForm({
 					/* ====================================================== */
 
 					if (
-						changeVersionRef.current !==
-							versionAtStart &&
-						latestValuesRef.current !=
-							null &&
-						pendingSaveRef.current ==
-							null
+						changeVersionRef.current !== versionAtStart &&
+						latestValuesRef.current != null &&
+						pendingSaveRef.current == null
 					) {
-						pendingSaveRef.current =
-							latestValuesRef.current;
+						pendingSaveRef.current = latestValuesRef.current;
 					}
 				}
 
 				if (mountedRef.current) {
-					setSetupStatus(
-						"completed",
-					);
+					setSetupStatus("completed");
 				}
 			} catch (error) {
-				console.error(
-					"[SetupForm] autosave failed",
-					error,
-				);
+				console.error("[SetupForm] autosave failed", error);
 
 				if (mountedRef.current) {
-					setSetupStatus(
-						"warning",
-					);
+					setSetupStatus("warning");
 				}
 			} finally {
 				savingRef.current = false;
 
 				if (
 					mountedRef.current &&
-					pendingSaveRef.current !=
-						null &&
+					pendingSaveRef.current != null &&
 					!savingRef.current
 				) {
 					queueMicrotask(() => {
-						if (
-							mountedRef.current &&
-							pendingSaveRef.current !=
-								null
-						) {
-							void persistSetup(
-								pendingSaveRef.current,
-							);
+						if (mountedRef.current && pendingSaveRef.current != null) {
+							void persistSetup(pendingSaveRef.current);
 						}
 					});
 				}
@@ -521,14 +287,10 @@ export function SetupForm({
 	/* Persistence ref                                                         */
 	/* ---------------------------------------------------------------------- */
 
-	const persistSetupRef =
-		useRef<typeof persistSetup>(
-			persistSetup,
-		);
+	const persistSetupRef = useRef<typeof persistSetup>(persistSetup);
 
 	useEffect(() => {
-		persistSetupRef.current =
-			persistSetup;
+		persistSetupRef.current = persistSetup;
 	}, [persistSetup]);
 
 	/* ---------------------------------------------------------------------- */
@@ -540,76 +302,43 @@ export function SetupForm({
 			return;
 		}
 
-		const subscription =
-			form.watch((values) => {
-				if (!hydratedRef.current) {
-					return;
-				}
+		const subscription = form.watch((values) => {
+			if (!hydratedRef.current) {
+				return;
+			}
 
+			if (!mountedRef.current) {
+				return;
+			}
+
+			const nextValues = values as SetupFormOutput;
+			latestValuesRef.current = nextValues;
+			changeVersionRef.current += 1;
+			setSetupStatus("warning");
+			if (saveTimerRef.current !== null) {
+				window.clearTimeout(saveTimerRef.current);
+			}
+			saveTimerRef.current = window.setTimeout(() => {
+				saveTimerRef.current = null;
 				if (!mountedRef.current) {
 					return;
 				}
-
-				const nextValues =
-					values as SetupFormOutput;
-
-				latestValuesRef.current =
-					nextValues;
-
-				changeVersionRef.current += 1;
-
-				setSetupStatus("warning");
-
-				if (
-					saveTimerRef.current !== null
-				) {
-					window.clearTimeout(
-						saveTimerRef.current,
-					);
+				const latest = latestValuesRef.current;
+				if (!latest) {
+					return;
 				}
-
-				saveTimerRef.current =
-					window.setTimeout(() => {
-						saveTimerRef.current =
-							null;
-
-						if (
-							!mountedRef.current
-						) {
-							return;
-						}
-
-						const latest =
-							latestValuesRef.current;
-
-						if (!latest) {
-							return;
-						}
-
-						void persistSetupRef.current(
-							latest,
-						);
-					}, AUTO_SAVE_DELAY);
-			});
+				void persistSetupRef.current(latest);
+			}, AUTO_SAVE_DELAY);
+		});
 
 		return () => {
 			subscription.unsubscribe();
-
-			if (
-				saveTimerRef.current !== null
-			) {
-				window.clearTimeout(
-					saveTimerRef.current,
-				);
-
+			if (saveTimerRef.current !== null) {
+				window.clearTimeout(saveTimerRef.current);
 				saveTimerRef.current = null;
 			}
 		};
-	}, [
-		canEdit,
-		form,
-		setSetupStatus,
-	]);
+	}, [canEdit, form, setSetupStatus]);
 
 	/* ---------------------------------------------------------------------- */
 	/* Conditional finance terms                                               */
@@ -619,35 +348,22 @@ export function SetupForm({
 		if (purchaseType === "FINANCE") {
 			return;
 		}
-
-		const currentTerms =
-			form.getValues(
-				"financeTerms",
-			);
-
+		const currentTerms = form.getValues("financeTerms");
 		if (currentTerms.length === 0) {
 			return;
 		}
-
-		form.setValue(
-			"financeTerms",
-			[],
-			{
-				shouldDirty: true,
-				shouldTouch: false,
-				shouldValidate: false,
-			},
-		);
+		form.setValue("financeTerms", [], {
+			shouldDirty: true,
+			shouldTouch: false,
+			shouldValidate: false,
+		});
 	}, [purchaseType, form]);
 
 	/* ---------------------------------------------------------------------- */
 	/* Manual Save Draft                                                       */
 	/* ---------------------------------------------------------------------- */
 
-	const saveSetupRef =
-		useRef<(() => Promise<void>) | null>(
-			null,
-		);
+	const saveSetupRef = useRef<(() => Promise<void>) | null>(null);
 
 	saveSetupRef.current = async () => {
 		if (!canEdit) {
@@ -656,25 +372,13 @@ export function SetupForm({
 
 		await form.handleSubmit(
 			async (values) => {
-				if (
-					saveTimerRef.current !==
-					null
-				) {
-					window.clearTimeout(
-						saveTimerRef.current,
-					);
-
+				if (saveTimerRef.current !== null) {
+					window.clearTimeout(saveTimerRef.current);
 					saveTimerRef.current = null;
 				}
-
-				latestValuesRef.current =
-					values;
-
+				latestValuesRef.current = values;
 				changeVersionRef.current += 1;
-
-				await persistSetupRef.current(
-					values,
-				);
+				await persistSetupRef.current(values);
 			},
 			() => {
 				setSetupStatus("warning");
@@ -686,10 +390,9 @@ export function SetupForm({
 	/* Register Save Draft                                                     */
 	/* ---------------------------------------------------------------------- */
 
-	const stableSaveHandlerRef =
-		useRef(async () => {
-			await saveSetupRef.current?.();
-		});
+	const stableSaveHandlerRef = useRef(async () => {
+		await saveSetupRef.current?.();
+	});
 
 	useEffect(() => {
 		if (!canEdit) {
@@ -697,41 +400,29 @@ export function SetupForm({
 			return;
 		}
 
-		registerSaveHandler(
-			stableSaveHandlerRef.current,
-		);
+		registerSaveHandler(stableSaveHandlerRef.current);
 
 		return () => {
 			registerSaveHandler(null);
 		};
-	}, [
-		canEdit,
-		registerSaveHandler,
-	]);
+	}, [canEdit, registerSaveHandler]);
 
 	/* ---------------------------------------------------------------------- */
 	/* Loading                                                                  */
 	/* ---------------------------------------------------------------------- */
 
-	if (
-		isExistingRevision &&
-		isSetupLoading
-	) {
+	if (isExistingRevision && isSetupLoading) {
 		return (
 			<Box
 				sx={{
 					border: 1,
 					borderColor: "divider",
 					borderRadius: 3,
-					bgcolor:
-						"background.paper",
+					bgcolor: "background.paper",
 					p: 3,
 				}}
 			>
-				<Typography
-					variant="body2"
-					color="text.secondary"
-				>
+				<Typography variant="body2" color="text.secondary">
 					Loading setup...
 				</Typography>
 			</Box>
@@ -742,10 +433,7 @@ export function SetupForm({
 	/* Error                                                                    */
 	/* ---------------------------------------------------------------------- */
 
-	if (
-		isExistingRevision &&
-		isSetupError
-	) {
+	if (isExistingRevision && isSetupError) {
 		return (
 			<Alert
 				severity="error"
@@ -761,22 +449,15 @@ export function SetupForm({
 						Retry
 					</Button>
 				}
-				sx={{
-					alignItems: "center",
-				}}
+				sx={{ alignItems: "center" }}
 			>
 				<Stack spacing={0.5}>
-					<Typography
-						variant="body2"
-						sx={{fontWeight:600}}
-						
-					>
+					<Typography variant="body2" sx={{ fontWeight: 600 }}>
 						Failed to load setup
 					</Typography>
 
 					<Typography variant="body2">
-						We couldn't load this
-						revision's setup data.
+						We couldn't load this revision's setup data.
 					</Typography>
 				</Stack>
 			</Alert>
@@ -940,14 +621,7 @@ export function SetupForm({
 					>
 						{/* Program Type */}
 
-						<Box
-							sx={{
-								gridColumn: {
-									xs: "span 1",
-									lg: "span 5",
-								},
-							}}
-						>
+						<Box sx={{ gridColumn: { xs: "span 1", lg: "span 5" } }}>
 							<FormChoiceChipGroup
 								control={form.control}
 								name="programType"
@@ -1050,14 +724,7 @@ export function SetupForm({
 						{/* Finance Terms */}
 
 						{purchaseType === "FINANCE" && (
-							<Box
-								sx={{
-									gridColumn: {
-										xs: "span 1",
-										lg: "span 12",
-									},
-								}}
-							>
+							<Box sx={{ gridColumn: { xs: "span 1", lg: "span 12" } }}>
 								<FormChoiceChipGroup
 									control={form.control}
 									name="financeTerms"
@@ -1070,16 +737,7 @@ export function SetupForm({
 							</Box>
 						)}
 
-						{/* Contact */}
-
-						<Box
-							sx={{
-								gridColumn: {
-									xs: "span 1",
-									lg: "span 12",
-								},
-							}}
-						>
+						<Box sx={{ gridColumn: { xs: "span 1", lg: "span 12" } }}>
 							<FormInput
 								control={form.control}
 								name="contact"
@@ -1110,35 +768,29 @@ export function SetupForm({
 							gap: 2,
 						}}
 					>
-						<FlagCard>
-							<FormCheckbox
-								control={form.control}
-								name="flags.vinException"
-								label="VIN Exception"
-								description="Conditional — appears below the line, not against net price."
-								disabled={!canEdit}
-							/>
-						</FlagCard>
+						<FormCheckbox
+							control={form.control}
+							name="flags.vinException"
+							label="VIN Exception"
+							description="Conditional — appears below the line, not against net price."
+							disabled={!canEdit}
+						/>
 
-						<FlagCard>
-							<FormCheckbox
-								control={form.control}
-								name="flags.topOfDeal"
-								label="Top of Deal"
-								description="Program headlines the deal stack."
-								disabled={!canEdit}
-							/>
-						</FlagCard>
+						<FormCheckbox
+							control={form.control}
+							name="flags.topOfDeal"
+							label="Top of Deal"
+							description="Program headlines the deal stack."
+							disabled={!canEdit}
+						/>
 
-						<FlagCard>
-							<FormCheckbox
-								control={form.control}
-								name="flags.noAddOns"
-								label="No add-ons"
-								description="Program cannot be combined with dealer add-ons."
-								disabled={!canEdit}
-							/>
-						</FlagCard>
+						<FormCheckbox
+							control={form.control}
+							name="flags.noAddOns"
+							label="No add-ons"
+							description="Program cannot be combined with dealer add-ons."
+							disabled={!canEdit}
+						/>
 					</Box>
 				</ProgramSection>
 			</Stack>

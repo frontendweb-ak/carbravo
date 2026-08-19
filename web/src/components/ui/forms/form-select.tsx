@@ -1,3 +1,5 @@
+// src/components/ui/forms/form-select.tsx
+
 import type { ReactNode } from "react";
 import {
 	Controller,
@@ -6,39 +8,33 @@ import {
 	type Path,
 } from "react-hook-form";
 
-import {
-	FormControl,
-	FormHelperText,
-	InputLabel,
-	MenuItem,
-	Select,
-} from "@mui/material";
+import { FormField, Select, type SelectProps } from "../primitives";
 
-export interface SelectOption {
-	value: string;
-	label: string;
-}
-
-export interface FormSelectProps<T extends FieldValues> {
+export interface FormSelectProps<T extends FieldValues> extends Omit<
+	SelectProps,
+	"name" | "value" | "defaultValue" | "onChange" | "onBlur"
+> {
 	control: Control<T>;
 	name: Path<T>;
-
-	options: SelectOption[];
 
 	label?: ReactNode;
 	required?: boolean;
 	description?: ReactNode;
-	disabled?: boolean;
+
+	showRequiredIndicator?: boolean;
+	showDescriptionWithError?: boolean;
 }
 
 function FormSelect<T extends FieldValues>({
 	control,
 	name,
-	options,
 	label,
 	required = false,
 	description,
 	disabled = false,
+	showRequiredIndicator = true,
+	showDescriptionWithError = false,
+	...props
 }: FormSelectProps<T>) {
 	const id = `${String(name)}-select`;
 
@@ -47,37 +43,32 @@ function FormSelect<T extends FieldValues>({
 			control={control}
 			name={name}
 			render={({ field, fieldState }) => (
-				<FormControl fullWidth disabled={disabled} error={fieldState.invalid}>
-					{label && (
-						<InputLabel id={`${id}-label`} required={required}>
-							{label}
-						</InputLabel>
-					)}
-
+				<FormField
+					id={id}
+					label={label}
+					required={required}
+					description={description}
+					error={fieldState.error?.message}
+					disabled={disabled}
+					showRequiredIndicator={showRequiredIndicator}
+					showDescriptionWithError={showDescriptionWithError}
+				>
 					<Select
-						{...field}
-						labelId={`${id}-label`}
+						{...props}
 						id={id}
-						label={typeof label === "string" ? label : undefined}
-						value={field.value ?? ""}
-					>
-						{options.map((option) => (
-							<MenuItem key={option.value} value={option.value}>
-								{option.label}
-							</MenuItem>
-						))}
-					</Select>
-
-					{(fieldState.error?.message || description) && (
-						<FormHelperText>
-							{fieldState.error?.message ?? description}
-						</FormHelperText>
-					)}
-				</FormControl>
+						name={field.name}
+						value={String(field.value ?? "")}
+						onChange={(event) => {
+							field.onChange(event.target.value);
+						}}
+						onBlur={field.onBlur}
+						disabled={disabled}
+						error={fieldState.invalid}
+					/>
+				</FormField>
 			)}
 		/>
 	);
 }
 
 export { FormSelect };
-

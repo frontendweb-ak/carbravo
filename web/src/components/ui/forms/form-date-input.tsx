@@ -6,8 +6,8 @@ import {
 	type Path,
 } from "react-hook-form";
 
-import { DateInput, type DateInputProps } from "../primitives";
-import { FormField } from "./form-field";
+import { DateInput, type DateInputProps, FormField } from "../primitives";
+
 
 export type FormDateInputProps<T extends FieldValues> = Omit<
 	DateInputProps,
@@ -58,3 +58,4 @@ function FormDateInput<T extends FieldValues>({
 }
 
 export { FormDateInput };
+

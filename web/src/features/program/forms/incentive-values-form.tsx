@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Box, Button, Grid, Stack, Typography } from "@mui/material";
+import { Box, Grid, Stack, Typography } from "@mui/material";
 import { FormProvider, useForm } from "react-hook-form";
 
 import { FormChoiceChipGroup, FormInput } from "@/components/ui/forms";
@@ -113,6 +113,7 @@ export function IncentiveValuesForm() {
 							description="Can combine"
 							selectionMode="multiple"
 							options={STACKABILITY_OPTIONS}
+							borderRadius={5}
 						/>
 
 						{/* Not stackable with */}
@@ -124,6 +125,7 @@ export function IncentiveValuesForm() {
 							description="Mutually exclusive"
 							selectionMode="multiple"
 							options={STACKABILITY_OPTIONS}
+							borderRadius={5}
 						/>
 
 						{/* Belongs to */}
@@ -136,22 +138,6 @@ export function IncentiveValuesForm() {
 						/>
 					</Stack>
 				</ProgramSection>
-
-				{/* =========================================================
-				    FORM ACTION
-				========================================================= */}
-
-				<Stack direction="row" sx={{ justifyContent: "flex-end" }}>
-					<Button
-						type="submit"
-						variant="contained"
-						disabled={form.formState.isSubmitting}
-					>
-						{form.formState.isSubmitting
-							? "Saving..."
-							: "Save Incentive Values"}
-					</Button>
-				</Stack>
 			</Stack>
 		</FormProvider>
 	);

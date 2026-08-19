@@ -54,7 +54,7 @@ function FormChoiceChipGroup<T, TFieldValues extends FieldValues>({
 	minHeight,
 	paddingX,
 	showCheck,
-	gap = 1,
+	gap = 2,
 }: FormChoiceChipGroupProps<T, TFieldValues>) {
 	return (
 		<Controller

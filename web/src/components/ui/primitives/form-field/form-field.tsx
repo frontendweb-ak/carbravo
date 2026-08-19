@@ -1,11 +1,14 @@
-// src/components/ui/forms/form-field.tsx
+// src/components/ui/primitives/form-field/form-field.tsx
 
 import Box from "@mui/material/Box";
 import FormHelperText from "@mui/material/FormHelperText";
-import Typography from "@mui/material/Typography";
+import type { SxProps, Theme } from "@mui/material/styles";
 import type { ReactNode } from "react";
 
+import { FormLabel } from "../form-label";
+
 export interface FormFieldProps {
+	id?: string;
 	label?: ReactNode;
 	required?: boolean;
 	description?: ReactNode;
@@ -13,9 +16,17 @@ export interface FormFieldProps {
 	disabled?: boolean;
 	rightElement?: ReactNode;
 	children: ReactNode;
+
+	labelVariant?: "label" | "labelSmall" | "overline";
+	showRequiredIndicator?: boolean;
+	showDescriptionWithError?: boolean;
+
+	className?: string;
+	sx?: SxProps<Theme>;
 }
 
 function FormField({
+	id,
 	label,
 	required = false,
 	description,
@@ -23,90 +34,63 @@ function FormField({
 	disabled = false,
 	rightElement,
 	children,
+	labelVariant = "overline",
+	showRequiredIndicator = true,
+	showDescriptionWithError = false,
+	className,
+	sx,
 }: FormFieldProps) {
 	const hasHeader = label !== undefined || rightElement !== undefined;
+	const hasError = Boolean(error);
+	const hasDescription = Boolean(description);
+
+	const descriptionId = id ? `${id}-description` : undefined;
+	const errorId = id ? `${id}-error` : undefined;
 
 	return (
 		<Box
 			data-slot="form-field"
 			data-disabled={disabled || undefined}
-			sx={{
-				width: "100%",
-				display: "flex",
-				flexDirection: "column",
-				gap: 1,
-			}}
+			data-invalid={hasError || undefined}
+			data-required={required || undefined}
+			className={className}
+			sx={[
+				{
+					width: "100%",
+					display: "flex",
+					flexDirection: "column",
+					gap: 1,
+				},
+				...(Array.isArray(sx) ? sx : [sx]),
+			]}
 		>
 			{hasHeader && (
 				<Box
+					data-slot="form-field-header"
 					sx={{
 						display: "flex",
 						alignItems: "center",
 						justifyContent: "space-between",
 						gap: 1.5,
+						mb: 0.5,
 					}}
 				>
 					{label !== undefined && (
-						<Box
-							sx={{
-								display: "flex",
-								alignItems: "center",
-								gap: 1,
-								minWidth: 0,
-							}}
+						<FormLabel
+							htmlFor={id}
+							required={required}
+							disabled={disabled}
+							variant={labelVariant}
+							showRequiredIndicator={showRequiredIndicator}
 						>
-							<Typography
-								component="span"
-								variant="overline"
-								sx={{
-									color: "text.primary",
-									fontSize: "0.6875rem",
-									lineHeight: 1.4,
-									fontWeight: 700,
-									letterSpacing: "0.04em",
-								}}
-							>
-								{label}
-							</Typography>
-
-							{required && (
-								<Typography
-									component="span"
-									aria-hidden="true"
-									sx={{
-										display: "inline-flex",
-										alignItems: "center",
-										height: 18,
-										px: 0.75,
-
-										borderRadius: 0.75,
-
-										backgroundColor: "warning.soft",
-										color: "warning.softForeground",
-										border: "1px solid",
-										borderColor: "warning.softBorder",
-
-										fontSize: "0.625rem",
-										lineHeight: 1,
-										fontWeight: 700,
-										letterSpacing: "0.03em",
-										textTransform: "uppercase",
-										whiteSpace: "nowrap",
-									}}
-								>
-									Required
-								</Typography>
-							)}
-						</Box>
+							{label}
+						</FormLabel>
 					)}
 
 					{rightElement !== undefined && (
 						<Box
-							sx={{
-								display: "flex",
-								alignItems: "center",
-								flexShrink: 0,
-							}}
+							data-slot="form-field-right"
+							sx={{ display: "flex", alignItems: "center", flexShrink: 0 }}
 						>
 							{rightElement}
 						</Box>
@@ -114,32 +98,56 @@ function FormField({
 				</Box>
 			)}
 
-			{children}
+			<Box data-slot="form-field-control" sx={{ width: "100%" }}>
+				{children}
+			</Box>
 
-			{error ? (
+			{hasError ? (
 				<FormHelperText
+					id={errorId}
 					error
+					data-slot="form-field-error"
 					sx={{
 						mx: 0,
 						mt: 0.75,
 						fontSize: "0.75rem",
+						lineHeight: 1.5,
 						fontWeight: 500,
 					}}
 				>
 					{error}
 				</FormHelperText>
-			) : description ? (
+			) : hasDescription ? (
 				<FormHelperText
+					id={descriptionId}
+					data-slot="form-field-description"
 					sx={{
 						mx: 0,
 						mt: 0.75,
 						color: "text.secondary",
 						fontSize: "0.75rem",
+						lineHeight: 1.5,
 					}}
 				>
 					{description}
 				</FormHelperText>
 			) : null}
+
+			{showDescriptionWithError && hasError && hasDescription && (
+				<FormHelperText
+					id={descriptionId}
+					data-slot="form-field-description"
+					sx={{
+						mx: 0,
+						mt: 0,
+						color: "text.secondary",
+						fontSize: "0.75rem",
+						lineHeight: 1.5,
+					}}
+				>
+					{description}
+				</FormHelperText>
+			)}
 		</Box>
 	);
 }

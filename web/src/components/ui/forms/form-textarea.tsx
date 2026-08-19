@@ -6,15 +6,9 @@ import {
 	type Path,
 } from "react-hook-form";
 
-import {
-	Box,
-	FormControl,
-	FormHelperText,
-	InputLabel,
-	Typography,
-} from "@mui/material";
+import { Box, Typography } from "@mui/material";
 
-import { Textarea, type TextareaProps } from "../primitives";
+import { FormField, Textarea, type TextareaProps } from "../primitives";
 
 export type FormTextareaProps<T extends FieldValues> = Omit<
 	TextareaProps,
@@ -22,25 +16,23 @@ export type FormTextareaProps<T extends FieldValues> = Omit<
 > & {
 	control: Control<T>;
 	name: Path<T>;
-
 	label?: ReactNode;
 	required?: boolean;
 	description?: ReactNode;
 	showCounter?: boolean;
 };
+
 function FormTextarea<T extends FieldValues>({
 	control,
 	name,
 	label,
 	required = false,
 	description,
-	showCounter = true,
+	showCounter = false,
 	maxLength,
 	disabled = false,
 	...props
 }: FormTextareaProps<T>) {
-	const id = `${String(name)}-textarea`;
-
 	return (
 		<Controller
 			control={control}
@@ -50,30 +42,31 @@ function FormTextarea<T extends FieldValues>({
 				const currentLength = value.length;
 
 				return (
-					<FormControl fullWidth error={fieldState.invalid} disabled={disabled}>
-						{label && (
-							<InputLabel shrink htmlFor={id} required={required}>
-								{label}
-							</InputLabel>
-						)}
-
+					<FormField
+						label={label}
+						required={required}
+						description={description}
+						error={fieldState.error?.message}
+						disabled={disabled}
+					>
 						<Box sx={{ position: "relative" }}>
 							<Textarea
 								{...props}
-								id={id}
 								value={value}
 								onChange={field.onChange}
 								onBlur={field.onBlur}
 								inputRef={field.ref}
 								disabled={disabled}
 								error={fieldState.invalid}
+								maxLength={maxLength}
 								sx={{
-									...(maxLength && {
-										"& textarea": {
-											paddingBottom: "28px",
-										},
-									}),
-									...(props.sx || {}),
+									...(showCounter &&
+										maxLength != null && {
+											"& textarea": {
+												paddingBottom: "28px",
+											},
+										}),
+									...(props.sx ?? {}),
 								}}
 							/>
 
@@ -96,13 +89,7 @@ function FormTextarea<T extends FieldValues>({
 								</Typography>
 							)}
 						</Box>
-
-						{(fieldState.error?.message || description) && (
-							<FormHelperText>
-								{fieldState.error?.message ?? description}
-							</FormHelperText>
-						)}
-					</FormControl>
+					</FormField>
 				);
 			}}
 		/>

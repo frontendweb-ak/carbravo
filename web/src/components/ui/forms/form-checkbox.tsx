@@ -8,6 +8,7 @@ import {
 	type FieldValues,
 	type Path,
 } from "react-hook-form";
+
 import { CheckboxField } from "../primitives/checkbox/checkbox-field";
 
 export interface FormCheckboxProps<T extends FieldValues> {
@@ -18,6 +19,8 @@ export interface FormCheckboxProps<T extends FieldValues> {
 	description?: ReactNode;
 	required?: boolean;
 	disabled?: boolean;
+
+	variant?: "card" | "inline";
 }
 
 function FormCheckbox<T extends FieldValues>({
@@ -25,8 +28,9 @@ function FormCheckbox<T extends FieldValues>({
 	name,
 	label,
 	description,
-	required,
-	disabled,
+	required = false,
+	disabled = false,
+	variant = "card",
 }: FormCheckboxProps<T>) {
 	return (
 		<Controller
@@ -38,13 +42,14 @@ function FormCheckbox<T extends FieldValues>({
 					description={description}
 					required={required}
 					disabled={disabled}
+					variant={variant}
 					checked={Boolean(field.value)}
 					error={fieldState.invalid}
 					helperText={fieldState.error?.message}
 					onBlur={field.onBlur}
-					onChange={(event) =>
-						field.onChange((event.target as HTMLInputElement).checked)
-					}
+					onChange={(event) => {
+						field.onChange((event.target as HTMLInputElement).checked);
+					}}
 				/>
 			)}
 		/>

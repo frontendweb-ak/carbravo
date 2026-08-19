@@ -1,3 +1,5 @@
+// src/components/ui/forms/form-time-input.tsx
+
 import type { ReactNode } from "react";
 import {
 	type Control,
@@ -6,9 +8,7 @@ import {
 	type Path,
 } from "react-hook-form";
 
-import { FormControl, FormHelperText, InputLabel } from "@mui/material";
-
-import { TimeInput, type TimeInputProps } from "../primitives";
+import { FormField, TimeInput, type TimeInputProps } from "../primitives";
 
 export type FormTimeInputProps<T extends FieldValues> = Omit<
 	TimeInputProps,
@@ -20,6 +20,9 @@ export type FormTimeInputProps<T extends FieldValues> = Omit<
 	label?: ReactNode;
 	required?: boolean;
 	description?: ReactNode;
+
+	showRequiredIndicator?: boolean;
+	showDescriptionWithError?: boolean;
 };
 
 function FormTimeInput<T extends FieldValues>({
@@ -29,6 +32,8 @@ function FormTimeInput<T extends FieldValues>({
 	required = false,
 	description,
 	disabled = false,
+	showRequiredIndicator = true,
+	showDescriptionWithError = false,
 	...props
 }: FormTimeInputProps<T>) {
 	const id = `${String(name)}-time`;
@@ -38,26 +43,25 @@ function FormTimeInput<T extends FieldValues>({
 			control={control}
 			name={name}
 			render={({ field, fieldState }) => (
-				<FormControl fullWidth error={fieldState.invalid} disabled={disabled}>
-					{label && (
-						<InputLabel shrink htmlFor={id} required={required}>
-							{label}
-						</InputLabel>
-					)}
-
+				<FormField
+					id={id}
+					label={label}
+					required={required}
+					description={description}
+					error={fieldState.error?.message}
+					disabled={disabled}
+					showRequiredIndicator={showRequiredIndicator}
+					showDescriptionWithError={showDescriptionWithError}
+				>
 					<TimeInput
 						{...props}
 						value={field.value ?? null}
 						onChange={field.onChange}
 						disabled={disabled}
 						error={fieldState.invalid}
-						helperText={fieldState.error?.message}
+						fullWidth
 					/>
-
-					{!fieldState.error?.message && description && (
-						<FormHelperText>{description}</FormHelperText>
-					)}
-				</FormControl>
+				</FormField>
 			)}
 		/>
 	);

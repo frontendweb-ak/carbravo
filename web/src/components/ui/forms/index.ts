@@ -3,7 +3,6 @@ export * from "./form-checkbox-group";
 export * from "./form-choice-chip-group";
 export * from "./form-date-input";
 export * from "./form-datetime-input";
-export * from "./form-field";
 export * from "./form-input";
 export * from "./form-radio-group";
 export * from "./form-select";

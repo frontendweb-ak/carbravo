@@ -55,7 +55,7 @@ function ChoiceChipGroup<T>({
 	paddingX = 4,
 	fontSize = "0.8125rem",
 	fontWeight = 600,
-	gap = 1,
+	gap = 2,
 	sx,
 }: ChoiceChipGroupProps<T>) {
 	const theme = useTheme();

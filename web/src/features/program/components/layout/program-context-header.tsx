@@ -1,6 +1,13 @@
 // src/features/program/components/program-context-header.tsx
 
-import { Box, Container, Divider, Stack, Typography } from "@mui/material";
+import {
+	Box,
+	Container,
+	Divider,
+	Stack,
+	Typography,
+	useTheme,
+} from "@mui/material";
 import type { ReactNode } from "react";
 
 import type { ProgramWorkflowStatus } from "@/config/constants";
@@ -60,13 +67,12 @@ function ProgramContextHeader({
 	revisionTabs = [],
 	onRevisionChange,
 }: ProgramContextHeaderProps) {
+	const theme = useTheme();
+	const { palette } = theme;
 	return (
 		<Box
 			className={className}
-			sx={{
-				pt: 1.25,
-				backgroundColor: "background.default",
-			}}
+			sx={{ pt: 1.25, backgroundColor: "background.default" }}
 		>
 			<Container
 				maxWidth={false}
@@ -74,7 +80,6 @@ function ProgramContextHeader({
 					width: "100%",
 					maxWidth: 1360,
 					mx: "auto",
-
 					px: {
 						xs: 2,
 						sm: 3,
@@ -89,34 +94,15 @@ function ProgramContextHeader({
 				<Box
 					sx={{
 						display: "grid",
-
-						/*
-						 * LEFT:
-						 *   takes available space
-						 *   but is allowed to shrink
-						 *
-						 * RIGHT:
-						 *   always keeps its natural width
-						 */
 						gridTemplateColumns: "minmax(0, 1fr) auto",
-
 						alignItems: "center",
-
 						columnGap: 2,
-
 						minHeight: 42,
-
 						mb: 0.75,
 					}}
 				>
 					{/* Identity */}
-
-					<Box
-						sx={{
-							minWidth: 0,
-							overflow: "hidden",
-						}}
-					>
+					<Box sx={{ minWidth: 0, overflow: "hidden" }}>
 						<ProgramIdentityHeader
 							backHref={backHref}
 							backLabel={backLabel}
@@ -129,12 +115,7 @@ function ProgramContextHeader({
 					</Box>
 
 					{/* Save status */}
-
-					<Box
-						sx={{
-							flexShrink: 0,
-						}}
-					>
+					<Box sx={{ flexShrink: 0 }}>
 						<SaveStatus
 							saved={saved}
 							hideSave={hideSave}
@@ -144,10 +125,6 @@ function ProgramContextHeader({
 						/>
 					</Box>
 				</Box>
-
-				{/* =====================================================
-				    REVISION NAVIGATION
-				===================================================== */}
 
 				<Stack
 					direction="row"
@@ -180,18 +157,12 @@ function ProgramContextHeader({
 							direction="row"
 							sx={{
 								alignItems: "center",
-
 								minHeight: 30,
-
 								gap: 0.75,
-
 								px: 1.5,
 								py: 0.5,
-
 								borderRadius: 999,
-
-								backgroundColor: "#E7ECEE",
-
+								backgroundColor: palette.muted.main,
 								flexShrink: 0,
 							}}
 						>
@@ -209,7 +180,7 @@ function ProgramContextHeader({
 								sx={{
 									fontSize: 11,
 									lineHeight: 1.2,
-									color: "#637780",
+									color: palette.muted.foreground,
 									fontWeight: 600,
 									whiteSpace: "nowrap",
 								}}
@@ -230,19 +201,10 @@ function ProgramContextHeader({
 					width: "100%",
 					maxWidth: 1360,
 					mx: "auto",
-
-					px: {
-						xs: 2,
-						sm: 3,
-						lg: 4,
-					},
+					px: { xs: 2, sm: 3, lg: 4 },
 				}}
 			>
-				<Divider
-					sx={{
-						borderColor: "#DCE4E6",
-					}}
-				/>
+				<Divider sx={{ borderColor: "divider" }} />
 			</Container>
 		</Box>
 	);
