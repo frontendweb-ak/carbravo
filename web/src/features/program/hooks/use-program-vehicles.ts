@@ -111,11 +111,9 @@ export function useResolveVehicleFilters() {
 				};
 			}),
 		);
-
 		const vehicleCatalogIds = [
 			...new Set(resolvedRows.flatMap((result) => result.vehicleCatalogIds)),
 		];
-
 		return {
 			rows: resolvedRows,
 			vehicleCatalogIds,
