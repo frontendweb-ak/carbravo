@@ -26,6 +26,7 @@ export function mapValuesResponseToForm(
     customerCash: readCashAmount(response, "CUSTOMER_CASH"),
     bonusCash: readCashAmount(response, "BONUS_CASH"),
     downPaymentAssist: readCashAmount(response, "DOWN_PAYMENT_ASSIST"),
+    aprByTerm: [],
     // The current OpenAPI contract does not define stackability fields.
     stackableWith: [],
     notStackableWith: [],
