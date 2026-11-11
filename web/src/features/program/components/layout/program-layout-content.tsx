@@ -177,7 +177,6 @@ export function ProgramLayoutContent({
 			case "EXPIRED":
 				return "Expired";
 
-			case "DRAFT":
 			default:
 				return "Draft";
 		}
