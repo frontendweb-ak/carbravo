@@ -2,6 +2,7 @@ import { Alert, Box } from "@mui/material";
 import type { ProgramWorkflowStatus } from "@/config/constants";
 import { ProgramWorkflow } from "@/features/program/components/program-workflow";
 import { useProgramEditor } from "@/features/program/editor/program-editor-context";
+import { useMockUserRole } from "@/infra/api/use-mock-user-role";
 import {
   useApproveProgramRevision,
   useExpireProgram,
@@ -17,6 +18,7 @@ import {
 
 export default function ApprovalPage() {
   const { programId, revisionId, programStatus } = useProgramEditor();
+  const { role } = useMockUserRole();
 
   const approvalQuery = useProgramApproval(programId, revisionId);
   const setupQuery = useProgramSetup(programId, revisionId);
@@ -154,11 +156,11 @@ export default function ApprovalPage() {
         revisionId={revisionId}
         status={status}
         requirements={requirements}
-        onSubmitForReview={status === "DRAFT" ? handleSubmit : undefined}
-        onApprove={status === "REVIEW" ? handleApprove : undefined}
-        onReject={status === "REVIEW" ? handleReject : undefined}
-        onPostToProduction={status === "APPROVED" ? handlePostToProduction : undefined}
-        onExpire={status === "ACTIVE" ? handleExpire : undefined}
+        onSubmitForReview={status === "DRAFT" && (role === "AUTHOR" || role === "ADMIN") ? handleSubmit : undefined}
+        onApprove={status === "REVIEW" && (role === "APPROVER" || role === "ADMIN") ? handleApprove : undefined}
+        onReject={status === "REVIEW" && (role === "APPROVER" || role === "ADMIN") ? handleReject : undefined}
+        onPostToProduction={status === "APPROVED" && (role === "AUTHOR" || role === "ADMIN") ? handlePostToProduction : undefined}
+        onExpire={status === "ACTIVE" && role === "ADMIN" ? handleExpire : undefined}
         auditTimeline={approval?.auditTimeline ?? []}
         loading={isLoading}
       />
