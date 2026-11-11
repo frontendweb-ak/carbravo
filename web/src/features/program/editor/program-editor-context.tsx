@@ -12,7 +12,7 @@ import {
 export type ProgramEditorMode = "new" | "edit";
 export type ProgramWorkflowStatus =
 	| "DRAFT"
-	| "SUBMITTED"
+	| "REVIEW"
 	| "APPROVED"
 	| "ACTIVE"
 	| "EXPIRED";
@@ -354,7 +354,7 @@ export function ProgramEditorProvider({
 	/* ---------------------------------------------------------------------- */
 
 	const isSubmitted =
-		programStatus === "SUBMITTED" ||
+		programStatus === "REVIEW" ||
 		programStatus === "APPROVED" ||
 		programStatus === "ACTIVE" ||
 		programStatus === "EXPIRED";
