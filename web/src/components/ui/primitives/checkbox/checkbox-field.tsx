@@ -11,7 +11,7 @@ import { Checkbox, type CheckboxProps } from "./checkbox";
 
 export interface CheckboxFieldProps extends Omit<
 	CheckboxProps,
-	"checked" | "label" | "description"
+	"checked" | "label" | "description" | "variant"
 > {
 	label?: ReactNode;
 	description?: ReactNode;
