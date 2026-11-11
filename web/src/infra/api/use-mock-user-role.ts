@@ -10,10 +10,12 @@ import {
 export function useMockUserRole() {
   const [role, setRole] = useState<MockUserRole>(getMockUserRole);
 
-  useEffect(
-    () => subscribeToMockUserRole(setRole),
-    [],
-  );
+  useEffect(() => {
+    const unsubscribe = subscribeToMockUserRole(setRole);
+    return () => {
+      unsubscribe();
+    };
+  }, []);
 
   const updateRole = useCallback((nextRole: MockUserRole) => {
     setMockUserRole(nextRole);
