@@ -18,15 +18,11 @@ export type ProgramWorkflowStatus =
   | "APPROVED"
   | "ACTIVE"
   | "EXPIRED";
-export type ProgramTypeCode = "CUSTOMER_CASH" | "APR" | "BONUS_CASH";
+export type ProgramTypeCode = string;
 export type PurchaseType = "CASH" | "FINANCE";
-export type ConditionCode =
-  | "CARBRAVO"
-  | "MANUFACTURER_CERTIFIED"
-  | "USED_INSPECTED"
-  | "USED_AS_IS";
+export type ConditionCode = string;
 
-export type CreditTier = "A_PLUS" | "A1" | "A2" | "B";
+export type CreditTier = string;
 
 /**
  * ============================================================
@@ -46,8 +42,7 @@ export type AuditOperation =
   | "REVISE"
   | "MINOR_REVISE"
   | "POST_TO_PRODUCTION"
-  | "EXPIRE"
-  | "DELETE";
+  | "EXPIRE";
 
 /**
  * ============================================================
@@ -107,6 +102,7 @@ export interface SetupFields {
   contactPhone: string | null;
   financialProviderCode: string | null;
   conditionCode: ConditionCode | null;
+  conditionTier?: string | null;
   mileageCeiling: number | null;
   topOfDeal: boolean;
   vinException: boolean;
