@@ -7,6 +7,22 @@ import { getProgramOrThrow } from "../lib/programs.js";
 import type { Vehicle } from "../store.js";
 import { getNextId, readDb, writeDb } from "../store.js";
 export const vehicles = new Hono();
+function toSelectedVehicles(db: Awaited<ReturnType<typeof readDb>>, revision: Awaited<ReturnType<typeof readDb>>["revisions"][number]) {
+  return revision.vehicles.flatMap((selection) => {
+    const vehicle = db.vehicles.find((item) => item.vehicleCatalogId === selection.vehicleCatalogId);
+    if (!vehicle) return [];
+    return [{
+      revisionVehicleId: selection.revisionVehicleId,
+      vehicleCatalogId: vehicle.vehicleCatalogId,
+      year: vehicle.year,
+      make: vehicle.make,
+      model: vehicle.model,
+      ...(vehicle.trimName ? { trimName: vehicle.trimName } : {}),
+      segment: vehicle.segment,
+    }];
+  });
+}
+
 
 function vehicleLabel(vehicle: Vehicle): string {
 	return `${vehicle.year} ${vehicle.make} ${vehicle.model}${
@@ -124,7 +140,6 @@ vehicles.get("/vehicles/search", async (c) => {
   currentUser(c);
 
   const db = await readDb();
-  const search = c.req.query("search")?.trim().toLowerCase();
   const yearParam = c.req.query("year");
   const make = c.req.query("make")?.trim().toLowerCase();
   const model = c.req.query("model")?.trim().toLowerCase();
@@ -164,26 +179,6 @@ vehicles.get("/vehicles/search", async (c) => {
     );
   }
 
-  if (search) {
-    items = items.filter((vehicle) => {
-      const value = [
-        vehicle.year,
-        vehicle.make,
-        vehicle.model,
-        vehicle.trimName,
-        vehicle.bodyStyle,
-        vehicle.segment,
-        vehicle.fuelType,
-        vehicle.drivetrain,
-        vehicle.oemCode,
-      ]
-        .join(" ")
-        .toLowerCase();
-
-      return value.includes(search);
-    });
-  }
-
   return c.json({ vehicles: items });
 });
 
@@ -209,21 +204,7 @@ vehicles.get(
       throw notFound("REVISION_NOT_FOUND", "Revision not found");
     }
 
-    const selected = revision.vehicles.map((revisionVehicle) => {
-      const vehicle = db.vehicles.find(
-        (item) => item.vehicleCatalogId === revisionVehicle.vehicleCatalogId,
-      );
-
-      return {
-        revisionVehicleId: revisionVehicle.revisionVehicleId,
-        vehicleCatalogId: revisionVehicle.vehicleCatalogId,
-        label: vehicle
-          ? vehicleLabel(vehicle)
-          : `Vehicle ${revisionVehicle.vehicleCatalogId}`,
-      };
-    });
-
-    return c.json({ selectedVehicles: selected });
+    return c.json({ selectedVehicles: toSelectedVehicles(db, revision) });
   },
 );
 
@@ -300,7 +281,22 @@ vehicles.put(
 			);
 		}
 
-		revision.vehicles = uniqueIds;
+		const existingByCatalogId = new Map(
+			revision.vehicles.map((selection) => [selection.vehicleCatalogId, selection]),
+		);
+		let nextRevisionVehicleId = Math.max(
+			0,
+			...db.revisions.flatMap((item) =>
+				item.vehicles.map((selection) => selection.revisionVehicleId),
+			),
+		) + 1;
+		revision.vehicles = uniqueIds.map((vehicleCatalogId) => {
+			const existing = existingByCatalogId.get(vehicleCatalogId);
+			return existing ?? {
+				revisionVehicleId: nextRevisionVehicleId++,
+				vehicleCatalogId,
+			};
+		});
 
 		/**
 		 * Vehicle changes invalidate
@@ -350,25 +346,6 @@ vehicles.put(
 
 		await writeDb(db);
 
-		return c.json({
-      programId: program.id,
-      revisionId: revision.id,
-      vehicles: revision.vehicles.map((revisionVehicle) => {
-        const vehicle = db.vehicles.find(
-          (item) => item.vehicleCatalogId === revisionVehicle.vehicleCatalogId,
-        );
-        return {
-          vehicleCatalogId: revisionVehicle.vehicleCatalogId,
-          label: vehicle
-            ? vehicleLabel(vehicle)
-            : `Vehicle ${revisionVehicle.vehicleCatalogId}`,
-        };
-      }),
-
-      approval: {
-        isSubmitted: revision.approval.isSubmitted,
-        approved: revision.approval.approved,
-      },
-    });
+		return c.json({ selectedVehicles: toSelectedVehicles(db, revision) });;
 	},
 );
