@@ -10,25 +10,27 @@ export interface SelectedProgramVehicleDto {
   segment: string;
 }
 
-export interface RevisionVehiclesResponseDto {
+export interface GetProgramVehiclesResponseDto {
   selectedVehicles: SelectedProgramVehicleDto[];
 }
 
-export interface UpdateProgramVehiclesRequestDto {
+export type UpdateProgramVehiclesRequestDto = {
   vehicleCatalogIds: number[];
-}
+};
+
+export type UpdateProgramVehiclesResponseDto = GetProgramVehiclesResponseDto;
 
 export interface VehicleCatalogDto {
-  vehicleCatalogId: number;
   vehicleId: string;
+  vehicleCatalogId: number;
   year: number;
   make: string;
   model: string;
-  trimName?: string;
-  bodyStyle?: string;
+  trimName: string;
+  bodyStyle: string;
   segment: string;
   fuelType: string;
-  drivetrain?: string;
+  drivetrain: string;
 }
 
 export interface SearchVehiclesParams {
@@ -50,7 +52,7 @@ export interface VehicleYearsResponseDto {
 
 export interface VehicleMakeDto {
   make: string;
-  oemCode?: string;
+  oemCode: string;
 }
 
 export interface VehicleMakesResponseDto {
@@ -59,7 +61,7 @@ export interface VehicleMakesResponseDto {
 
 export interface VehicleModelDto {
   model: string;
-  division?: string;
+  division: string;
 }
 
 export interface VehicleModelsResponseDto {
@@ -67,8 +69,8 @@ export interface VehicleModelsResponseDto {
 }
 
 export const vehiclesApi = {
-  async getForRevision(programId: number, revisionId: number): Promise<RevisionVehiclesResponseDto> {
-    const response = await http.get<RevisionVehiclesResponseDto>(
+  async getForRevision(programId: number, revisionId: number): Promise<GetProgramVehiclesResponseDto> {
+    const response = await http.get<GetProgramVehiclesResponseDto>(
       `/programs/${programId}/revisions/${revisionId}/vehicles`,
     );
     return response.data;
@@ -78,8 +80,8 @@ export const vehiclesApi = {
     programId: number,
     revisionId: number,
     payload: UpdateProgramVehiclesRequestDto,
-  ): Promise<RevisionVehiclesResponseDto> {
-    const response = await http.put<RevisionVehiclesResponseDto>(
+  ): Promise<UpdateProgramVehiclesResponseDto> {
+    const response = await http.put<UpdateProgramVehiclesResponseDto>(
       `/programs/${programId}/revisions/${revisionId}/vehicles`,
       payload,
     );
