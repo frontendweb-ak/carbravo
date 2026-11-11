@@ -510,7 +510,7 @@ geography.put(
 
 function geographyExists(
 	db: Awaited<ReturnType<typeof readDb>>,
-	rule: Omit<GeoRule, "geoRuleId">,
+	rule: Omit<GeoRuleRecord, "geoRuleId">,
 ): boolean {
 	switch (rule.level) {
 		case "REGION":
