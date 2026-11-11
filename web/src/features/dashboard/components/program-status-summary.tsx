@@ -34,6 +34,7 @@ function ProgramStatusSummary({
 				<ProgramStatusCard
 					label="Review"
 					value={review}
+					href="/programs?pendingApproval=true"
 					status="REVIEW"
 					loading={loading}
 				/>
@@ -43,6 +44,7 @@ function ProgramStatusSummary({
 				<ProgramStatusCard
 					label="Approved"
 					value={approved}
+					href="/programs?workflowStatus=APPROVED"
 					status="APPROVED"
 					loading={loading}
 				/>
