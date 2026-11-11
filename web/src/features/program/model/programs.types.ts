@@ -32,7 +32,7 @@ export interface Program {
 	identifier: string;
 	name: string;
 
-	status: ProgramStatus;
+	status: ProgramWorkflowStatus;
 	type: ProgramType | null;
 
 	revision: ProgramRevision | null;
