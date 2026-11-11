@@ -34,7 +34,9 @@ export function setMockUserRole(role: MockUserRole): void {
       // The active role still applies for this page session if storage is blocked.
     }
   }
-  listeners.forEach((listener) => listener(currentRole));
+  for (const listener of listeners) {
+    listener(currentRole);
+  }
 }
 
 export function subscribeToMockUserRole(listener: (role: MockUserRole) => void) {
