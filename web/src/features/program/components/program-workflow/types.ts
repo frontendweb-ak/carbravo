@@ -2,6 +2,7 @@
 
 import type { ProgramWorkflowStatus } from "@/config/constants";
 import type { ApprovalAuditEventDto } from "../../api/revisions.api";
+import type { ApprovalAuditEventDto } from "../../api/revisions.api";
 
 export interface WorkflowRequirement {
 	key: "setup" | "vehicles" | "geography" | "eligibility" | "incentive-values" | "marketing" | "summary";
@@ -18,11 +19,13 @@ export interface ProgramWorkflowProps {
 
 	onSubmitForReview?: () => void;
 	onApprove?: () => void;
+	onReject?: () => void;
 	onReject?: (reason: string) => void;
 	onPostToProduction?: () => void;
 	onExpire?: () => void;
 
 	auditTimeline?: ApprovalAuditEventDto[];
 
+	timeline?: ApprovalAuditEventDto[];
 	loading?: boolean;
 }
