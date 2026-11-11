@@ -226,8 +226,8 @@ approval.post(
 		}
 
 		const comment =
-			typeof body?.approvalComment === "string"
-				? body.approvalComment.trim()
+			typeof body?.comment === "string"
+				? body.comment.trim()
 				: null;
 
 		const now = new Date().toISOString();
