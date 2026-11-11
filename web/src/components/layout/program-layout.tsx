@@ -112,9 +112,8 @@ function ProgramLayout({ mode = "edit" }: ProgramLayoutProps) {
 			revisionLabel={
 				mode === "edit" ? (selectedRevision?.label ?? undefined) : undefined
 			}
-			programStatus={
-				mode === "edit" ? (selectedRevision?.status ?? undefined) : undefined
-			}
+			programStatus={mode === "edit" ? selectedWorkflowStatus : undefined}
+			isMinorRevision={mode === "edit" ? (selectedRevision?.isMinorRevision ?? false) : false}
 		>
 			<ProgramLayoutContent
 				revisionTabs={revisionTabs}
