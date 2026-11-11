@@ -109,7 +109,7 @@ export function mapSetupFormToDto(
     : {
         programName: values.programName,
         programTypeCode: values.programType,
-        customerTypeCodes: ["STANDARD"],
+        customerTypeCodes: ["GENERAL_CONSUMER"],
         deliveryStartDate: "",
         deliveryEndDate: "",
       };
