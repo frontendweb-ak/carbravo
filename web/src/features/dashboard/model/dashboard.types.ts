@@ -1,4 +1,5 @@
 export type DashboardParentStatus = "DRAFT" | "ACTIVE" | "EXPIRED";
+export type DashboardProgramStatus = "DRAFT" | "REVIEW" | "APPROVED" | "ACTIVE" | "EXPIRED";
 export type DashboardEventType = "INCENTIVE_REVISION" | "INCENTIVE_PROGRAM";
 export type ActivityColor = "DRAFT" | "REVIEW" | "APPROVED" | "ACTIVE" | "EXPIRED";
 
