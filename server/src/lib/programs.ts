@@ -125,87 +125,6 @@ function getCurrentRevision(
 }
 
 /* -------------------------------------------------------------------------- */
-/* Vehicles                                                                   */
-/* -------------------------------------------------------------------------- */
-
-/**
- * Returns lightweight vehicle labels for the programs list.
- *
- * The list should not return the complete vehicle catalog object.
- */
-function mapVehicleLabels(
-	db: MockDb,
-	revision: MockRevision,
-) {
-	return revision.vehicles
-		.map((selection) => {
-			const vehicle = db.vehicles.find(
-				(item) =>
-					item.vehicleCatalogId === selection.vehicleCatalogId,
-			);
-
-			if (!vehicle) {
-				return null;
-			}
-
-			return {
-				vehicleCatalogId: vehicle.vehicleCatalogId,
-				label: `${vehicle.make} ${vehicle.model}`,
-			};
-		})
-		.filter(
-			(vehicle): vehicle is NonNullable<typeof vehicle> =>
-				vehicle !== null,
-		);
-}
-
-/* -------------------------------------------------------------------------- */
-/* Geography                                                                  */
-/* -------------------------------------------------------------------------- */
-
-/**
- * Converts stored geography rules into the compact geography summary
- * required by the programs list.
- *
- * Examples:
- *
- *   National
- *   Midwest
- *   Southeast
- *   CA, NY, WA
- */
-function mapGeographySummary(
-	revision: MockRevision,
-): string[] {
-	const includedRules = revision.geography.filter(
-		(rule) => rule.isIncluded,
-	);
-
-	if (includedRules.length === 0) {
-		return [];
-	}
-
-	/*
-	 * National is already a complete summary.
-	 */
-	const national = includedRules.find(
-		(rule) =>
-			rule.level === "REGION" &&
-			rule.code === "NATIONAL",
-	);
-
-	if (national) {
-		return [national.name ?? "National"];
-	}
-
-	return includedRules
-		.filter((rule) => rule.level === "STATE")
-		.map((rule) => rule.name ?? rule.code);
-}
-
-/* -------------------------------------------------------------------------- */
-/* Program list item                                                          */
-/* -------------------------------------------------------------------------- */
 
 export function programListItem(
 	db: MockDb,
@@ -217,10 +136,6 @@ export function programListItem(
 	const currentRevision =
 		active ?? draft;
 
-	const workflowStatus = getProgramWorkflowStatus(
-		program,
-		draft,
-	);
 	return {
 		programId: program.id,
 		programIdentifier: program.identifier,
