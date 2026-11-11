@@ -56,7 +56,7 @@ function WorkflowTimeline({
         <Stack spacing={0} sx={{ mt: 2 }}>
           {events.map((event, index) => (
             <Box
-              key={`${event.operation}-${event.changedAt}-${index}`}
+              key={`${event.operation}-${event.changedAt}-${event.changedBy}-${event.comment ?? ""}`}
               sx={{ display: "flex", gap: 1.5, minHeight: 54 }}
             >
               <Box
