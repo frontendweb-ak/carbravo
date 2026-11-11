@@ -23,6 +23,7 @@ export function mapDashboardSummary(
 		counts: dto.counts.map((item) => ({
 			status: item.status,
 			total: item.total,
+			pendingApproval: item.pendingApproval,
 		})),
 	};
 }
