@@ -91,6 +91,15 @@ function ProgramLayout({ mode = "edit" }: ProgramLayoutProps) {
 			? getSelectedRevision(program, revisionHistory, revisionSelection)
 			: null;
 	const revisionId = selectedRevision?.id ?? undefined;
+	const selectedWorkflowStatus = (() => {
+		if (!selectedRevision) return undefined;
+		if (selectedRevision.status === "ACTIVE" || selectedRevision.status === "EXPIRED") {
+			return selectedRevision.status;
+		}
+		if (selectedRevision.approved) return "APPROVED" as const;
+		if (selectedRevision.isSubmitted) return "REVIEW" as const;
+		return "DRAFT" as const;
+	})();
 
 	return (
 		<ProgramEditorProvider
