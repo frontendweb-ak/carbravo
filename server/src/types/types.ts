@@ -94,6 +94,7 @@ export type ErrorCode =
   | "PROGRAM_NOT_CLONABLE";
 
 export interface SetupFields {
+  programName: string | null;
   programTypeCode: ProgramTypeCode | null;
   purchaseType: PurchaseType | null;
   customerTypeCodes: string[];
