@@ -51,15 +51,6 @@ export interface ProgramDetail extends Program {
 	activeRevision: ProgramRevision | null;
 	draftRevision: ProgramRevision | null;
 }
-export interface ProgramsStatusCounts {
-	all: number;
-	draft: number;
-	review: number;
-	approved: number;
-	active: number;
-	expired: number;
-}
-
 export interface ProgramsPagination {
 	page: number;
 	size: number;
@@ -70,5 +61,4 @@ export interface ProgramsPagination {
 export interface ProgramsList {
 	items: Program[];
 	pagination: ProgramsPagination;
-	statusCounts: ProgramsStatusCounts;
 }
