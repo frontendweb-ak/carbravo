@@ -1,40 +1,36 @@
+import { useCallback, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Box, Grid, Stack, Typography } from "@mui/material";
-import { FormProvider, useForm } from "react-hook-form";
-import { useCallback, useEffect, useRef } from "react";
+import { Alert, Box, Grid, Stack, Typography } from "@mui/material";
+import { FormProvider, useForm, type Path } from "react-hook-form";
 
 import { FormChoiceChipGroup, FormInput } from "@/components/ui/forms";
-
 import { ProgramSection } from "../components";
+import { incentiveValuesDefaultValues, STACKABILITY_OPTIONS } from "../constants";
+import { useProgramEditor } from "../editor/program-editor-context";
+import { useProgramValues, useUpdateProgramValues } from "../hooks";
 import {
-  incentiveValuesDefaultValues,
-  STACKABILITY_OPTIONS,
-} from "../constants";
+  mapIncentiveFormToComponents,
+  mapProgramValuesToForm,
+} from "../model/incentive-values.mapper";
 import {
   type IncentiveValuesFormValues,
   incentiveValuesFormSchema,
 } from "../schema";
-import { useProgramEditor } from "../editor/program-editor-context";
-import { useProgramValues, useUpdateProgramValues } from "../hooks";
-import {
-  hasUnsupportedStackabilityValues,
-  mapValuesFormToRequest,
-  mapValuesResponseToForm,
-} from "../model/values.mapper";
 
 export function IncentiveValuesForm() {
   const {
     programId,
     revisionId,
     isReadOnly,
+    isMinorRevision,
     registerSaveHandler,
-    updateSectionStatus,
     setSectionSaving,
+    updateSectionStatus,
   } = useProgramEditor();
 
   const valuesQuery = useProgramValues(programId, revisionId);
   const updateValues = useUpdateProgramValues();
-  const hydratedRevisionRef = useRef<string | null>(null);
+  const canEdit = !isReadOnly && !isMinorRevision;
 
   const form = useForm<IncentiveValuesFormValues>({
     resolver: zodResolver(incentiveValuesFormSchema),
@@ -43,85 +39,93 @@ export function IncentiveValuesForm() {
   });
 
   useEffect(() => {
-    if (!valuesQuery.data || programId == null || revisionId == null) return;
-    const key = `${programId}:${revisionId}`;
-    if (hydratedRevisionRef.current === key) return;
+    if (!valuesQuery.data || form.formState.isDirty) return;
+    form.reset(mapProgramValuesToForm(valuesQuery.data));
+  }, [form, valuesQuery.data]);
 
-    hydratedRevisionRef.current = key;
-    form.reset(mapValuesResponseToForm(valuesQuery.data));
-    updateSectionStatus("incentive-values", "completed");
-  }, [valuesQuery.data, programId, revisionId, form, updateSectionStatus]);
-
-  useEffect(() => {
-    if (valuesQuery.isError) {
-      updateSectionStatus("incentive-values", "warning");
-    }
-  }, [valuesQuery.isError, updateSectionStatus]);
-
-  const save = useCallback(async () => {
-    if (isReadOnly || programId == null || revisionId == null) return;
-
-    const isValid = await form.trigger();
-    if (!isValid) {
-      updateSectionStatus("incentive-values", "warning");
+  const onSubmit = useCallback(async (values: IncentiveValuesFormValues) => {
+    if (!canEdit || programId == null || revisionId == null || !valuesQuery.data) {
       return;
     }
 
-    const values = form.getValues();
     setSectionSaving(true);
     try {
+      const components = mapIncentiveFormToComponents(values, valuesQuery.data);
       await updateValues.mutateAsync({
         programId,
         revisionId,
-        payload: mapValuesFormToRequest(values),
+        payload: { components },
       });
-      form.reset(values);
       updateSectionStatus(
         "incentive-values",
-        hasUnsupportedStackabilityValues(values) ? "warning" : "completed",
+        components.length > 0 ? "completed" : "warning",
       );
+      form.reset(values);
     } finally {
       setSectionSaving(false);
     }
   }, [
+    canEdit,
     form,
-    isReadOnly,
     programId,
     revisionId,
     setSectionSaving,
     updateSectionStatus,
     updateValues,
+    valuesQuery.data,
   ]);
 
   useEffect(() => {
-    registerSaveHandler(isReadOnly ? null : save);
+    registerSaveHandler(async () => {
+      await form.handleSubmit(onSubmit)();
+    });
     return () => registerSaveHandler(null);
-  }, [isReadOnly, registerSaveHandler, save]);
+  }, [form, onSubmit, registerSaveHandler]);
+
+  const aprTerms = valuesQuery.data?.financeTerms ?? [];
 
   return (
     <FormProvider {...form}>
       <Stack
         component="form"
-        onSubmit={form.handleSubmit(async () => save())}
+        onSubmit={form.handleSubmit(onSubmit)}
         spacing={2.5}
       >
+        {isMinorRevision && (
+          <Alert severity="info">
+            Incentive values are locked for a minor revision. Only marketing text can be changed.
+          </Alert>
+        )}
+
         <ProgramSection
           title="APR by term"
-          description="Set Purchase type to Finance in Setup to author APR by term."
+          description="Set Purchase Type to Finance in Setup to author APR by term."
         >
-          <Box
-            sx={{
-              borderRadius: 1.5,
-              backgroundColor: "action.hover",
-              px: 1.5,
-              py: 1.25,
-            }}
-          >
-            <Typography variant="body2" color="text.secondary">
-              APR values can be configured when the program's Purchase Type is
-              set to Finance.
-            </Typography>
-          </Box>
+          {aprTerms.length === 0 ? (
+            <Box sx={{ borderRadius: 1.5, backgroundColor: "action.hover", px: 1.5, py: 1.25 }}>
+              <Typography variant="body2" color="text.secondary">
+                Select one or more finance terms in Setup to configure APR values here.
+              </Typography>
+            </Box>
+          ) : (
+            <Grid container spacing={2}>
+              {aprTerms.map((termMonths, index) => (
+                <Grid key={termMonths} size={{ xs: 12, sm: 6, lg: 4 }}>
+                  <FormInput
+                    control={form.control}
+                    name={`aprByTerm.${index}.aprRate` as Path<IncentiveValuesFormValues>}
+                    label={`${termMonths}-month APR`}
+                    type="number"
+                    placeholder="0.00"
+                    rightElement={
+                      <Typography variant="caption" color="text.secondary">%</Typography>
+                    }
+                    disabled={!canEdit}
+                  />
+                </Grid>
+              ))}
+            </Grid>
+          )}
         </ProgramSection>
 
         <ProgramSection title="Cash values">
@@ -133,10 +137,9 @@ export function IncentiveValuesForm() {
                 label="Customer Cash"
                 type="number"
                 placeholder="0"
-                disabled={isReadOnly}
+                disabled={!canEdit}
               />
             </Grid>
-
             <Grid size={{ xs: 12, lg: 4 }}>
               <FormInput
                 control={form.control}
@@ -144,10 +147,9 @@ export function IncentiveValuesForm() {
                 label="Bonus Cash"
                 type="number"
                 placeholder="0"
-                disabled={isReadOnly}
+                disabled={!canEdit}
               />
             </Grid>
-
             <Grid size={{ xs: 12, lg: 4 }}>
               <FormInput
                 control={form.control}
@@ -155,7 +157,7 @@ export function IncentiveValuesForm() {
                 label="Down Payment Assist"
                 type="number"
                 placeholder="0"
-                disabled={isReadOnly}
+                disabled={!canEdit}
               />
             </Grid>
           </Grid>
@@ -165,6 +167,9 @@ export function IncentiveValuesForm() {
           title="Stackability"
           description="How this program combines with others on the same deal."
         >
+          <Alert severity="info" sx={{ mb: 2 }}>
+            Stackability and belongs-to fields appear in the UI reference but are not represented in the current OpenAPI values schema. They are shown for reference and are not sent to the API.
+          </Alert>
           <Stack spacing={3}>
             <FormChoiceChipGroup
               control={form.control}
@@ -174,9 +179,8 @@ export function IncentiveValuesForm() {
               selectionMode="multiple"
               options={STACKABILITY_OPTIONS}
               borderRadius={5}
-              disabled={isReadOnly}
+              disabled
             />
-
             <FormChoiceChipGroup
               control={form.control}
               name="notStackableWith"
@@ -185,15 +189,14 @@ export function IncentiveValuesForm() {
               selectionMode="multiple"
               options={STACKABILITY_OPTIONS}
               borderRadius={5}
-              disabled={isReadOnly}
+              disabled
             />
-
             <FormInput
               control={form.control}
               name="belongsTo"
               label="Belongs to"
               placeholder="e.g. GMF National"
-              disabled={isReadOnly}
+              disabled
             />
           </Stack>
         </ProgramSection>
