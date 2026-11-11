@@ -179,7 +179,9 @@ vehicles.get("/vehicles/search", async (c) => {
     );
   }
 
-  return c.json({ vehicles: items });
+  return c.json({
+    vehicles: items.map(({ oemCode: _oemCode, ...vehicle }) => vehicle),
+  });
 });
 
 /**
