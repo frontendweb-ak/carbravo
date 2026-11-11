@@ -130,3 +130,34 @@ export function mapSetupFormToDto(
     creditTiers: [...values.creditTiers],
   };
 }
+
+
+/**
+ * Strip revision metadata from a Setup response before sending a complete
+ * SetupInput to PUT /setup.
+ */
+export function mapSetupResponseToDto(data: ProgramSetupResponseDto): ProgramSetupDto {
+  return {
+    programName: data.programName,
+    programTypeCode: data.programTypeCode,
+    customerTypeCodes: [...data.customerTypeCodes],
+    contactName: data.contactName,
+    contactEmail: data.contactEmail,
+    contactPhone: data.contactPhone,
+    financialProviderCode: data.financialProviderCode,
+    conditionCode: data.conditionCode,
+    conditionTier: data.conditionTier,
+    mileageCeiling: data.mileageCeiling,
+    topOfDeal: data.topOfDeal,
+    vinException: data.vinException,
+    mfpnText: data.mfpnText,
+    disclosureText: data.disclosureText,
+    localeCode: data.localeCode,
+    deliveryStartDate: data.deliveryStartDate,
+    deliveryEndDate: data.deliveryEndDate,
+    effectiveStartDate: data.effectiveStartDate,
+    effectiveEndDate: data.effectiveEndDate,
+    financeTerms: [...data.financeTerms],
+    creditTiers: [...data.creditTiers],
+  };
+}
