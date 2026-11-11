@@ -5,7 +5,7 @@ import { ProgramStatusCard } from "./program-status-card";
 export interface ProgramStatusSummaryProps {
 	draft: number;
 	review: number;
-	approved: number;
+	approved: number | null;
 	active: number;
 	expired: number;
 	loading?: boolean;
