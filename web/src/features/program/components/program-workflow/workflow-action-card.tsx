@@ -34,7 +34,7 @@ function WorkflowActionCard({
 	loading,
 }: WorkflowActionCardProps) {
 	const isDraft = status === "DRAFT";
-	const isSubmitted = status === "ACTIVE";
+	const isSubmitted = status === "REVIEW";
 	const isApproved = status === "APPROVED";
 	const isActive = status === "ACTIVE";
 	const isExpired = status === "EXPIRED";
