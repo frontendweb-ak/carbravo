@@ -1,6 +1,6 @@
+import { useCallback, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Box } from "@mui/material";
-import { useCallback, useEffect, useRef } from "react";
+import { Alert, Box } from "@mui/material";
 import { FormProvider, useForm } from "react-hook-form";
 
 import {
@@ -11,7 +11,6 @@ import {
   FormTextarea,
   Typography,
 } from "@/components/ui";
-
 import { ProgramSection } from "../components";
 import {
   CUSTOMER_TYPE_OPTIONS,
@@ -20,7 +19,7 @@ import {
 } from "../constants";
 import { useProgramEditor } from "../editor/program-editor-context";
 import { useProgramSetup, useUpdateProgramSetup } from "../hooks";
-import { mergeSetupResponseToDto } from "../model/setup.mapper";
+import { mapSetupResponseToDto } from "../model/setup.mapper";
 import { type EligibilityFormValues, eligibilityFormSchema } from "../schema";
 
 export function EligibilityForm() {
@@ -28,14 +27,15 @@ export function EligibilityForm() {
     programId,
     revisionId,
     isReadOnly,
+    isMinorRevision,
     registerSaveHandler,
-    updateSectionStatus,
     setSectionSaving,
+    updateSectionStatus,
   } = useProgramEditor();
 
   const setupQuery = useProgramSetup(programId, revisionId);
   const updateSetup = useUpdateProgramSetup();
-  const hydratedRevisionRef = useRef<string | null>(null);
+  const canEdit = !isReadOnly && !isMinorRevision;
 
   const form = useForm<EligibilityFormValues>({
     resolver: zodResolver(eligibilityFormSchema),
@@ -44,85 +44,73 @@ export function EligibilityForm() {
   });
 
   useEffect(() => {
-    if (!setupQuery.data || programId == null || revisionId == null) return;
-    const key = `${programId}:${revisionId}`;
-    if (hydratedRevisionRef.current === key) return;
-
-    hydratedRevisionRef.current = key;
+    if (!setupQuery.data || form.formState.isDirty) return;
     form.reset({
       financialProviderCode: setupQuery.data.financialProviderCode ?? "",
       tierRate: false,
       customerTypeCodes: [...setupQuery.data.customerTypeCodes],
-      footnotes: "",
+      footnotes: setupQuery.data.disclosureText ?? "",
     });
-    updateSectionStatus("eligibility", "completed");
-  }, [setupQuery.data, programId, revisionId, form, updateSectionStatus]);
+  }, [setupQuery.data, form]);
 
-  useEffect(() => {
-    if (setupQuery.isError) updateSectionStatus("eligibility", "warning");
-  }, [setupQuery.isError, updateSectionStatus]);
-
-  const save = useCallback(async () => {
-    if (isReadOnly || programId == null || revisionId == null || !setupQuery.data) return;
-
-    const isValid = await form.trigger();
-    if (!isValid) {
-      updateSectionStatus("eligibility", "warning");
+  const onSubmit = useCallback(async (values: EligibilityFormValues) => {
+    if (!canEdit || programId == null || revisionId == null || !setupQuery.data) {
       return;
     }
 
-    const values = form.getValues();
     setSectionSaving(true);
     try {
-      const payload = mergeSetupResponseToDto(setupQuery.data, {
-        financialProviderCode: values.financialProviderCode,
-        customerTypeCodes: [...values.customerTypeCodes],
+      await updateSetup.mutateAsync({
+        programId,
+        revisionId,
+        payload: {
+          ...mapSetupResponseToDto(setupQuery.data),
+          financialProviderCode: values.financialProviderCode || null,
+          customerTypeCodes: [...values.customerTypeCodes],
+          disclosureText: values.footnotes.trim() || null,
+        },
       });
-      await updateSetup.mutateAsync({ programId, revisionId, payload });
+      updateSectionStatus("eligibility", "completed");
       form.reset(values);
-      // tierRate and footnotes are not represented in the supplied OpenAPI contract.
-      updateSectionStatus(
-        "eligibility",
-        values.tierRate || values.footnotes.trim().length > 0 ? "warning" : "completed",
-      );
     } finally {
       setSectionSaving(false);
     }
   }, [
+    canEdit,
     form,
-    isReadOnly,
     programId,
     revisionId,
-    setupQuery.data,
     setSectionSaving,
+    setupQuery.data,
     updateSectionStatus,
     updateSetup,
   ]);
 
   useEffect(() => {
-    registerSaveHandler(isReadOnly ? null : save);
+    registerSaveHandler(async () => {
+      await form.handleSubmit(onSubmit)();
+    });
     return () => registerSaveHandler(null);
-  }, [isReadOnly, registerSaveHandler, save]);
+  }, [form, onSubmit, registerSaveHandler]);
 
   return (
     <FormProvider {...form}>
       <Box
         component="form"
-        onSubmit={form.handleSubmit(async () => save())}
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 2.5,
-        }}
+        onSubmit={form.handleSubmit(onSubmit)}
+        sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}
       >
+        {isMinorRevision && (
+          <Alert severity="info">
+            Eligibility is locked for a minor revision. Minor revisions can update marketing text only.
+          </Alert>
+        )}
+
         <ProgramSection title="Financial provider">
           <Box
             sx={{
               display: "grid",
-              gridTemplateColumns: {
-                xs: "1fr",
-                lg: "repeat(2, minmax(0, 1fr))",
-              },
+              gridTemplateColumns: { xs: "1fr", lg: "repeat(2, minmax(0, 1fr))" },
               gap: 2.5,
             }}
           >
@@ -132,46 +120,20 @@ export function EligibilityForm() {
               label="Provider"
               required
               options={FINANCIAL_PROVIDER_OPTIONS}
-              disabled={isReadOnly}
+              disabled={!canEdit}
             />
 
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "flex-end",
-                minWidth: 0,
-              }}
-            >
-              <Typography
-                variant="overline"
-                sx={{ mb: 0.75, color: "text.secondary" }}
-              >
+            <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "flex-end", minWidth: 0 }}>
+              <Typography variant="overline" sx={{ mb: 0.75, color: "text.secondary" }}>
                 Tier rate
               </Typography>
-              <Box
-                sx={{
-                  minHeight: 40,
-                  display: "flex",
-                  alignItems: "center",
-                }}
-              >
+              <Box sx={{ minHeight: 40, display: "flex", alignItems: "center" }}>
                 <FormCheckbox
                   control={form.control}
                   name="tierRate"
                   variant="inline"
-                  disabled={isReadOnly}
-                  label={
-                    <>
-                      Apply tier-based rate structure{" "}
-                      <Box
-                        component="span"
-                        sx={{ color: "warning.main", fontWeight: 700 }}
-                      >
-                        (TBD)
-                      </Box>
-                    </>
-                  }
+                  disabled
+                  label={<>Apply tier-based rate structure <Box component="span" sx={{ color: "warning.main", fontWeight: 700 }}>(TBD)</Box></>}
                 />
               </Box>
             </Box>
@@ -186,7 +148,7 @@ export function EligibilityForm() {
               type="button"
               variant="outline"
               size="small"
-              disabled={isReadOnly}
+              disabled={!canEdit}
               onClick={() => {
                 const allValues = CUSTOMER_TYPE_OPTIONS.map((option) => option.value);
                 const currentValues = form.getValues("customerTypeCodes");
@@ -211,25 +173,29 @@ export function EligibilityForm() {
             required
             selectionMode="multiple"
             options={CUSTOMER_TYPE_OPTIONS}
-            disabled={isReadOnly}
+            disabled={!canEdit}
           />
         </ProgramSection>
 
         <ProgramSection
           title="Eligibility footnotes"
-          description="Legal & conditional text shown with the incentive."
+          description="The current API contract stores these in the shared disclosureText field also used by Marketing & Disclosures."
         >
           <FormTextarea
             control={form.control}
             name="footnotes"
-            label="Footnotes"
+            label="Footnotes / disclosure"
             required
-            placeholder="Enter disclaimer or conditions..."
+            placeholder="Enter eligibility and legal disclosure text..."
             maxLength={2000}
             showCounter
-            disabled={isReadOnly}
+            disabled={!canEdit}
           />
         </ProgramSection>
+
+        {!canEdit && !isMinorRevision && (
+          <Alert severity="info">This revision is read-only.</Alert>
+        )}
       </Box>
     </FormProvider>
   );
