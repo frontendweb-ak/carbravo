@@ -2,6 +2,7 @@ import { useCallback, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Alert, Box, Grid, Stack, Typography } from "@mui/material";
 import { FormProvider, useForm, type Path } from "react-hook-form";
+import { z } from "zod";
 
 import { FormChoiceChipGroup, FormInput } from "@/components/ui/forms";
 import { ProgramSection } from "../components";
@@ -16,6 +17,8 @@ import {
   type IncentiveValuesFormValues,
   incentiveValuesFormSchema,
 } from "../schema";
+
+type IncentiveValuesFormInput = z.input<typeof incentiveValuesFormSchema>;
 
 export function IncentiveValuesForm() {
   const {
@@ -32,7 +35,7 @@ export function IncentiveValuesForm() {
   const updateValues = useUpdateProgramValues();
   const canEdit = !isReadOnly && !isMinorRevision;
 
-  const form = useForm<IncentiveValuesFormValues>({
+  const form = useForm<IncentiveValuesFormInput, unknown, IncentiveValuesFormValues>({
     resolver: zodResolver(incentiveValuesFormSchema),
     defaultValues: incentiveValuesDefaultValues,
     mode: "onBlur",
@@ -113,7 +116,7 @@ export function IncentiveValuesForm() {
                 <Grid key={termMonths} size={{ xs: 12, sm: 6, lg: 4 }}>
                   <FormInput
                     control={form.control}
-                    name={`aprByTerm.${index}.aprRate` as Path<IncentiveValuesFormValues>}
+                    name={`aprByTerm.${index}.aprRate` as Path<IncentiveValuesFormInput>}
                     label={`${termMonths}-month APR`}
                     type="number"
                     placeholder="0.00"
