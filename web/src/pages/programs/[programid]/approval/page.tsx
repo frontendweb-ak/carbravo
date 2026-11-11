@@ -77,6 +77,7 @@ export default function ApprovalPage() {
   ];
 
   const status: ProgramWorkflowStatus = (() => {
+    if (programStatus === "EXPIRED") return "EXPIRED";
     if (approval?.revisionStatus === "EXPIRED") return "EXPIRED";
     if (approval?.revisionStatus === "ACTIVE") return "ACTIVE";
     if (approval?.approved) return "APPROVED";
