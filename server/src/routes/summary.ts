@@ -2,255 +2,150 @@ import { Hono } from "hono";
 
 import { currentUser, requireRole } from "../lib/auth.js";
 import { badRequest, conflict, notFound } from "../lib/errors.js";
-
 import { getProgramOrThrow } from "../lib/programs.js";
-
-import { clone, getNextId, readDb, writeDb } from "../store.js";
+import { getNextId, readDb, writeDb } from "../store.js";
 
 export const summary = new Hono();
 
 /**
- * GET
- * /api/programs/:programId/revisions/:revisionId/summary
+ * GET /api/programs/:programId/revisions/:revisionId/summary
  *
- * Returns a UI-friendly summary of the
- * current revision.
+ * Read-only projection matching the OpenAPI RevisionSummary schema.
  */
 summary.get("/programs/:programId/revisions/:revisionId/summary", async (c) => {
-	currentUser(c);
+  currentUser(c);
 
-	const db = await readDb();
+  const programId = Number(c.req.param("programId"));
+  const revisionId = Number(c.req.param("revisionId"));
+  if (!Number.isInteger(programId) || programId <= 0 || !Number.isInteger(revisionId) || revisionId <= 0) {
+    throw badRequest("VALIDATION_ERROR", "programId and revisionId must be positive integers");
+  }
 
-	const programId = Number(c.req.param("programId"));
+  const db = await readDb();
+  const program = getProgramOrThrow(db, programId);
+  const revision = db.revisions.find(
+    (item) => item.id === revisionId && item.programId === program.id,
+  );
+  if (!revision) {
+    throw notFound("REVISION_NOT_FOUND", "Revision not found");
+  }
 
-	const revisionId = Number(c.req.param("revisionId"));
+  const vehicles = revision.vehicles.flatMap((selection) => {
+    const vehicle = db.vehicles.find(
+      (item) => item.vehicleCatalogId === selection.vehicleCatalogId,
+    );
+    if (!vehicle) return [];
+    return [{
+      vehicleCatalogId: vehicle.vehicleCatalogId,
+      label: `${vehicle.year} ${vehicle.make} ${vehicle.model}${vehicle.trimName ? ` ${vehicle.trimName}` : ""}`,
+    }];
+  });
 
-	const program = getProgramOrThrow(db, programId);
-
-	const revision = db.revisions.find(
-		(item) => item.id === revisionId && item.programId === program.id,
-	);
-
-	if (!revision) {
-		throw notFound("REVISION_NOT_FOUND", "Revision not found");
-	}
-
-	const setup = revision.setup;
-
-	const components = Array.isArray(revision.values?.components)
-		? revision.values.components
-		: [];
-
-	const includedGeography = revision.geography.filter(
-		(rule) => rule.isIncluded,
-	);
-
-	const summary = {
-		program: {
-			programId: program.id,
-
-			programIdentifier: program.identifier,
-
-			programName: program.name,
-
-			programType: program.programType,
-		},
-
-		revision: {
-			revisionId: revision.id,
-
-			majorRevision: revision.majorRevision,
-
-			minorRevision: revision.minorRevision,
-
-			revisionLabel: `${revision.majorRevision}.${revision.minorRevision}`,
-
-			status: revision.status,
-
-			isMinorRevision: revision.isMinorRevision,
-		},
-
-		setup: {
-			programTypeCode: setup.programTypeCode,
-
-			purchaseType: setup.purchaseType,
-
-			customerTypeCodes: setup.customerTypeCodes,
-
-			conditionCode: setup.conditionCode,
-
-			financialProviderCode: setup.financialProviderCode,
-
-			deliveryStartDate: setup.deliveryStartDate,
-
-			deliveryEndDate: setup.deliveryEndDate,
-
-			effectiveStartDate: setup.effectiveStartDate,
-
-			effectiveEndDate: setup.effectiveEndDate,
-		},
-
-		vehicles: {
-			count: revision.vehicles.length,
-
-			vehicleCatalogIds: revision.vehicles,
-		},
-
-		geography: {
-			count: includedGeography.length,
-
-			rules: includedGeography,
-		},
-
-		values: {
-			componentCount: components.length,
-
-			components,
-		},
-
-		approval: {
-			isSubmitted: revision.approval.isSubmitted,
-
-			submittedAt: revision.approval.submittedAt,
-
-			submittedBy: revision.approval.submittedBy,
-
-			approved: revision.approval.approved,
-
-			approvedAt: revision.approval.approvedAt,
-
-			approvedBy: revision.approval.approvedBy,
-
-			approvalComment: revision.approval.approvalComment,
-
-			rejectedAt: revision.approval.rejectedAt,
-
-			rejectedBy: revision.approval.rejectedBy,
-
-			rejectionReason: revision.approval.rejectionReason,
-		},
-
-		completion: revision.summary,
-	};
-
-	return c.json(summary);
+  return c.json({
+    program: {
+      programId: program.id,
+      programIdentifier: program.identifier,
+      programName: program.name,
+      programStatus: program.status,
+    },
+    revision: {
+      revisionId: revision.id,
+      majorRevision: revision.majorRevision,
+      minorRevision: revision.minorRevision,
+      revisionLabel: `${revision.majorRevision}.${revision.minorRevision}`,
+      revisionStatus: revision.status,
+      isMinorRevision: revision.isMinorRevision,
+    },
+    setup: {
+      programTypeCode: revision.setup.programTypeCode ?? "",
+      customerTypeCode: revision.setup.customerTypeCodes.join(", "),
+      deliveryStartDate: revision.setup.deliveryStartDate,
+      deliveryEndDate: revision.setup.deliveryEndDate,
+    },
+    vehicles,
+    geoRules: revision.geography.map(({ isIncluded, level, code, name }) => ({
+      isIncluded,
+      level,
+      code,
+      name,
+    })),
+    components: revision.values.components.map(({ componentCode, componentName }) => ({
+      componentCode,
+      componentName,
+    })),
+    mfpnText: revision.setup.mfpnText ?? "",
+    disclosureText: revision.setup.disclosureText ?? "",
+  });
 });
 
 /**
- * PATCH
- * /api/programs/:programId/revisions/:revisionId/summary
+ * PATCH /api/programs/:programId/revisions/:revisionId/summary
  *
- * Updates the calculated/manual completion summary
- * for the current revision.
+ * The API contract intentionally limits this endpoint to text-only updates
+ * for a minor-revision draft. Other setup or summary fields are not accepted.
  */
 summary.patch(
-	"/programs/:programId/revisions/:revisionId/summary",
-	async (c) => {
-		const user = requireRole(c, "AUTHOR", "ADMIN");
+  "/programs/:programId/revisions/:revisionId/summary",
+  async (c) => {
+    const user = requireRole(c, "AUTHOR", "ADMIN");
+    const programId = Number(c.req.param("programId"));
+    const revisionId = Number(c.req.param("revisionId"));
+    if (!Number.isInteger(programId) || programId <= 0 || !Number.isInteger(revisionId) || revisionId <= 0) {
+      throw badRequest("VALIDATION_ERROR", "programId and revisionId must be positive integers");
+    }
 
-		const programId = Number(c.req.param("programId"));
-		const revisionId = Number(c.req.param("revisionId"));
+    const body = await c.req.json().catch(() => null);
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
+      throw badRequest("VALIDATION_ERROR", "Request body must be an object");
+    }
 
-		if (!Number.isInteger(programId) || !Number.isInteger(revisionId)) {
-			throw badRequest(
-				"VALIDATION_ERROR",
-				"programId and revisionId must be integers",
-			);
-		}
+    const input = body as Record<string, unknown>;
+    const hasMfpnText = Object.prototype.hasOwnProperty.call(input, "mfpnText");
+    const hasDisclosureText = Object.prototype.hasOwnProperty.call(input, "disclosureText");
+    if (!hasMfpnText && !hasDisclosureText) {
+      throw badRequest("VALIDATION_ERROR", "At least one text field is required");
+    }
+    if (hasMfpnText && typeof input.mfpnText !== "string") {
+      throw badRequest("VALIDATION_ERROR", "mfpnText must be a string");
+    }
+    if (hasDisclosureText && typeof input.disclosureText !== "string") {
+      throw badRequest("VALIDATION_ERROR", "disclosureText must be a string");
+    }
 
-		const body = await c.req.json().catch(() => null);
+    const db = await readDb();
+    const program = getProgramOrThrow(db, programId);
+    const revision = db.revisions.find(
+      (item) => item.id === revisionId && item.programId === program.id,
+    );
+    if (!revision) {
+      throw notFound("REVISION_NOT_FOUND", "Revision not found");
+    }
+    if (revision.status !== "DRAFT" || !revision.isMinorRevision) {
+      throw conflict("REVISION_NOT_EDITABLE", "Only a minor-revision draft can update summary text");
+    }
 
-		if (!body || typeof body !== "object" || Array.isArray(body)) {
-			throw badRequest("VALIDATION_ERROR", "Request body must be an object");
-		}
+    if (hasMfpnText) revision.setup.mfpnText = input.mfpnText as string;
+    if (hasDisclosureText) revision.setup.disclosureText = input.disclosureText as string;
 
-		const db = await readDb();
+    const now = new Date().toISOString();
+    program.updatedAt = now;
+    db.activity.unshift({
+      id: getNextId(db.activity),
+      entityType: "INCENTIVE_REVISION",
+      entityId: revision.id,
+      operation: "UPDATE",
+      changedBy: user.username,
+      changedAt: now,
+      comment: "Updated minor revision disclosure text",
+      programId: program.id,
+      programName: program.name,
+      programIdentifier: program.identifier,
+    });
 
-		const program = getProgramOrThrow(db, programId);
-
-		const revision = db.revisions.find(
-			(item) => item.id === revisionId && item.programId === program.id,
-		);
-
-		if (!revision) {
-			throw notFound("REVISION_NOT_FOUND", "Revision not found");
-		}
-
-		if (revision.status !== "DRAFT") {
-			throw conflict(
-				"REVISION_NOT_EDITABLE",
-				"Summary can only be edited while the revision is DRAFT",
-			);
-		}
-
-		/**
-		 * Store the supplied summary snapshot.
-		 */
-		revision.summary = clone(body);
-
-		/**
-		 * Major revision changes invalidate
-		 * approval/submission state.
-		 */
-		if (!revision.isMinorRevision) {
-			revision.approval.isSubmitted = false;
-			revision.approval.submittedAt = null;
-			revision.approval.submittedBy = null;
-
-			revision.approval.approved = false;
-			revision.approval.approvedAt = null;
-			revision.approval.approvedBy = null;
-			revision.approval.approvalComment = null;
-
-			revision.approval.rejectedAt = null;
-			revision.approval.rejectedBy = null;
-			revision.approval.rejectionReason = null;
-		}
-
-		const now = new Date().toISOString();
-
-		program.updatedAt = now;
-
-		db.activity.unshift({
-			id: getNextId(db.activity),
-
-			entityType: "INCENTIVE_REVISION",
-
-			entityId: revision.id,
-
-			operation: "UPDATE",
-
-			changedBy: user.username,
-
-			changedAt: now,
-
-			programName: program.name,
-
-			programIdentifier: program.identifier,
-		});
-
-		await writeDb(db);
-
-		return c.json({
-			programId: program.id,
-
-			programIdentifier: program.identifier,
-
-			programName: program.name,
-
-			revisionId: revision.id,
-
-			revisionLabel: `${revision.majorRevision}.${revision.minorRevision}`,
-
-			revisionStatus: revision.status,
-
-			summary: revision.summary,
-
-			approval: {
-				isSubmitted: revision.approval.isSubmitted,
-
-				approved: revision.approval.approved,
-			},
-		});
-	},
+    await writeDb(db);
+    return c.json({
+      mfpnText: revision.setup.mfpnText ?? "",
+      disclosureText: revision.setup.disclosureText ?? "",
+    });
+  },
 );
