@@ -25,6 +25,13 @@ export interface ProgramSetupDto {
 }
 
 export interface ProgramSetupResponseDto extends ProgramSetupDto {
+  customerTypeCodes: string[];
+  deliveryStartDate: string;
+  deliveryEndDate: string;
+  conditionCode: string | null;
+  conditionTier: string | null;
+  financeTerms: number[];
+  creditTiers: string[];
   programId: number;
   programIdentifier: string;
   revisionId: number;
