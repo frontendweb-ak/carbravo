@@ -27,7 +27,12 @@ export function useProgramApproval(programId?: number, revisionId?: number) {
       programId != null && revisionId != null
         ? queryKeys.approval.byRevision(programId, revisionId)
         : ["approval", "revision", "disabled"],
-    queryFn: () => revisionsApi.getApproval(programId!, revisionId!),
+    queryFn: () => {
+      if (programId == null || revisionId == null) {
+        throw new Error("Program and revision are required to load approval state.");
+      }
+      return revisionsApi.getApproval(programId, revisionId);
+    },
     enabled: programId != null && revisionId != null,
   });
 }
