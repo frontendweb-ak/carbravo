@@ -397,7 +397,8 @@ programs.delete("/programs/:programId", async (c) => {
     entityType: "INCENTIVE_PROGRAM",
     entityId: program.id,
 
-    operation: "DELETE",
+    operation: "UPDATE",
+    comment: "Program soft-deleted",
     changedBy: user.username,
     changedAt: now,
 
