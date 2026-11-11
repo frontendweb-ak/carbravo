@@ -110,8 +110,8 @@ export function mapProgramsList(dto: {
 export function getWorkflowStatus(
 	program: ProgramListItemDto,
 ): ProgramWorkflowStatus {
-	if (program.programStatus === "ACTIVE") return "ACTIVE";
 	if (program.programStatus === "EXPIRED") return "EXPIRED";
+
 	if (
 		program.currentRevision?.isSubmitted &&
 		!program.currentRevision?.approved
@@ -126,6 +126,7 @@ export function getWorkflowStatus(
 		return "APPROVED";
 	}
 
+	if (program.programStatus === "ACTIVE") return "ACTIVE";
 	return "DRAFT";
 }
 
