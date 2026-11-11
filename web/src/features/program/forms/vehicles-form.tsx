@@ -29,22 +29,12 @@ import {
 import { retainAvailableValues } from "../utils";
 
 export function VehiclesForm() {
-	const { programId, revisionId, isReadOnly, isMinorRevision, setSectionSaving } =
+	const { programId, revisionId, isMinorRevision, setSectionSaving } =
 		useProgramEditor();
 	const canEdit = !isReadOnly && !isMinorRevision;
 	const [editingIndex, setEditingIndex] = React.useState<number | null>(null);
 	const savedVehiclesQuery = useProgramVehicles(programId, revisionId);
 	const savedVehicles = savedVehiclesQuery.data?.selectedVehicles ?? [];
-	const [persistedVehicleIds, setPersistedVehicleIds] = React.useState<number[]>([]);
-
-	useEffect(() => {
-		if (savedVehiclesQuery.data) {
-			setPersistedVehicleIds(
-				savedVehiclesQuery.data.selectedVehicles.map((vehicle) => vehicle.vehicleCatalogId),
-			);
-		}
-	}, [savedVehiclesQuery.data]);
-
 	const form = useForm<VehiclesFormValues>({
 		resolver: zodResolver(vehiclesFormSchema),
 		defaultValues: vehiclesDefaultValues,
@@ -250,33 +240,6 @@ export function VehiclesForm() {
 		setEditingIndex(index);
 	};
 
-	const onDeleteRow = (index: number) => {
-		if (isReadOnly) {
-			return;
-		}
-
-		const nextRows = selectedRows.filter((_, rowIndex) => rowIndex !== index);
-
-		form.setValue("selectedRows", nextRows, {
-			shouldDirty: true,
-			shouldValidate: true,
-		});
-
-		if (editingIndex === index) {
-			setEditingIndex(null);
-
-			form.setValue("currentRow", {
-				...emptyVehicleFilterRow,
-			});
-
-			return;
-		}
-
-		if (editingIndex !== null && index < editingIndex) {
-			setEditingIndex((current) => (current === null ? null : current - 1));
-		}
-	};
-
 	const onCancelEdit = () => {
 		setEditingIndex(null);
 
@@ -306,19 +269,50 @@ export function VehiclesForm() {
 
 			const resolved = await resolveVehicleFilters(rows);
 
-			const nextVehicleIds = [
-				...new Set([...persistedVehicleIds, ...resolved.vehicleCatalogIds]),
-			];
+			const vehicleCatalogIds = [...new Set(resolved.vehicleCatalogIds)];
 			await updateVehiclesAsync({
 				programId,
 				revisionId,
-				payload: {
-					vehicleCatalogIds: nextVehicleIds,
-				},
+				payload: { vehicleCatalogIds },
 			});
-			setPersistedVehicleIds(nextVehicleIds);
 		},
-		[programId, revisionId, persistedVehicleIds, resolveVehicleFilters, updateVehiclesAsync],
+		[canEdit, programId, revisionId, resolveVehicleFilters, updateVehiclesAsync],
+	);
+
+	const onDeleteRow = React.useCallback(
+		async (index: number) => {
+			if (!canEdit || isUpdatingVehicles) return;
+
+			const nextRows = selectedRows.filter((_, rowIndex) => rowIndex !== index);
+			setSectionSaving(true);
+			try {
+				await persistRows(nextRows);
+				form.setValue("selectedRows", nextRows, {
+					shouldDirty: false,
+					shouldValidate: true,
+				});
+
+				if (editingIndex === index) {
+					setEditingIndex(null);
+					form.setValue("currentRow", { ...emptyVehicleFilterRow });
+				} else if (editingIndex !== null && index < editingIndex) {
+					setEditingIndex((current) => (current === null ? null : current - 1));
+				}
+			} catch (error) {
+				console.error("Failed to remove vehicle selection:", error);
+			} finally {
+				setSectionSaving(false);
+			}
+		},
+		[
+			canEdit,
+			editingIndex,
+			form,
+			isUpdatingVehicles,
+			persistRows,
+			selectedRows,
+			setSectionSaving,
+		],
 	);
 
 	const onCommitRow = async (values: VehiclesFormValues) => {
