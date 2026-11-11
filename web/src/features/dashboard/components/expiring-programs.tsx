@@ -3,7 +3,6 @@ import Chip from "@mui/material/Chip";
 
 import { AppCardHeader, Card, StatusBadge, Typography } from "@/components/ui";
 import type { ExpiringProgram } from "../model/dashboard.types";
-import { mapStatus } from "../utils";
 import { ExpiringProgramsSkeleton } from "./expiring-programs-skeleton";
 
 export interface ExpiringProgramsProps {
