@@ -90,8 +90,8 @@ export function mapSetupResponseToForm(
     financeTerms: [...data.financeTerms],
     contact: data.contactName ?? "",
     flags: {
-      vinException: data.vinException,
-      topOfDeal: data.topOfDeal,
+      vinException: data.vinException ?? false,
+      topOfDeal: data.topOfDeal ?? false,
       noAddOns: false,
     },
   };
