@@ -104,7 +104,7 @@ export const PROGRAM_EDITOR_SECTION_DEFINITIONS = [
 		id: "summary",
 		number: 7,
 		label: "10-Point Summary",
-		requiredForSubmission: true,
+		requiredForSubmission: false,
 	},
 	{
 		id: "approval",
