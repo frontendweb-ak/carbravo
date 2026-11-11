@@ -37,11 +37,11 @@ export function getProgramStatusBadge(status: Program["status"]) {
 /* Program type                                                                */
 /* -------------------------------------------------------------------------- */
 
-const PROGRAM_TYPE_LABELS = {
+const PROGRAM_TYPE_LABELS: Record<string, string> = {
 	CUSTOMER_CASH: "Customer Cash",
 	APR: "APR",
 	BONUS_CASH: "Bonus Cash",
-}:
+};
 
 export function getProgramTypeLabel(type: Program["type"]): string {
 	if (!type) {
