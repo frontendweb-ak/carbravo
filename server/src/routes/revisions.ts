@@ -155,17 +155,12 @@ revisions.post("/programs/:programId/revise", async (c) => {
   return c.json(
     {
       programId: program.id,
-      programIdentifier: program.identifier,
-      programName: program.name,
-
       revisionId: revision.id,
-      revisionStatus: revision.status,
-
       majorRevision: revision.majorRevision,
       minorRevision: revision.minorRevision,
-
       revisionLabel: revisionLabel(revision),
-
+      revisionStatus: revision.status,
+      isMinorRevision: revision.isMinorRevision,
       copiedFromRevisionId: revision.copiedFromRevisionId,
     },
     201,
@@ -311,23 +306,12 @@ revisions.post(
     return c.json(
       {
         programId: program.id,
-
-        programIdentifier: program.identifier,
-
-        programName: program.name,
-
         revisionId: revision.id,
-
-        revisionStatus: revision.status,
-
         majorRevision: revision.majorRevision,
-
         minorRevision: revision.minorRevision,
-
         revisionLabel: revisionLabel(revision),
-
+        revisionStatus: revision.status,
         isMinorRevision: revision.isMinorRevision,
-
         copiedFromRevisionId: revision.copiedFromRevisionId,
       },
       201,
@@ -465,29 +449,12 @@ revisions.post(
 		await writeDb(db);
 
 		return c.json({
-			programId: program.id,
-
-			programIdentifier: program.identifier,
-
-			programName: program.name,
-
-			programStatus: program.status,
-
 			revisionId: revision.id,
-
-			revisionLabel: revisionLabel(revision),
-
-			revisionStatus: revision.status,
-
 			majorRevision: revision.majorRevision,
-
 			minorRevision: revision.minorRevision,
-
-			previousActiveRevisionId: previousActive?.id ?? null,
-
-			postedAt: revision.postedAt,
-
-			postedBy: revision.postedBy,
+			revisionLabel: revisionLabel(revision),
+			revisionStatus: revision.status,
+			isMinorRevision: revision.isMinorRevision,
 		});
 	},
 );
