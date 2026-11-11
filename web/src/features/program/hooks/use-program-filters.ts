@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
 import type { ListProgramsParams, ProgramStatusDto } from "../api/programs.api";
@@ -66,6 +66,16 @@ export function useProgramFilters() {
   }));
 
   const workflowStatus = initialWorkflowStatus;
+
+  useEffect(() => {
+    setFilters((current) => ({
+      ...current,
+      status: undefined,
+      pendingApproval: undefined,
+      ...buildApiFilters(workflowStatus),
+      search: current.search,
+    }));
+  }, [workflowStatus]);
 
   const setWorkflowStatus = (nextStatus?: ProgramWorkflowFilter) => {
     setFilters((current) => ({
