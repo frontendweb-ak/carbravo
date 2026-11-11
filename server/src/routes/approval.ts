@@ -121,10 +121,6 @@ approval.post(
 			validationErrors.push("programTypeCode is required");
 		}
 
-		if (!revision.setup.purchaseType) {
-			validationErrors.push("purchaseType is required");
-		}
-
 		if (!revision.setup.deliveryStartDate) {
 			validationErrors.push("deliveryStartDate is required");
 		}
