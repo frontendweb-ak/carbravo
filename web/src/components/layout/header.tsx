@@ -4,14 +4,21 @@ import Button from "@mui/material/Button";
 import Container from "@mui/material/Container";
 import Divider from "@mui/material/Divider";
 import Typography from "@mui/material/Typography";
+import FormControl from "@mui/material/FormControl";
+import MenuItem from "@mui/material/MenuItem";
+import Select from "@mui/material/Select";
 import { NavLink, useNavigate } from "react-router-dom";
 
 import { AppBar, Avatar } from "@mui/material";
 import { Logo } from "./logo";
 import NavItem from "./nav-item";
+import { useMockUserRole } from "@/infra/api/use-mock-user-role";
 
 function Header() {
 	const navigate = useNavigate();
+	const { role, setRole } = useMockUserRole();
+	const mockRoleSwitchEnabled =
+		import.meta.env.DEV && import.meta.env.VITE_ENABLE_API_MOCKS === "true";
 
 	return (
 		<AppBar
@@ -118,28 +125,28 @@ function Header() {
 								ROLE
 							</Typography>
 
-							<Button
-								variant="text"
-								color="inherit"
-								size="small"
-								sx={{
-									minWidth: "auto",
-									p: 0.5,
-									textTransform: "none",
-									fontWeight: 600,
-								}}
-							>
-								Admin
-								<Box
-									component="span"
-									sx={{
-										ml: 0.5,
-										color: "text.secondary",
-									}}
-								>
-									▾
-								</Box>
-							</Button>
+							{mockRoleSwitchEnabled ? (
+								<FormControl size="small" sx={{ minWidth: 112 }}>
+									<Select
+										value={role}
+										aria-label="Mock user role"
+										onChange={(event) => setRole(event.target.value as typeof role)}
+										sx={{
+											fontSize: 13,
+											fontWeight: 600,
+											"& .MuiOutlinedInput-notchedOutline": { border: 0 },
+										}}
+									>
+										<MenuItem value="AUTHOR">Author</MenuItem>
+										<MenuItem value="APPROVER">Approver</MenuItem>
+										<MenuItem value="ADMIN">Admin</MenuItem>
+									</Select>
+								</FormControl>
+							) : (
+								<Typography variant="body2" sx={{ fontWeight: 600 }}>
+									{role === "AUTHOR" ? "Author" : role === "APPROVER" ? "Approver" : "Admin"}
+								</Typography>
+							)}
 						</Box>
 
 						<Avatar
