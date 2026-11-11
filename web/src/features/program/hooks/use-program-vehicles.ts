@@ -364,18 +364,6 @@ export function useVehicleModels(year?: number, make?: string) {
 }
 
 /* -------------------------------------------------------------------------- */
-/* Segments                                                                    */
-/* -------------------------------------------------------------------------- */
-
-export function useVehicleSegments() {
-	return useQuery({
-		queryKey: queryKeys.vehicles.segments(),
-		queryFn: () => vehiclesApi.getSegments(),
-		staleTime: 30 * 60 * 1000,
-	});
-}
-
-/* -------------------------------------------------------------------------- */
 /* Search                                                                      */
 /* -------------------------------------------------------------------------- */
 
