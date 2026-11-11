@@ -18,6 +18,7 @@ function ProgramWorkflow({
 	onPostToProduction,
 	onExpire,
 	auditTimeline,
+	timeline = [],
 	loading = false,
 }: ProgramWorkflowProps) {
 	const incompleteRequirements = requirements.filter((item) => !item.complete);
