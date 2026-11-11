@@ -29,7 +29,7 @@ import {
 import { retainAvailableValues } from "../utils";
 
 export function VehiclesForm() {
-	const { programId, revisionId, isMinorRevision, setSectionSaving } =
+	const { programId, revisionId, isReadOnly, isMinorRevision, setSectionSaving } =
 		useProgramEditor();
 	const canEdit = !isReadOnly && !isMinorRevision;
 	const [editingIndex, setEditingIndex] = React.useState<number | null>(null);
@@ -599,7 +599,7 @@ export function VehiclesForm() {
 						<Typography variant="subtitle2" sx={{ mb: 1 }}>
 							Saved catalog vehicles ({savedVehicles.length})
 						</Typography>
-						<Stack direction="row" flexWrap="wrap" gap={1}>
+						<Stack direction="row" sx={{ flexWrap: "wrap", gap: 1 }}>
 							{savedVehicles.map((vehicle) => (
 								<Chip
 									key={vehicle.vehicleCatalogId}
