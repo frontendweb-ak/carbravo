@@ -18,7 +18,6 @@ function ProgramWorkflow({
 	onPostToProduction,
 	onExpire,
 	auditTimeline,
-	timeline = [],
 	loading = false,
 }: ProgramWorkflowProps) {
 	const incompleteRequirements = requirements.filter((item) => !item.complete);
@@ -43,7 +42,7 @@ function ProgramWorkflow({
 				loading={loading}
 			/>
 
-			<WorkflowTimeline status={status} auditTimeline={auditTimeline ?? []} />
+			<WorkflowTimeline auditTimeline={auditTimeline ?? []} />
 		</Stack>
 	);
 }
