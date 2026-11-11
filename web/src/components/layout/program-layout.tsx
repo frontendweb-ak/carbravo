@@ -92,6 +92,7 @@ function ProgramLayout({ mode = "edit" }: ProgramLayoutProps) {
 			: null;
 	const revisionId = selectedRevision?.id ?? undefined;
 	const selectedWorkflowStatus = (() => {
+		if (mode === "edit" && program?.status === "EXPIRED") return "EXPIRED" as const;
 		if (!selectedRevision) return undefined;
 		if (selectedRevision.status === "ACTIVE" || selectedRevision.status === "EXPIRED") {
 			return selectedRevision.status;
