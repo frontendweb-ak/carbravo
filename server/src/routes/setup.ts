@@ -29,17 +29,14 @@ export const setup = new Hono();
  * Required:
  * - programName
  * - programTypeCode
- * - purchaseType
  * - customerTypeCodes
- * - conditionCode
  * - deliveryStartDate
  * - deliveryEndDate
  */
 type SetupInput = {
   programName: string;
 
-  programTypeCode: ProgramTypeCode;
-  purchaseType: PurchaseType;
+  programTypeCode: string;
 
   customerTypeCodes: string[];
 
@@ -49,7 +46,8 @@ type SetupInput = {
 
   financialProviderCode?: string | null;
 
-  conditionCode: ConditionCode;
+  conditionCode?: string | null;
+  conditionTier?: string | null;
 
   mileageCeiling?: number | null;
 
@@ -89,8 +87,7 @@ type SetupResponse = {
 
   programName: string;
 
-  programTypeCode: ProgramTypeCode;
-  purchaseType: PurchaseType;
+  programTypeCode: string;
 
   customerTypeCodes: string[];
 
@@ -100,7 +97,8 @@ type SetupResponse = {
 
   financialProviderCode: string | null;
 
-  conditionCode: ConditionCode;
+  conditionCode: string | null;
+  conditionTier: string | null;
 
   mileageCeiling: number | null;
 
@@ -125,17 +123,6 @@ type SetupResponse = {
 /* -------------------------------------------------------------------------- */
 /* Contract constants                                                         */
 /* -------------------------------------------------------------------------- */
-
-const PROGRAM_TYPE_CODES = ["CUSTOMER_CASH", "APR", "BONUS_CASH"] as const;
-
-const PURCHASE_TYPES = ["CASH", "FINANCE"] as const;
-
-const CONDITION_CODES = [
-  "CARBRAVO",
-  "MANUFACTURER_CERTIFIED",
-  "USED_INSPECTED",
-  "USED_AS_IS",
-] as const;
 
 const CREDIT_TIER_CODES = ["A_PLUS", "A1", "A2", "B"] as const;
 
@@ -239,11 +226,8 @@ function validateSetup(body: unknown): asserts body is SetupInput {
     );
   }
 
-  if (
-    typeof body.programTypeCode !== "string" ||
-    !PROGRAM_TYPE_CODES.includes(body.programTypeCode as ProgramTypeCode)
-  ) {
-    throw badRequest("VALIDATION_ERROR", "Invalid programTypeCode");
+  if (typeof body.programTypeCode !== "string" || !body.programTypeCode.trim()) {
+    throw badRequest("VALIDATION_ERROR", "programTypeCode is required");
   }
 
   // if (
@@ -480,8 +464,7 @@ function setupResponse(
 
     programName: setup.programName ?? program.name,
 
-    programTypeCode: setup.programTypeCode as ProgramTypeCode,
-    purchaseType: setup.purchaseType as PurchaseType,
+    programTypeCode: setup.programTypeCode ?? "",
 
     customerTypeCodes: [...(setup.customerTypeCodes ?? [])],
 
@@ -493,7 +476,8 @@ function setupResponse(
 
     financialProviderCode: setup.financialProviderCode ?? null,
 
-    conditionCode: setup.conditionCode as ConditionCode,
+    conditionCode: setup.conditionCode ?? null,
+    conditionTier: setup.conditionCode ?? null,
 
     mileageCeiling: setup.mileageCeiling ?? null,
 
@@ -589,14 +573,13 @@ setup.put("/programs/:programId/revisions/:revisionId/setup", async (c) => {
     ...revision.setup,
 
     programName: body.programName.trim(),
-    programTypeCode: body.programTypeCode,
-    purchaseType: body.purchaseType,
+    programTypeCode: body.programTypeCode as ProgramTypeCode,
     customerTypeCodes: [...body.customerTypeCodes],
     contactName: body.contactName ?? null,
     contactEmail: body.contactEmail ?? null,
     contactPhone: body.contactPhone ?? null,
     financialProviderCode: body.financialProviderCode ?? null,
-    conditionCode: body.conditionCode,
+    conditionCode: (body.conditionCode ?? body.conditionTier ?? null) as ConditionCode | null,
     mileageCeiling: body.mileageCeiling ?? null,
     topOfDeal: body.topOfDeal ?? false,
     vinException: body.vinException ?? false,
