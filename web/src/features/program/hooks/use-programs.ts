@@ -11,7 +11,6 @@ export function usePrograms(params?: ListProgramsParams) {
 		queryKey: queryKeys.programs.list(params),
 		queryFn: async () => {
 			const response = await programsApi.getList(params);
-			console.log("RE", response);
 			return mapProgramsList(response);
 		},
 		placeholderData: (previousData) => previousData,
@@ -42,12 +41,7 @@ export function useProgram(programId?: number) {
 		queryKey: queryKeys.programs.detail(programId!),
 		queryFn: async () => {
 			const response = await programsApi.getDetail(programId!);
-			console.log(
-				"PROGRAM DETAIL API RESPONSE",
-				JSON.stringify(response, null, 2),
-			);
 			const program = mapProgramDetail(response);
-			console.log("PROGRAM DETAIL MAPPED", JSON.stringify(program, null, 2));
 			return program;
 		},
 		enabled: programId != null,
