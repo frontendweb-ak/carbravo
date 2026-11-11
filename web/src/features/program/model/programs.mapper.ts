@@ -62,14 +62,17 @@ export function mapProgram(dto: ProgramListItemDto): Program {
 		identifier: dto.programIdentifier ?? "",
 		name: dto.programName ?? "Untitled program",
 
-		status: dto.programStatus,
+		status: getWorkflowStatus({
+			programStatus: dto.programStatus,
+			currentRevision: dto.draftRevision ?? dto.activeRevision ?? undefined,
+		}),
 		type: dto.programType ?? null,
 
 		revision: mapRevision(dto.currentRevision),
 		hasDraft: dto.hasDraft ?? false,
 
-		vehicles: dto.vehicles ?? [],
-		geography: dto.geography ?? [],
+		vehicles: [],
+		geography: [],
 
 		deliveryStartDate: dto.deliveryStartDate ?? null,
 		deliveryEndDate: dto.deliveryEndDate ?? null,
@@ -90,17 +93,8 @@ export function mapProgramsPagination(dto?: PaginationDto): ProgramsPagination {
 		totalPages: dto?.totalPages ?? 0,
 	};
 }
-export function mapProgramsStatusCounts(
-	dto?: ProgramStatusCountsDto,
-): ProgramsStatusCounts {
-	return {
-		all: dto?.all ?? 0,
-		draft: dto?.draft ?? 0,
-		review: dto?.review ?? 0,
-		approved: dto?.approved ?? 0,
-		active: dto?.active ?? 0,
-		expired: dto?.expired ?? 0,
-	};
+export function mapProgramsStatusCounts(): ProgramsStatusCounts {
+  return { all: 0, draft: 0, review: 0, approved: 0, active: 0, expired: 0 };
 }
 /* -------------------------------------------------------------------------- */
 /* List                                                                       */
@@ -114,7 +108,7 @@ export function mapProgramsList(dto: {
 	return {
 		items: (dto.content ?? []).map(mapProgram),
 		pagination: mapProgramsPagination(dto.pagination),
-		statusCounts: mapProgramsStatusCounts(dto.statusCounts),
+		statusCounts: mapProgramsStatusCounts(),
 	};
 }
 
