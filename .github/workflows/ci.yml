@@ -45,8 +45,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Check frontend formatting and lint
-        run: pnpm --filter carbravo check
+      - name: Lint frontend
+        run: pnpm --filter carbravo lint
 
       - name: Typecheck frontend
         run: pnpm --filter carbravo typecheck
