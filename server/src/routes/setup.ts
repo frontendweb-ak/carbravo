@@ -11,7 +11,6 @@ import {
   getNextId,
   type MockRevision,
   ProgramTypeCode,
-  PurchaseType,
   readDb,
   writeDb,
 } from "../store.js";
@@ -358,6 +357,8 @@ function validateSetup(body: unknown): asserts body is SetupInput {
   for (const field of [
     "contactPhone",
     "financialProviderCode",
+    "conditionCode",
+    "conditionTier",
     "mfpnText",
     "disclosureText",
     "localeCode",
@@ -404,42 +405,25 @@ function validateSetup(body: unknown): asserts body is SetupInput {
   /* Finance terms                                                           */
   /* ---------------------------------------------------------------------- */
 
-  // if (body.financeTerms !== undefined) {
-  //   if (!Array.isArray(body.financeTerms)) {
-  //     throw badRequest("VALIDATION_ERROR", "financeTerms must be an array");
-  //   }
-
-  //   if (
-  //     body.financeTerms.some(
-  //       (value) => typeof value !== "number" || !Number.isInteger(value),
-  //     )
-  //   ) {
-  //     throw badRequest(
-  //       "VALIDATION_ERROR",
-  //       "financeTerms must contain integer values",
-  //     );
-  //   }
-  // }
+  if (body.financeTerms !== undefined) {
+    if (!Array.isArray(body.financeTerms) || body.financeTerms.some(
+      (value) => typeof value !== "number" || !Number.isInteger(value),
+    )) {
+      throw badRequest("VALIDATION_ERROR", "financeTerms must contain integer values");
+    }
+  }
 
   /* ---------------------------------------------------------------------- */
   /* Credit tiers                                                            */
   /* ---------------------------------------------------------------------- */
 
-  // if (body.creditTiers !== undefined) {
-  //   if (!Array.isArray(body.creditTiers)) {
-  //     throw badRequest("VALIDATION_ERROR", "creditTiers must be an array");
-  //   }
-
-  //   if (
-  //     body.creditTiers.some(
-  //       (value) =>
-  //         typeof value !== "string" ||
-  //         !CREDIT_TIER_CODES.includes(value as CreditTier),
-  //     )
-  //   ) {
-  //     throw badRequest("VALIDATION_ERROR", "Invalid creditTiers value");
-  //   }
-  // }
+  if (body.creditTiers !== undefined) {
+    if (!Array.isArray(body.creditTiers) || body.creditTiers.some(
+      (value) => typeof value !== "string",
+    )) {
+      throw badRequest("VALIDATION_ERROR", "creditTiers must contain string values");
+    }
+  }
 }
 
 /* -------------------------------------------------------------------------- */
@@ -477,7 +461,7 @@ function setupResponse(
     financialProviderCode: setup.financialProviderCode ?? null,
 
     conditionCode: setup.conditionCode ?? null,
-    conditionTier: setup.conditionCode ?? null,
+    conditionTier: setup.conditionTier ?? null,
 
     mileageCeiling: setup.mileageCeiling ?? null,
 
@@ -579,7 +563,8 @@ setup.put("/programs/:programId/revisions/:revisionId/setup", async (c) => {
     contactEmail: body.contactEmail ?? null,
     contactPhone: body.contactPhone ?? null,
     financialProviderCode: body.financialProviderCode ?? null,
-    conditionCode: (body.conditionCode ?? body.conditionTier ?? null) as ConditionCode | null,
+    conditionCode: (body.conditionCode ?? null) as ConditionCode | null,
+    conditionTier: body.conditionTier ?? null,
     mileageCeiling: body.mileageCeiling ?? null,
     topOfDeal: body.topOfDeal ?? false,
     vinException: body.vinException ?? false,
