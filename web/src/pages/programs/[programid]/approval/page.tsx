@@ -85,7 +85,6 @@ export default function ApprovalPage() {
     if (approval?.approved) return "APPROVED";
     if (approval?.isSubmitted) return "REVIEW";
     if (
-      programStatus === "EXPIRED" ||
       programStatus === "ACTIVE" ||
       programStatus === "APPROVED" ||
       programStatus === "REVIEW"
