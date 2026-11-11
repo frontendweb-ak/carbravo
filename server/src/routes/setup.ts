@@ -545,6 +545,13 @@ setup.put("/programs/:programId/revisions/:revisionId/setup", async (c) => {
     );
   }
 
+  if (revision.isMinorRevision) {
+    throw conflict(
+      "REVISION_NOT_EDITABLE",
+      "Minor revisions can only update marketing text",
+    );
+  }
+
   const now = new Date().toISOString();
 
   /* -------------------------------------------------------------- */
