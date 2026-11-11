@@ -4,24 +4,24 @@ export interface ProgramSetupDto {
   programName: string;
   programTypeCode: string;
   customerTypeCodes: string[];
-  contactName: string | null;
-  contactEmail: string | null;
-  contactPhone: string | null;
-  financialProviderCode: string | null;
-  conditionCode: string | null;
-  conditionTier: string | null;
-  mileageCeiling: number | null;
-  topOfDeal: boolean;
-  vinException: boolean;
-  mfpnText: string | null;
-  disclosureText: string | null;
-  localeCode: string;
+  contactName?: string | null;
+  contactEmail?: string | null;
+  contactPhone?: string | null;
+  financialProviderCode?: string | null;
+  conditionCode?: string | null;
+  conditionTier?: string | null;
+  mileageCeiling?: number | null;
+  topOfDeal?: boolean;
+  vinException?: boolean;
+  mfpnText?: string | null;
+  disclosureText?: string | null;
+  localeCode?: string;
   deliveryStartDate: string;
   deliveryEndDate: string;
-  effectiveStartDate: string | null;
-  effectiveEndDate: string | null;
-  financeTerms: number[];
-  creditTiers: string[];
+  effectiveStartDate?: string | null;
+  effectiveEndDate?: string | null;
+  financeTerms?: number[];
+  creditTiers?: string[];
 }
 
 export interface ProgramSetupResponseDto extends ProgramSetupDto {
@@ -31,7 +31,7 @@ export interface ProgramSetupResponseDto extends ProgramSetupDto {
   majorRevision: number;
   minorRevision: number;
   revisionLabel: string;
-  revisionStatus: string;
+  revisionStatus: "DRAFT" | "ACTIVE" | "EXPIRED";
 }
 
 export type SaveProgramSetupResponseDto = ProgramSetupResponseDto;
