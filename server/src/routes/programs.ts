@@ -228,6 +228,7 @@ programs.post("/programs", async (c) => {
     },
 
     setup: {
+      programName: programName,
       programTypeCode: null,
       purchaseType: null,
 
