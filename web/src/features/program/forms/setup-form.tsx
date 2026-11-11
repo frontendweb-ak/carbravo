@@ -268,6 +268,7 @@ export function SetupForm({
 		[
 			canEdit,
 			mode,
+			setup,
 			createProgramAsync,
 			updateSetupAsync,
 			onCreated,
