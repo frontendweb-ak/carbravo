@@ -6,7 +6,6 @@ import {
   type MockProgram,
   type MockRevision,
 } from "../store.js";
-import type { ProgramWorkflowStatus } from "../types/types.js";
 
 import { notFound } from "./errors.js";
 
@@ -14,32 +13,6 @@ import { notFound } from "./errors.js";
 /* Program workflow                                                           */
 /* -------------------------------------------------------------------------- */
 
-export function getProgramWorkflowStatus(
-	program: MockProgram,
-	draft: MockRevision | null,
-): ProgramWorkflowStatus {
-	/*
-	 * Program lifecycle always wins for posted programs.
-	 */
-	if (program.status === "ACTIVE") return "ACTIVE";
-	if (program.status === "EXPIRED") return "EXPIRED";
-
-	/*
-	 * A program that has never been posted is represented
-	 * by its draft revision workflow.
-	 */
-	if (!draft) return "DRAFT";
-
-	if (draft.approval.isSubmitted && draft.approval.approved) {
-		return "APPROVED";
-	}
-
-	if (draft.approval.isSubmitted && !draft.approval.approved) {
-		return "REVIEW";
-	}
-
-	return "DRAFT";
-}
 
 /* -------------------------------------------------------------------------- */
 /* Program lookup                                                             */
@@ -248,17 +221,6 @@ export function programListItem(
 		program,
 		draft,
 	);
-console.log("PROGRAM LIST MAPPER V2");
-console.log({
-	programId: program.id,
-	currentRevisionId: currentRevision?.id,
-	vehicles: currentRevision
-		? mapVehicleLabels(db, currentRevision)
-		: [],
-	geography: currentRevision
-		? mapGeographySummary(currentRevision)
-		: [],
-});
 	return {
 		programId: program.id,
 		programIdentifier: program.identifier,
@@ -274,7 +236,7 @@ console.log({
 		 * while the persisted program lifecycle only has:
 		 * DRAFT → ACTIVE → EXPIRED
 		 */
-		programStatus: workflowStatus,
+		programStatus: program.status,
 
 		programType:
 			program.programType ||
@@ -298,30 +260,6 @@ console.log({
 			currentRevision?.setup.deliveryEndDate ??
 			program.deliveryEndDate,
 
-		/*
-		 * Effective dates shown in the Programs table.
-		 */
-		effectiveStartDate:
-			currentRevision?.setup.effectiveStartDate ??
-			null,
-
-		effectiveEndDate:
-			currentRevision?.setup.effectiveEndDate ??
-			null,
-
-		/*
-		 * Lightweight vehicle summary.
-		 */
-		vehicles: currentRevision
-			? mapVehicleLabels(db, currentRevision)
-			: [],
-
-		/*
-		 * Lightweight geography summary.
-		 */
-		geography: currentRevision
-			? mapGeographySummary(currentRevision)
-			: [],
 
 		updatedAt: program.updatedAt,
 	};
