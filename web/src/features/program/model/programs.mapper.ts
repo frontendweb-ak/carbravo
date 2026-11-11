@@ -4,7 +4,6 @@ import type {
 	PaginationDto,
 	ProgramDetailDto,
 	ProgramListItemDto,
-	ProgramStatusCountsDto,
 	RevisionRefDto,
 } from "../api/programs.api";
 
@@ -62,10 +61,7 @@ export function mapProgram(dto: ProgramListItemDto): Program {
 		identifier: dto.programIdentifier ?? "",
 		name: dto.programName ?? "Untitled program",
 
-		status: getWorkflowStatus({
-			programStatus: dto.programStatus,
-			currentRevision: dto.draftRevision ?? dto.activeRevision ?? undefined,
-		}),
+		status: getWorkflowStatus(dto),
 		type: dto.programType ?? null,
 
 		revision: mapRevision(dto.currentRevision),
@@ -103,7 +99,6 @@ export function mapProgramsStatusCounts(): ProgramsStatusCounts {
 export function mapProgramsList(dto: {
 	content?: ProgramListItemDto[];
 	pagination?: PaginationDto;
-	statusCounts?: ProgramStatusCountsDto;
 }): ProgramsList {
 	return {
 		items: (dto.content ?? []).map(mapProgram),
@@ -163,7 +158,10 @@ export function mapProgramDetail(dto: ProgramDetailDto): ProgramDetail {
 		identifier: dto.programIdentifier ?? "",
 		name: dto.programName ?? "Untitled program",
 
-		status: dto.programStatus,
+		status: getWorkflowStatus({
+			programStatus: dto.programStatus,
+			currentRevision: dto.draftRevision ?? dto.activeRevision ?? undefined,
+		}),
 		type: dto.programType ?? null,
 
 		revision: mapRevision(dto.activeRevision),
@@ -172,8 +170,8 @@ export function mapProgramDetail(dto: ProgramDetailDto): ProgramDetail {
 
 		hasDraft: dto.draftRevision != null,
 
-		vehicles: dto.vehicles ?? [],
-		geography: dto.geography ?? [],
+		vehicles: [],
+		geography: [],
 
 		deliveryStartDate: dto.deliveryStartDate ?? null,
 		deliveryEndDate: dto.deliveryEndDate ?? null,
