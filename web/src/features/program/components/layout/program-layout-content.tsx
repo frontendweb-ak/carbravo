@@ -165,7 +165,7 @@ export function ProgramLayoutContent({
 
 	const headerStatus = (() => {
 		switch (programStatus) {
-			case "SUBMITTED":
+			case "REVIEW":
 				return "Submitted";
 
 			case "APPROVED":
