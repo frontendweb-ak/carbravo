@@ -1,10 +1,6 @@
 import { PageState, StatusChips, type StatusChipOption } from "@/components/ui";
 import { useDashboardSummary } from "@/features/dashboard";
-import {
-	useCloneProgram,
-	useProgramFilters,
-	usePrograms,
-} from "@/features/program";
+import { useProgramFilters, usePrograms } from "@/features/program";
 import type { ProgramStatusDto } from "@/features/program/api/programs.api";
 import { ProgramPagination } from "@/features/program/components";
 import { ProgramHeader } from "@/features/program/components/program-header";
@@ -42,7 +38,6 @@ export default function ProgramsPage() {
 
 	const programsQuery = usePrograms(filters);
 
-	const cloneProgram = useCloneProgram();
 
 	const programs = programsQuery.data?.items ?? [];
 	const pagination = programsQuery.data?.pagination;
@@ -83,15 +78,7 @@ export default function ProgramsPage() {
 		setPage(0);
 	};
 
-	const handleClone = (programId: number) => {
-		cloneProgram.mutate(programId, {
-			onSuccess: ({ programId }) => {
-				if (programId) {
-					navigate(`/programs/${programId}`);
-				}
-			},
-		});
-	};
+
 
 	return (
 		<Box
@@ -140,7 +127,6 @@ export default function ProgramsPage() {
 					programs={programs}
 					isFetching={programsQuery.isFetching}
 					onProgramClick={(programId) => navigate(`/programs/${programId}`)}
-					onClone={handleClone}
 				/>
 
 				<Box sx={{ mt: 3 }}>
