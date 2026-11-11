@@ -50,7 +50,9 @@ function buildApiFilters(
 
 export function useProgramFilters() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const initialWorkflowStatus = parseWorkflowFilter(searchParams.get("workflowStatus"));
+  const initialWorkflowStatus =
+    parseWorkflowFilter(searchParams.get("workflowStatus")) ??
+    (searchParams.get("pendingApproval") === "true" ? "REVIEW" : undefined);
 
   const [filters, setFilters] = useState<ListProgramsParams>(() => ({
     ...buildApiFilters(initialWorkflowStatus),
