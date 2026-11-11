@@ -14,8 +14,10 @@ function ProgramWorkflow({
 	requirements = [],
 	onSubmitForReview,
 	onApprove,
+	onReject,
 	onPostToProduction,
 	onExpire,
+	auditTimeline,
 	loading = false,
 }: ProgramWorkflowProps) {
 	const incompleteRequirements = requirements.filter((item) => !item.complete);
@@ -34,12 +36,13 @@ function ProgramWorkflow({
 				incompleteRequirements={incompleteRequirements}
 				onSubmitForReview={onSubmitForReview}
 				onApprove={onApprove}
+				onReject={onReject}
 				onPostToProduction={onPostToProduction}
 				onExpire={onExpire}
 				loading={loading}
 			/>
 
-			<WorkflowTimeline status={status} />
+			<WorkflowTimeline status={status} auditTimeline={auditTimeline ?? []} />
 		</Stack>
 	);
 }
