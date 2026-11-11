@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Box } from "@mui/material";
+import { Box, Chip, Stack, Typography } from "@mui/material";
 import React, { useEffect } from "react";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 
@@ -9,6 +9,7 @@ import {
 } from "@/features/program/components/vehicle";
 
 import {
+	useProgramVehicles,
 	useResolveVehicleFilters,
 	useUpdateProgramVehicles,
 	useVehicleCatalog,
@@ -31,6 +32,17 @@ export function VehiclesForm() {
 	const { programId, revisionId, isReadOnly, setSectionSaving } =
 		useProgramEditor();
 	const [editingIndex, setEditingIndex] = React.useState<number | null>(null);
+	const savedVehiclesQuery = useProgramVehicles(programId, revisionId);
+	const savedVehicles = savedVehiclesQuery.data?.selectedVehicles ?? [];
+	const [persistedVehicleIds, setPersistedVehicleIds] = React.useState<number[]>([]);
+
+	useEffect(() => {
+		if (savedVehiclesQuery.data) {
+			setPersistedVehicleIds(
+				savedVehiclesQuery.data.selectedVehicles.map((vehicle) => vehicle.vehicleCatalogId),
+			);
+		}
+	}, [savedVehiclesQuery.data]);
 
 	const form = useForm<VehiclesFormValues>({
 		resolver: zodResolver(vehiclesFormSchema),
@@ -126,7 +138,6 @@ export function VehiclesForm() {
 		useVehicleCatalog(selectedYears, selectedMakes, shouldLoadCatalog);
 	const catalogVehicles = catalogResponse?.vehicles ?? [];
 
-	console.log("catalogResponse", catalogResponse);
 	/* ------------------------------------------------------------------ */
 	/* Models                                                              */
 	/* ------------------------------------------------------------------ */
@@ -294,16 +305,19 @@ export function VehiclesForm() {
 
 			const resolved = await resolveVehicleFilters(rows);
 
-			const result = await updateVehiclesAsync({
+			const nextVehicleIds = [
+				...new Set([...persistedVehicleIds, ...resolved.vehicleCatalogIds]),
+			];
+			await updateVehiclesAsync({
 				programId,
 				revisionId,
 				payload: {
-					vehicleCatalogIds: resolved.vehicleCatalogIds,
+					vehicleCatalogIds: nextVehicleIds,
 				},
 			});
-			console.log("RESULT VEHICLE SVAE", result);
+			setPersistedVehicleIds(nextVehicleIds);
 		},
-		[programId, revisionId, resolveVehicleFilters, updateVehiclesAsync],
+		[programId, revisionId, persistedVehicleIds, resolveVehicleFilters, updateVehiclesAsync],
 	);
 
 	const onCommitRow = async (values: VehiclesFormValues) => {
@@ -584,6 +598,26 @@ export function VehiclesForm() {
 					onEdit={isReadOnly ? undefined : onEditRow}
 					onDelete={isReadOnly ? undefined : onDeleteRow}
 				/>
+
+				{savedVehicles.length > 0 && (
+					<Box sx={{ border: 1, borderColor: "divider", borderRadius: 2, p: 2 }}>
+						<Typography variant="subtitle2" sx={{ mb: 1 }}>
+							Saved catalog vehicles ({savedVehicles.length})
+						</Typography>
+						<Stack direction="row" flexWrap="wrap" gap={1}>
+							{savedVehicles.map((vehicle) => (
+								<Chip
+									key={vehicle.vehicleCatalogId}
+									label={[`${vehicle.year} ${vehicle.make} ${vehicle.model}`, vehicle.trimName]
+										.filter(Boolean)
+										.join(" · ")}
+									size="small"
+									variant="outlined"
+								/>
+							))}
+						</Stack>
+					</Box>
+				)}
 			</Box>
 		</FormProvider>
 	);
