@@ -29,8 +29,9 @@ import {
 import { retainAvailableValues } from "../utils";
 
 export function VehiclesForm() {
-	const { programId, revisionId, isReadOnly, setSectionSaving } =
+	const { programId, revisionId, isReadOnly, isMinorRevision, setSectionSaving } =
 		useProgramEditor();
+	const canEdit = !isReadOnly && !isMinorRevision;
 	const [editingIndex, setEditingIndex] = React.useState<number | null>(null);
 	const savedVehiclesQuery = useProgramVehicles(programId, revisionId);
 	const savedVehicles = savedVehiclesQuery.data?.selectedVehicles ?? [];
@@ -222,7 +223,7 @@ export function VehiclesForm() {
 	/* ------------------------------------------------------------------ */
 
 	const onEditRow = (index: number) => {
-		if (isReadOnly) {
+		if (!canEdit) {
 			return;
 		}
 
@@ -299,7 +300,7 @@ export function VehiclesForm() {
 			 * Keep the rows in RHF. They will be available when the
 			 * program/revision has been created.
 			 */
-			if (programId == null || revisionId == null) {
+			if (!canEdit || programId == null || revisionId == null) {
 				return;
 			}
 
@@ -321,7 +322,7 @@ export function VehiclesForm() {
 	);
 
 	const onCommitRow = async (values: VehiclesFormValues) => {
-		if (isReadOnly || isUpdatingVehicles) {
+		if (!canEdit || isUpdatingVehicles) {
 			return;
 		}
 
@@ -496,7 +497,7 @@ export function VehiclesForm() {
 				sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}
 			>
 				<VehicleFilterBuilder
-					disabled={isReadOnly}
+					disabled={!canEdit}
 					editing={editingIndex !== null}
 					onCancelEdit={onCancelEdit}
 					columns={[
@@ -595,8 +596,8 @@ export function VehiclesForm() {
 
 				<SelectedVehiclesSection
 					rows={selectedRows}
-					onEdit={isReadOnly ? undefined : onEditRow}
-					onDelete={isReadOnly ? undefined : onDeleteRow}
+					onEdit={canEdit ? onEditRow : undefined}
+					onDelete={canEdit ? onDeleteRow : undefined}
 				/>
 
 				{savedVehicles.length > 0 && (
