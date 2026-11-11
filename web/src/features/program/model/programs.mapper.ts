@@ -21,7 +21,7 @@ import type {
 /* Revision                                                                   */
 /* -------------------------------------------------------------------------- */
 
-function mapRevision(dto?: RevisionRefDto): ProgramRevision | null {
+function mapRevision(dto?: RevisionRefDto | null): ProgramRevision | null {
 	if (!dto) return null;
 
 	return {
