@@ -6,14 +6,12 @@ import { currentUser, requireRole } from "../lib/auth.js";
 import { badRequest, conflict, notFound } from "../lib/errors.js";
 import { getProgramOrThrow } from "../lib/programs.js";
 import {
-  ConditionCode,
-  CreditTier,
   getNextId,
   type MockRevision,
-  ProgramTypeCode,
   readDb,
   writeDb,
 } from "../store.js";
+import type { ConditionCode, CreditTier, ProgramTypeCode } from "../types/types.js";
 
 export const setup = new Hono();
 
