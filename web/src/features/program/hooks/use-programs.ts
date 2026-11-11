@@ -38,11 +38,11 @@ export function usePrograms(params?: ListProgramsParams) {
  */
 export function useProgram(programId?: number) {
 	return useQuery({
-		queryKey: queryKeys.programs.detail(programId!),
+		queryKey: queryKeys.programs.detail(programId ?? 0),
 		queryFn: async () => {
-			const response = await programsApi.getDetail(programId!);
-			const program = mapProgramDetail(response);
-			return program;
+			if (programId == null) throw new Error("programId is required");
+			const response = await programsApi.getDetail(programId);
+			return mapProgramDetail(response);
 		},
 		enabled: programId != null,
 	});
@@ -51,9 +51,10 @@ export function useProgram(programId?: number) {
 // revisons
 export function useProgramRevisionHistory(programId?: number) {
 	return useQuery({
-		queryKey: queryKeys.programs.revisions(programId!),
+		queryKey: queryKeys.programs.revisions(programId ?? 0),
 		queryFn: async () => {
-			const response = await revisionsApi.getHistory(programId!);
+			if (programId == null) throw new Error("programId is required");
+			const response = await revisionsApi.getHistory(programId);
 			return mapRevisionHistory(response);
 		},
 		enabled: programId != null,
@@ -70,8 +71,13 @@ export function useProgramRevisionHistory(programId?: number) {
  */
 export function useProgramSetup(programId?: number, revisionId?: number) {
 	return useQuery({
-		queryKey: queryKeys.setup.byRevision(programId!, revisionId!),
-		queryFn: () => setupApi.get(programId!, revisionId!),
+		queryKey: queryKeys.setup.byRevision(programId ?? 0, revisionId ?? 0),
+		queryFn: () => {
+			if (programId == null || revisionId == null) {
+				throw new Error("programId and revisionId are required");
+			}
+			return setupApi.get(programId, revisionId);
+		},
 		enabled: programId != null && revisionId != null,
 	});
 }
