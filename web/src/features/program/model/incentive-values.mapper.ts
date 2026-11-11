@@ -11,7 +11,7 @@ const CASH_COMPONENTS = [
   { code: "DOWN_PAYMENT_ASSIST", name: "Down Payment Assist", field: "downPaymentAssist", sequenceNo: 3 },
 ] as const;
 
-const MANAGED_COMPONENT_CODES = [
+const MANAGED_COMPONENT_CODES: readonly string[] = [
   ...CASH_COMPONENTS.map((item) => item.code),
   "APR_BY_TERM",
 ];
