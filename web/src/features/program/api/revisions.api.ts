@@ -189,6 +189,13 @@ export const revisionsApi = {
     return response.data;
   },
 
+  async getApproval(programId: number, revisionId: number): Promise<RevisionApprovalDto> {
+    const response = await http.get<RevisionApprovalDto>(
+      `/programs/${programId}/revisions/${revisionId}/approval`,
+    );
+    return response.data;
+  },
+
   async submit(programId: number, revisionId: number): Promise<SubmitRevisionResponseDto> {
     const response = await http.post<SubmitRevisionResponseDto>(
       `/programs/${programId}/revisions/${revisionId}/submit`,
@@ -227,7 +234,7 @@ export const revisionsApi = {
     return response.data;
   },
 
-  async expire(programId: number, _revisionId: number): Promise<ExpireRevisionResponseDto> {
+  async expire(programId: number): Promise<ExpireRevisionResponseDto> {
     const response = await http.post<ExpireRevisionResponseDto>(
       `/programs/${programId}/expire`,
     );
