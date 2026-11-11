@@ -3,7 +3,7 @@
 import { Hono } from "hono";
 
 import { currentUser, requireRole } from "../lib/auth.js";
-import { badRequest, notFound } from "../lib/errors.js";
+import { badRequest, conflict, notFound } from "../lib/errors.js";
 import { getProgramOrThrow } from "../lib/programs.js";
 
 import { type GeoRule, getNextId, readDb, writeDb } from "../store.js";
@@ -327,6 +327,13 @@ geography.put(
 			throw badRequest(
 				"REVISION_NOT_EDITABLE",
 				"Only a draft revision can be edited",
+			);
+		}
+
+		if (revision.isMinorRevision) {
+			throw conflict(
+				"REVISION_NOT_EDITABLE",
+				"Geography cannot be changed in a minor revision",
 			);
 		}
 
