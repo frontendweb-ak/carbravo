@@ -172,7 +172,7 @@ export function SetupForm({
 					const latestValues = pendingSaveRef.current;
 					pendingSaveRef.current = null;
 					const versionAtStart = changeVersionRef.current;
-					const payload = mapSetupFormToDto(latestValues);
+					const payload = mapSetupFormToDto(latestValues, setup);
 					// CREATE NEW PROGRAM
 					if (mode === "new" && persistenceRef.current.programId == null) {
 						if (createInFlightRef.current) {
