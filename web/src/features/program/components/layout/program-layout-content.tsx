@@ -221,7 +221,7 @@ export function ProgramLayoutContent({
 					saved={!isSaving}
 					saveLabel={isSaving ? "Saving..." : "Save draft"}
 					saveDisabled={revisionReadOnly || isSaving}
-					hideSave={revisionReadOnly}
+					hideSave={revisionReadOnly || activeSection === "summary"}
 					onSave={handleSave}
 				/>
 			</Box>
