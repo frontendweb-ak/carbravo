@@ -218,7 +218,7 @@ function ExpiringProgramRow({ program, last }: ExpiringProgramRowProps) {
 			</Typography>
 
 			<Box>
-				<StatusBadge status={mapStatus(program.status)} />
+				<StatusBadge status={program.status} />
 			</Box>
 		</Box>
 	);
