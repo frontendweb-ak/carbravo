@@ -13,7 +13,6 @@ import type {
 	ProgramRevision,
 	ProgramsList,
 	ProgramsPagination,
-	ProgramsStatusCounts,
 	ProgramWorkflowStatus,
 } from "./programs.types";
 
@@ -89,9 +88,6 @@ export function mapProgramsPagination(dto?: PaginationDto): ProgramsPagination {
 		totalPages: dto?.totalPages ?? 0,
 	};
 }
-export function mapProgramsStatusCounts(): ProgramsStatusCounts {
-  return { all: 0, draft: 0, review: 0, approved: 0, active: 0, expired: 0 };
-}
 /* -------------------------------------------------------------------------- */
 /* List                                                                       */
 /* -------------------------------------------------------------------------- */
@@ -103,12 +99,11 @@ export function mapProgramsList(dto: {
 	return {
 		items: (dto.content ?? []).map(mapProgram),
 		pagination: mapProgramsPagination(dto.pagination),
-		statusCounts: mapProgramsStatusCounts(),
 	};
 }
 
 export function getWorkflowStatus(
-	program: ProgramListItemDto,
+	program: Pick<ProgramListItemDto, "programStatus" | "currentRevision">,
 ): ProgramWorkflowStatus {
 	if (program.programStatus === "EXPIRED") return "EXPIRED";
 
