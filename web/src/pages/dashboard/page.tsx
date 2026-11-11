@@ -15,9 +15,12 @@ import {
 
 import { getStatusCounts } from "@/features/dashboard/utils";
 import { formatLongDate } from "@/utils";
+import { useMockUserRole } from "@/infra/api/use-mock-user-role";
 
 function DashboardPage() {
 	const navigate = useNavigate();
+	const { role } = useMockUserRole();
+	const roleLabel = role === "AUTHOR" ? "Author" : role === "APPROVER" ? "Approver" : "Admin";
 
 	const summaryQuery = useDashboardSummary();
 	const activityQuery = useDashboardActivity();
@@ -29,7 +32,7 @@ function DashboardPage() {
 	return (
 		<Box sx={{ backgroundColor: "background.default" }}>
 			<DashboardHeader
-				userName="Alex Chen"
+				userName={roleLabel}
 				rightContent={
 					<>
 						Signed in as{" "}
@@ -37,7 +40,7 @@ function DashboardPage() {
 							component="strong"
 							sx={{ color: "text.primary", fontWeight: 600 }}
 						>
-							Admin
+							{roleLabel}
 						</Box>
 						{` · ${formattedDate}`}
 					</>
@@ -70,7 +73,7 @@ function DashboardPage() {
 						reviewCount={statusCounts.review}
 						onNewProgram={() => navigate("/programs/new")}
 						onBrowsePrograms={() => navigate("/programs")}
-						onReviewQueue={() => navigate('/programs?status="REVIEW"')}
+						onReviewQueue={() => navigate("/programs?pendingApproval=true")}
 					/>
 				</Stack>
 			</Box>
