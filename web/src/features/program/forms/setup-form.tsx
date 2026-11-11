@@ -54,10 +54,10 @@ export function SetupForm({
 	readOnly = false,
 	onCreated,
 }: SetupFormProps) {
-	const { registerSaveHandler, updateSectionStatus } = useProgramEditor();
+	const { registerSaveHandler, updateSectionStatus, isMinorRevision } = useProgramEditor();
 	const isExistingRevision =
 		mode === "edit" && programId != null && revisionId != null;
-	const canEdit = mode === "new" || (isExistingRevision && !readOnly);
+	const canEdit = mode === "new" || (isExistingRevision && !readOnly && !isMinorRevision);
 
 	// Api
 	const {
