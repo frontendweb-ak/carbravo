@@ -35,8 +35,9 @@ function buildApiFilters(
 ): Pick<ListProgramsParams, "status" | "pendingApproval" | "page" | "size"> {
   switch (workflowStatus) {
     case "DRAFT":
-    case "APPROVED":
       return { status: "DRAFT", pendingApproval: false, page: 0, size: 100 };
+    case "APPROVED":
+      return { pendingApproval: false, page: 0, size: 100 };
     case "REVIEW":
       return { pendingApproval: true, page: 0, size: 100 };
     case "ACTIVE":
