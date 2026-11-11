@@ -25,6 +25,7 @@ function ProgramStatusSummary({
 				<ProgramStatusCard
 					label="Draft"
 					value={draft}
+					href="/programs?workflowStatus=DRAFT"
 					status="DRAFT"
 					loading={loading}
 				/>
@@ -54,6 +55,7 @@ function ProgramStatusSummary({
 				<ProgramStatusCard
 					label="Active"
 					value={active}
+					href="/programs?workflowStatus=ACTIVE"
 					status="ACTIVE"
 					loading={loading}
 				/>
@@ -63,6 +65,7 @@ function ProgramStatusSummary({
 				<ProgramStatusCard
 					label="Expired"
 					value={expired}
+					href="/programs?workflowStatus=EXPIRED"
 					status="EXPIRED"
 					loading={loading}
 				/>
