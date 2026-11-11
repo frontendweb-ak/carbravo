@@ -87,6 +87,9 @@ values.put("/programs/:programId/revisions/:revisionId/values", async (c) => {
   if (revision.status !== "DRAFT") {
     throw conflict("REVISION_NOT_EDITABLE", "Values can only be edited while the revision is DRAFT");
   }
+  if (revision.isMinorRevision) {
+    throw conflict("REVISION_NOT_EDITABLE", "Incentive values cannot be changed in a minor revision");
+  }
 
   const input = body as Record<string, unknown>;
   if (!Array.isArray(input.components)) {
