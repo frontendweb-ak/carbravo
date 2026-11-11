@@ -5,6 +5,14 @@ const PROGRAM_STATUS_BADGES = {
 		label: "Draft",
 		variant: "statusDraft",
 	},
+	REVIEW: {
+		label: "Review",
+		variant: "statusDraft",
+	},
+	APPROVED: {
+		label: "Approved",
+		variant: "statusActive",
+	},
 	ACTIVE: {
 		label: "Active",
 		variant: "statusActive",
@@ -33,12 +41,12 @@ const PROGRAM_TYPE_LABELS = {
 	CUSTOMER_CASH: "Customer Cash",
 	APR: "APR",
 	BONUS_CASH: "Bonus Cash",
-} as const satisfies Record<NonNullable<Program["type"]>, string>;
+}:
 
 export function getProgramTypeLabel(type: Program["type"]): string {
 	if (!type) {
 		return "—";
 	}
 
-	return PROGRAM_TYPE_LABELS[type];
+	return PROGRAM_TYPE_LABELS[type] ?? type;
 }
