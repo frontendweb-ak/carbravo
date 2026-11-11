@@ -118,6 +118,7 @@ export function mapSetupFormToDto(
     ...base,
     programName: values.programName,
     programTypeCode: values.programType,
+    conditionCode: mappedConditionTier,
     conditionTier: mappedConditionTier,
     mileageCeiling: values.mileageMaximum,
     topOfDeal: values.flags.topOfDeal,
