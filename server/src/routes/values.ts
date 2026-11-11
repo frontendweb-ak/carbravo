@@ -24,7 +24,7 @@ function toValuesResponse(db: Awaited<ReturnType<typeof readDb>>, revision: Awai
   });
 
   return {
-    financeTerms: revision.values.financeTerms,
+    financeTerms: revision.setup.financeTerms,
     scopeVehicles,
     components: revision.values.components,
   };
