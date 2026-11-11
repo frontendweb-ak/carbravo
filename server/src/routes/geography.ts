@@ -3,10 +3,11 @@
 import { Hono } from "hono";
 
 import { currentUser, requireRole } from "../lib/auth.js";
-import { badRequest, notFound } from "../lib/errors.js";
+import { badRequest, conflict, notFound } from "../lib/errors.js";
 import { getProgramOrThrow } from "../lib/programs.js";
 
-import { type GeoRule, getNextId, readDb, writeDb } from "../store.js";
+import { getNextId, readDb, writeDb } from "../store.js";
+import type { GeoLevel, GeoRuleRecord } from "../types/types.js";
 
 export const geography = new Hono();
 
@@ -330,6 +331,13 @@ geography.put(
 			);
 		}
 
+		if (revision.isMinorRevision) {
+			throw conflict(
+				"REVISION_NOT_EDITABLE",
+				"Geography cannot be changed in a minor revision",
+			);
+		}
+
 		const body = await c.req.json().catch(() => null);
 
 		if (!body || typeof body !== "object") {
@@ -386,7 +394,7 @@ geography.put(
 		 * Therefore geoRuleId must NOT be required
 		 * from the client.
 		 */
-		const normalizedRules: GeoRule[] = geoRules.map(
+		const normalizedRules: GeoRuleRecord[] = geoRules.map(
 			(rule) => {
 				if (!rule || typeof rule !== "object") {
 					throw badRequest(
@@ -405,7 +413,9 @@ geography.put(
 				if (
 					typeof value.isIncluded !== "boolean" ||
 					typeof value.level !== "string" ||
-					typeof value.code !== "string"
+					typeof value.code !== "string" ||
+					typeof value.name !== "string" ||
+					!value.name.trim()
 				) {
 					throw badRequest(
 						"BAD_REQUEST",
@@ -424,14 +434,11 @@ geography.put(
 					);
 				}
 
-				const candidate: Omit<GeoRule, "geoRuleId"> = {
+				const candidate: Omit<GeoRuleRecord, "geoRuleId"> = {
 					isIncluded: value.isIncluded,
 					level: value.level as GeoLevel,
 					code: value.code.trim(),
-					name:
-						typeof value.name === "string"
-							? value.name
-							: undefined,
+					name: typeof value.name === "string" ? value.name.trim() : "",
 				};
 
 				if (
@@ -503,7 +510,7 @@ geography.put(
 
 function geographyExists(
 	db: Awaited<ReturnType<typeof readDb>>,
-	rule: Omit<GeoRule, "geoRuleId">,
+	rule: Omit<GeoRuleRecord, "geoRuleId">,
 ): boolean {
 	switch (rule.level) {
 		case "REGION":

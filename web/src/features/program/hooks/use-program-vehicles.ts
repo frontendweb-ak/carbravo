@@ -190,8 +190,13 @@ function dedupeVehicles<T extends { vehicleCatalogId: number }>(
 
 export function useProgramVehicles(programId?: number, revisionId?: number) {
 	return useQuery({
-		queryKey: queryKeys.vehicles.byRevision(programId!, revisionId!),
-		queryFn: () => vehiclesApi.getForRevision(programId!, revisionId!),
+		queryKey: queryKeys.vehicles.byRevision(programId ?? 0, revisionId ?? 0),
+		queryFn: () => {
+			if (programId == null || revisionId == null) {
+				throw new Error("Program and revision are required to load selected vehicles.");
+			}
+			return vehiclesApi.getForRevision(programId, revisionId);
+		},
 		enabled: programId != null && revisionId != null,
 	});
 }
@@ -289,8 +294,11 @@ export function useVehicleMakesForYears(years: number[]) {
  */
 export function useVehicleMakes(year?: number) {
 	return useQuery({
-		queryKey: queryKeys.vehicles.makes(year!),
-		queryFn: () => vehiclesApi.getMakes(year!),
+		queryKey: queryKeys.vehicles.makes(year ?? 0),
+		queryFn: () => {
+			if (year == null) throw new Error("A model year is required to load makes.");
+			return vehiclesApi.getMakes(year);
+		},
 		enabled: year != null,
 		staleTime: 5 * 60 * 1000,
 	});
@@ -356,22 +364,15 @@ export function useVehicleModelsForSelection(years: number[], makes: string[]) {
  */
 export function useVehicleModels(year?: number, make?: string) {
 	return useQuery({
-		queryKey: queryKeys.vehicles.models(year!, make!),
-		queryFn: () => vehiclesApi.getModels(year!, make!),
+		queryKey: queryKeys.vehicles.models(year ?? 0, make ?? ""),
+		queryFn: () => {
+			if (year == null || !make) {
+				throw new Error("A model year and make are required to load models.");
+			}
+			return vehiclesApi.getModels(year, make);
+		},
 		enabled: year != null && Boolean(make),
 		staleTime: 5 * 60 * 1000,
-	});
-}
-
-/* -------------------------------------------------------------------------- */
-/* Segments                                                                    */
-/* -------------------------------------------------------------------------- */
-
-export function useVehicleSegments() {
-	return useQuery({
-		queryKey: queryKeys.vehicles.segments(),
-		queryFn: () => vehiclesApi.getSegments(),
-		staleTime: 30 * 60 * 1000,
 	});
 }
 

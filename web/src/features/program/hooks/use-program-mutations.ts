@@ -34,28 +34,6 @@ export function useCreateProgram() {
 	});
 }
 
-export function useCloneProgram() {
-	const queryClient = useQueryClient();
-
-	return useAppMutation({
-		mutationFn: (programId: number) => programsApi.clone(programId),
-
-		successMessage: "Program cloned successfully.",
-
-		onSuccess: (data) => {
-			queryClient.invalidateQueries({
-				queryKey: queryKeys.programs.all,
-			});
-
-			if (data.programId != null) {
-				queryClient.invalidateQueries({
-					queryKey: queryKeys.programs.detail(data.programId),
-				});
-			}
-		},
-	});
-}
-
 export function useDeleteProgram() {
 	const queryClient = useQueryClient();
 

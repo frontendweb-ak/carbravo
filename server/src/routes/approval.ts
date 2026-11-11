@@ -6,6 +6,38 @@ import { getProgramOrThrow } from "../lib/programs.js";
 import { getNextId, readDb, writeDb } from "../store.js";
 
 export const approval = new Hono();
+function toApprovalState(db: Awaited<ReturnType<typeof readDb>>, revision: Awaited<ReturnType<typeof readDb>>["revisions"][number]) {
+  const auditTimeline = db.activity
+    .filter((event) => event.entityType === "INCENTIVE_REVISION" && event.entityId === revision.id)
+    .sort((a, b) => new Date(a.changedAt).getTime() - new Date(b.changedAt).getTime())
+    .map((event) => ({
+      operation: event.operation,
+      changedBy: event.changedBy,
+      changedAt: event.changedAt,
+      comment: event.comment ?? null,
+    }));
+
+  return {
+    revisionId: revision.id,
+    majorRevision: revision.majorRevision,
+    minorRevision: revision.minorRevision,
+    revisionLabel: `${revision.majorRevision}.${revision.minorRevision}`,
+    revisionStatus: revision.status,
+    isMinorRevision: revision.isMinorRevision,
+    isSubmitted: revision.approval.isSubmitted,
+    submittedAt: revision.approval.submittedAt,
+    submittedBy: revision.approval.submittedBy,
+    approved: revision.approval.approved,
+    approvedAt: revision.approval.approvedAt,
+    approvedBy: revision.approval.approvedBy,
+    approvalComment: revision.approval.approvalComment,
+    rejectedAt: revision.approval.rejectedAt,
+    rejectedBy: revision.approval.rejectedBy,
+    rejectionReason: revision.approval.rejectionReason,
+    auditTimeline,
+  };
+}
+
 
 /**
  * GET
@@ -33,38 +65,7 @@ approval.get(
 			throw notFound("REVISION_NOT_FOUND", "Revision not found");
 		}
 
-		return c.json({
-			programId: program.id,
-			programIdentifier: program.identifier,
-			programName: program.name,
-
-			revisionId: revision.id,
-			revisionLabel: `${revision.majorRevision}.${revision.minorRevision}`,
-			revisionStatus: revision.status,
-			isMinorRevision: revision.isMinorRevision,
-
-			approval: {
-				isSubmitted: revision.approval.isSubmitted,
-
-				submittedAt: revision.approval.submittedAt,
-
-				submittedBy: revision.approval.submittedBy,
-
-				approved: revision.approval.approved,
-
-				approvedAt: revision.approval.approvedAt,
-
-				approvedBy: revision.approval.approvedBy,
-
-				approvalComment: revision.approval.approvalComment,
-
-				rejectedAt: revision.approval.rejectedAt,
-
-				rejectedBy: revision.approval.rejectedBy,
-
-				rejectionReason: revision.approval.rejectionReason,
-			},
-		});
+		return c.json(toApprovalState(db, revision));
 	},
 );
 
@@ -118,10 +119,6 @@ approval.post(
 
 		if (!revision.setup.programTypeCode) {
 			validationErrors.push("programTypeCode is required");
-		}
-
-		if (!revision.setup.purchaseType) {
-			validationErrors.push("purchaseType is required");
 		}
 
 		if (!revision.setup.deliveryStartDate) {
@@ -178,41 +175,7 @@ approval.post(
 
 		await writeDb(db);
 
-		return c.json({
-			programId: program.id,
-
-			programIdentifier: program.identifier,
-
-			programName: program.name,
-
-			revisionId: revision.id,
-
-			revisionLabel: `${revision.majorRevision}.${revision.minorRevision}`,
-
-			revisionStatus: revision.status,
-
-			approval: {
-				isSubmitted: revision.approval.isSubmitted,
-
-				submittedAt: revision.approval.submittedAt,
-
-				submittedBy: revision.approval.submittedBy,
-
-				approved: revision.approval.approved,
-
-				approvedAt: revision.approval.approvedAt,
-
-				approvedBy: revision.approval.approvedBy,
-
-				approvalComment: revision.approval.approvalComment,
-
-				rejectedAt: revision.approval.rejectedAt,
-
-				rejectedBy: revision.approval.rejectedBy,
-
-				rejectionReason: revision.approval.rejectionReason,
-			},
-		});
+		return c.json(toApprovalState(db, revision));
 	},
 );
 
@@ -263,8 +226,8 @@ approval.post(
 		}
 
 		const comment =
-			typeof body?.approvalComment === "string"
-				? body.approvalComment.trim()
+			typeof body?.comment === "string"
+				? body.comment.trim()
 				: null;
 
 		const now = new Date().toISOString();
@@ -301,41 +264,7 @@ approval.post(
 
 		await writeDb(db);
 
-		return c.json({
-			programId: program.id,
-
-			programIdentifier: program.identifier,
-
-			programName: program.name,
-
-			revisionId: revision.id,
-
-			revisionLabel: `${revision.majorRevision}.${revision.minorRevision}`,
-
-			revisionStatus: revision.status,
-
-			approval: {
-				isSubmitted: revision.approval.isSubmitted,
-
-				submittedAt: revision.approval.submittedAt,
-
-				submittedBy: revision.approval.submittedBy,
-
-				approved: revision.approval.approved,
-
-				approvedAt: revision.approval.approvedAt,
-
-				approvedBy: revision.approval.approvedBy,
-
-				approvalComment: revision.approval.approvalComment,
-
-				rejectedAt: revision.approval.rejectedAt,
-
-				rejectedBy: revision.approval.rejectedBy,
-
-				rejectionReason: revision.approval.rejectionReason,
-			},
-		});
+		return c.json(toApprovalState(db, revision));
 	},
 );
 
@@ -441,25 +370,6 @@ approval.post(
 
 		await writeDb(db);
 
-		return c.json({
-			programId: program.id,
-			programIdentifier: program.identifier,
-			programName: program.name,
-			revisionId: revision.id,
-			revisionLabel: `${revision.majorRevision}.${revision.minorRevision}`,
-			revisionStatus: revision.status,
-			approval: {
-				isSubmitted: revision.approval.isSubmitted,
-				submittedAt: revision.approval.submittedAt,
-				submittedBy: revision.approval.submittedBy,
-				approved: revision.approval.approved,
-				approvedAt: revision.approval.approvedAt,
-				approvedBy: revision.approval.approvedBy,
-				approvalComment: revision.approval.approvalComment,
-				rejectedAt: revision.approval.rejectedAt,
-				rejectedBy: revision.approval.rejectedBy,
-				rejectionReason: revision.approval.rejectionReason,
-			},
-		});
+		return c.json(toApprovalState(db, revision));
 	},
 );

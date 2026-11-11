@@ -5,7 +5,7 @@ import { ProgramStatusCard } from "./program-status-card";
 export interface ProgramStatusSummaryProps {
 	draft: number;
 	review: number;
-	approved: number;
+	approved: number | null;
 	active: number;
 	expired: number;
 	loading?: boolean;
@@ -25,6 +25,7 @@ function ProgramStatusSummary({
 				<ProgramStatusCard
 					label="Draft"
 					value={draft}
+					href="/programs?workflowStatus=DRAFT"
 					status="DRAFT"
 					loading={loading}
 				/>
@@ -34,6 +35,7 @@ function ProgramStatusSummary({
 				<ProgramStatusCard
 					label="Review"
 					value={review}
+					href="/programs?pendingApproval=true"
 					status="REVIEW"
 					loading={loading}
 				/>
@@ -43,6 +45,7 @@ function ProgramStatusSummary({
 				<ProgramStatusCard
 					label="Approved"
 					value={approved}
+					href="/programs?workflowStatus=APPROVED"
 					status="APPROVED"
 					loading={loading}
 				/>
@@ -52,6 +55,7 @@ function ProgramStatusSummary({
 				<ProgramStatusCard
 					label="Active"
 					value={active}
+					href="/programs?workflowStatus=ACTIVE"
 					status="ACTIVE"
 					loading={loading}
 				/>
@@ -61,6 +65,7 @@ function ProgramStatusSummary({
 				<ProgramStatusCard
 					label="Expired"
 					value={expired}
+					href="/programs?workflowStatus=EXPIRED"
 					status="EXPIRED"
 					loading={loading}
 				/>

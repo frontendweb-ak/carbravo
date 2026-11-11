@@ -4,7 +4,6 @@ import type {
 	PaginationDto,
 	ProgramDetailDto,
 	ProgramListItemDto,
-	ProgramStatusCountsDto,
 	RevisionRefDto,
 } from "../api/programs.api";
 
@@ -14,7 +13,6 @@ import type {
 	ProgramRevision,
 	ProgramsList,
 	ProgramsPagination,
-	ProgramsStatusCounts,
 	ProgramWorkflowStatus,
 } from "./programs.types";
 
@@ -22,7 +20,7 @@ import type {
 /* Revision                                                                   */
 /* -------------------------------------------------------------------------- */
 
-function mapRevision(dto?: RevisionRefDto): ProgramRevision | null {
+function mapRevision(dto?: RevisionRefDto | null): ProgramRevision | null {
 	if (!dto) return null;
 
 	return {
@@ -62,14 +60,14 @@ export function mapProgram(dto: ProgramListItemDto): Program {
 		identifier: dto.programIdentifier ?? "",
 		name: dto.programName ?? "Untitled program",
 
-		status: dto.programStatus,
+		status: getWorkflowStatus(dto),
 		type: dto.programType ?? null,
 
 		revision: mapRevision(dto.currentRevision),
 		hasDraft: dto.hasDraft ?? false,
 
-		vehicles: dto.vehicles ?? [],
-		geography: dto.geography ?? [],
+		vehicles: [],
+		geography: [],
 
 		deliveryStartDate: dto.deliveryStartDate ?? null,
 		deliveryEndDate: dto.deliveryEndDate ?? null,
@@ -90,18 +88,6 @@ export function mapProgramsPagination(dto?: PaginationDto): ProgramsPagination {
 		totalPages: dto?.totalPages ?? 0,
 	};
 }
-export function mapProgramsStatusCounts(
-	dto?: ProgramStatusCountsDto,
-): ProgramsStatusCounts {
-	return {
-		all: dto?.all ?? 0,
-		draft: dto?.draft ?? 0,
-		review: dto?.review ?? 0,
-		approved: dto?.approved ?? 0,
-		active: dto?.active ?? 0,
-		expired: dto?.expired ?? 0,
-	};
-}
 /* -------------------------------------------------------------------------- */
 /* List                                                                       */
 /* -------------------------------------------------------------------------- */
@@ -109,20 +95,18 @@ export function mapProgramsStatusCounts(
 export function mapProgramsList(dto: {
 	content?: ProgramListItemDto[];
 	pagination?: PaginationDto;
-	statusCounts?: ProgramStatusCountsDto;
 }): ProgramsList {
 	return {
 		items: (dto.content ?? []).map(mapProgram),
 		pagination: mapProgramsPagination(dto.pagination),
-		statusCounts: mapProgramsStatusCounts(dto.statusCounts),
 	};
 }
 
 export function getWorkflowStatus(
-	program: ProgramListItemDto,
+	program: Pick<ProgramListItemDto, "programStatus" | "currentRevision">,
 ): ProgramWorkflowStatus {
-	if (program.programStatus === "ACTIVE") return "ACTIVE";
 	if (program.programStatus === "EXPIRED") return "EXPIRED";
+
 	if (
 		program.currentRevision?.isSubmitted &&
 		!program.currentRevision?.approved
@@ -137,6 +121,7 @@ export function getWorkflowStatus(
 		return "APPROVED";
 	}
 
+	if (program.programStatus === "ACTIVE") return "ACTIVE";
 	return "DRAFT";
 }
 
@@ -169,7 +154,10 @@ export function mapProgramDetail(dto: ProgramDetailDto): ProgramDetail {
 		identifier: dto.programIdentifier ?? "",
 		name: dto.programName ?? "Untitled program",
 
-		status: dto.programStatus,
+		status: getWorkflowStatus({
+			programStatus: dto.programStatus,
+			currentRevision: dto.draftRevision ?? dto.activeRevision ?? undefined,
+		}),
 		type: dto.programType ?? null,
 
 		revision: mapRevision(dto.activeRevision),
@@ -178,8 +166,8 @@ export function mapProgramDetail(dto: ProgramDetailDto): ProgramDetail {
 
 		hasDraft: dto.draftRevision != null,
 
-		vehicles: dto.vehicles ?? [],
-		geography: dto.geography ?? [],
+		vehicles: [],
+		geography: [],
 
 		deliveryStartDate: dto.deliveryStartDate ?? null,
 		deliveryEndDate: dto.deliveryEndDate ?? null,

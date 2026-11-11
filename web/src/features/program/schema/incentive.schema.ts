@@ -15,6 +15,12 @@ export const incentiveValuesFormSchema = z.object({
 		.min(0, "Down Payment Assist cannot be negative."),
 	stackableWith: z.array(stackabilityTypeSchema),
 	notStackableWith: z.array(stackabilityTypeSchema),
+	aprByTerm: z.array(
+		z.object({
+			termMonths: z.coerce.number().int().positive(),
+			aprRate: z.coerce.number().min(0),
+		}),
+	),
 	belongsTo: z
 		.string()
 		.trim()

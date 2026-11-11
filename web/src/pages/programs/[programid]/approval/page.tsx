@@ -1,93 +1,168 @@
-// src/pages/programs/[programId]/edit/approval/page.tsx
-
-import { Box } from "@mui/material";
-
+import { Alert, Box } from "@mui/material";
 import type { ProgramWorkflowStatus } from "@/config/constants";
 import { ProgramWorkflow } from "@/features/program/components/program-workflow";
 import { useProgramEditor } from "@/features/program/editor/program-editor-context";
+import { useMockUserRole } from "@/infra/api/use-mock-user-role";
+import {
+  useApproveProgramRevision,
+  useExpireProgram,
+  usePostProgramRevision,
+  useProgramApproval,
+  useProgramGeography,
+  useProgramSetup,
+  useProgramValues,
+  useProgramVehicles,
+  useRejectProgramRevision,
+  useSubmitProgramRevision,
+} from "@/features/program";
 
 export default function ApprovalPage() {
-	const { mode, programId, revisionId, isReadOnly } = useProgramEditor();
+  const { programId, revisionId, programStatus } = useProgramEditor();
+  const { role } = useMockUserRole();
 
-	const status: ProgramWorkflowStatus = "DRAFT";
+  const approvalQuery = useProgramApproval(programId, revisionId);
+  const setupQuery = useProgramSetup(programId, revisionId);
+  const vehiclesQuery = useProgramVehicles(programId, revisionId);
+  const geographyQuery = useProgramGeography(programId, revisionId);
+  const valuesQuery = useProgramValues(programId, revisionId);
 
-	const requirements = [
-		{
-			key: "setup" as const,
-			label: "Setup",
-			complete: false,
-		},
-		{
-			key: "vehicles" as const,
-			label: "Vehicles",
-			complete: false,
-		},
-		{
-			key: "geography" as const,
-			label: "Geography",
-			complete: false,
-		},
-		{
-			key: "incentive-values" as const,
-			label: "Incentive Values",
-			complete: false,
-		},
-		{
-			key: "summary" as const,
-			label: "10-Point Summary",
-			complete: false,
-		},
-	];
+  const submitRevision = useSubmitProgramRevision();
+  const approveRevision = useApproveProgramRevision();
+  const rejectRevision = useRejectProgramRevision();
+  const postRevision = usePostProgramRevision();
+  const expireProgram = useExpireProgram();
 
-	const handleSubmitForReview = () => {
-		if (isReadOnly) return;
+  const approval = approvalQuery.data;
+  const setup = setupQuery.data;
+  const selectedVehicles = vehiclesQuery.data?.selectedVehicles ?? [];
+  const geographyRules = geographyQuery.data?.geoRules ?? [];
+  const components = valuesQuery.data?.components ?? [];
 
-		console.log("Submit revision for review", {
-			programId,
-			revisionId,
-		});
-	};
+  const requirements = [
+    {
+      key: "setup" as const,
+      label: "Setup",
+      complete: Boolean(
+        setup?.programName.trim() &&
+          setup.programTypeCode.trim() &&
+          setup.deliveryStartDate &&
+          setup.deliveryEndDate &&
+          setup.customerTypeCodes.length > 0 &&
+          (setup.conditionTier || setup.conditionCode),
+      ),
+    },
+    {
+      key: "vehicles" as const,
+      label: "Vehicles",
+      complete: selectedVehicles.length > 0,
+    },
+    {
+      key: "geography" as const,
+      label: "Geography",
+      complete: geographyRules.some((rule) => rule.isIncluded),
+    },
+    {
+      key: "eligibility" as const,
+      label: "Eligibility",
+      complete: Boolean(setup?.customerTypeCodes.length && setup.financialProviderCode),
+    },
+    {
+      key: "incentive-values" as const,
+      label: "Incentive Values",
+      complete: components.some((component) => component.attributes.length > 0),
+    },
+    {
+      key: "marketing" as const,
+      label: "Marketing & Disclosures",
+      complete: Boolean(setup?.mfpnText?.trim() && setup.disclosureText?.trim()),
+    },
+  ];
 
-	const handleApprove = () => {
-		if (isReadOnly) return;
+  const status: ProgramWorkflowStatus = (() => {
+    if (programStatus === "EXPIRED") return "EXPIRED";
+    if (approval?.revisionStatus === "EXPIRED") return "EXPIRED";
+    if (approval?.revisionStatus === "ACTIVE") return "ACTIVE";
+    if (approval?.approved) return "APPROVED";
+    if (approval?.isSubmitted) return "REVIEW";
+    if (
+      programStatus === "ACTIVE" ||
+      programStatus === "APPROVED" ||
+      programStatus === "REVIEW"
+    ) {
+      return programStatus;
+    }
+    return "DRAFT";
+  })();
 
-		console.log("Approve revision", {
-			programId,
-			revisionId,
-		});
-	};
+  const isLoading =
+    approvalQuery.isLoading ||
+    setupQuery.isLoading ||
+    vehiclesQuery.isLoading ||
+    geographyQuery.isLoading ||
+    valuesQuery.isLoading ||
+    submitRevision.isPending ||
+    approveRevision.isPending ||
+    rejectRevision.isPending ||
+    postRevision.isPending ||
+    expireProgram.isPending;
 
-	const handlePostToProduction = () => {
-		if (isReadOnly) return;
+  const queryError =
+    approvalQuery.isError ||
+    setupQuery.isError ||
+    vehiclesQuery.isError ||
+    geographyQuery.isError ||
+    valuesQuery.isError;
 
-		console.log("Post revision to production", {
-			programId,
-			revisionId,
-		});
-	};
+  const handleSubmit = () => {
+    if (programId == null || revisionId == null) return;
+    submitRevision.mutate({ programId, revisionId });
+  };
 
-	const handleExpire = () => {
-		if (isReadOnly) return;
+  const handleApprove = () => {
+    if (programId == null || revisionId == null) return;
+    approveRevision.mutate({ programId, revisionId });
+  };
 
-		console.log("Expire program", {
-			programId,
-			revisionId,
-		});
-	};
+  const handleReject = (rejectionReason: string) => {
+    if (programId == null || revisionId == null || !rejectionReason.trim()) return;
+    rejectRevision.mutate({
+      programId,
+      revisionId,
+      payload: { rejectionReason: rejectionReason.trim() },
+    });
+  };
 
-	return (
-		<Box sx={{ width: "100%" }}>
-			<ProgramWorkflow
-				programId={programId}
-				revisionId={revisionId}
-				status={status}
-				requirements={requirements}
-				onSubmitForReview={isReadOnly ? undefined : handleSubmitForReview}
-				onApprove={isReadOnly ? undefined : handleApprove}
-				onPostToProduction={isReadOnly ? undefined : handlePostToProduction}
-				onExpire={isReadOnly ? undefined : handleExpire}
-				loading={false}
-			/>
-		</Box>
-	);
+  const handlePostToProduction = () => {
+    if (programId == null || revisionId == null) return;
+    postRevision.mutate({ programId, revisionId });
+  };
+
+  const handleExpire = () => {
+    if (programId == null) return;
+    expireProgram.mutate({ programId });
+  };
+
+  return (
+    <Box sx={{ width: "100%" }}>
+      {queryError && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          Some workflow details could not be loaded. Retry the affected section before changing its approval state.
+        </Alert>
+      )}
+
+      <ProgramWorkflow
+        programId={programId}
+        revisionId={revisionId}
+        status={status}
+        requirements={requirements}
+        onSubmitForReview={status === "DRAFT" && (role === "AUTHOR" || role === "ADMIN") ? handleSubmit : undefined}
+        onApprove={status === "REVIEW" && (role === "APPROVER" || role === "ADMIN") ? handleApprove : undefined}
+        onReject={status === "REVIEW" && (role === "APPROVER" || role === "ADMIN") ? handleReject : undefined}
+        onPostToProduction={status === "APPROVED" && (role === "AUTHOR" || role === "ADMIN") ? handlePostToProduction : undefined}
+        onExpire={status === "ACTIVE" && role === "ADMIN" ? handleExpire : undefined}
+        auditTimeline={approval?.auditTimeline ?? []}
+        loading={isLoading}
+      />
+    </Box>
+  );
 }

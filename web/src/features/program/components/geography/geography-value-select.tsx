@@ -14,11 +14,13 @@ import type { GeographyFormValues, GeographyLevel } from "../../schema";
 interface GeographyValueSelectProps {
 	control: Control<GeographyFormValues>;
 	setValue: UseFormSetValue<GeographyFormValues>;
+	disabled?: boolean;
 }
 
 export function GeographyValueSelect({
 	control,
 	setValue,
+	disabled: externallyDisabled = false,
 }: GeographyValueSelectProps) {
 	const level = useWatch({
 		control,
@@ -204,7 +206,7 @@ export function GeographyValueSelect({
 			name="currentRule.code"
 			label="Value"
 			options={options}
-			disabled={disabled}
+			disabled={externallyDisabled || disabled}
 			placeholder={placeholder}
 		/>
 	);

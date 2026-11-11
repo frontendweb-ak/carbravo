@@ -6,9 +6,9 @@ const dateRegex = /^\d{2}-\d{2}-\d{4}$/;
 export const setupFormSchema = z
 	.object({
 		programName: z.string().trim().min(1, "Program name is required"),
-		programNumber: z.string().trim().min(1, "Program number is required"),
-		incentiveCodes: z.string().trim().min(1, "Incentive codes are required"),
-		country: z.string().trim().min(1, "Country is required"),
+		programNumber: z.string().default(""),
+		incentiveCodes: z.string().default(""),
+		country: z.string().default("US"),
 		deliveryStart: z
 			.string()
 			.min(1, "Delivery start is required")
@@ -17,10 +17,7 @@ export const setupFormSchema = z
 			.string()
 			.min(1, "Delivery end is required")
 			.regex(dateRegex, "Date must be DD-MM-YYYY"),
-		firstVisibleDate: z
-			.string()
-			.min(1, "First visible date is required")
-			.regex(dateRegex, "Date must be DD-MM-YYYY"),
+		firstVisibleDate: z.string().default(""),
 		firstVisibleTime: z.string().optional(),
 		programType: z.string().trim().min(1, "Program type is required"),
 		purchaseType: z.string().trim().min(1, "Purchase type is required"),

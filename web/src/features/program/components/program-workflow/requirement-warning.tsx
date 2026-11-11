@@ -16,12 +16,14 @@ interface RequirementWarningProps {
 
 const REQUIREMENT_ROUTES: Record<
 	WorkflowRequirement["key"],
-	(programId: string) => string
+	(programId: number) => string
 > = {
 	setup: (programId) => `/programs/${programId}/setup`,
 	vehicles: (programId) => `/programs/${programId}/vehicles`,
 	geography: (programId) => `/programs/${programId}/geography`,
 	"incentive-values": (programId) => `/programs/${programId}/incentive-values`,
+	eligibility: (programId) => `/programs/${programId}/eligibility`,
+	marketing: (programId) => `/programs/${programId}/marketing`,
 	summary: (programId) => `/programs/${programId}/summary`,
 };
 
@@ -29,6 +31,7 @@ function RequirementWarning({ programId, items }: RequirementWarningProps) {
 	const navigate = useNavigate();
 
 	const handleNavigate = (key: WorkflowRequirement["key"]) => {
+		if (programId == null) return;
 		navigate(REQUIREMENT_ROUTES[key](programId));
 	};
 

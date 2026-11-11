@@ -3,6 +3,7 @@
 import axios from "axios";
 
 import { normalizeError } from "./errors";
+import { getMockUserRole } from "./mock-session";
 
 const http = axios.create({
 	baseURL: import.meta.env.VITE_API_URL ?? "http://localhost:3001/api",
@@ -34,6 +35,12 @@ http.interceptors.request.use(
 
 		if (accessToken) {
 			config.headers.Authorization = `Bearer ${accessToken}`;
+		}
+
+		if (import.meta.env.DEV && import.meta.env.VITE_ENABLE_API_MOCKS === "true") {
+			const role = getMockUserRole();
+			config.headers["X-User-Role"] = role;
+			config.headers["X-User-Name"] = `demo.${role.toLowerCase()}`;
 		}
 
 		return config;

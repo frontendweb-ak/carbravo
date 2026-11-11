@@ -6,15 +6,12 @@ import { currentUser, requireRole } from "../lib/auth.js";
 import { badRequest, conflict, notFound } from "../lib/errors.js";
 import { getProgramOrThrow } from "../lib/programs.js";
 import {
-  ConditionCode,
-  CreditTier,
   getNextId,
   type MockRevision,
-  ProgramTypeCode,
-  PurchaseType,
   readDb,
   writeDb,
 } from "../store.js";
+import type { ConditionCode, CreditTier, ProgramTypeCode } from "../types/types.js";
 
 export const setup = new Hono();
 
@@ -29,17 +26,14 @@ export const setup = new Hono();
  * Required:
  * - programName
  * - programTypeCode
- * - purchaseType
  * - customerTypeCodes
- * - conditionCode
  * - deliveryStartDate
  * - deliveryEndDate
  */
 type SetupInput = {
   programName: string;
 
-  programTypeCode: ProgramTypeCode;
-  purchaseType: PurchaseType;
+  programTypeCode: string;
 
   customerTypeCodes: string[];
 
@@ -49,7 +43,8 @@ type SetupInput = {
 
   financialProviderCode?: string | null;
 
-  conditionCode: ConditionCode;
+  conditionCode?: string | null;
+  conditionTier?: string | null;
 
   mileageCeiling?: number | null;
 
@@ -89,8 +84,7 @@ type SetupResponse = {
 
   programName: string;
 
-  programTypeCode: ProgramTypeCode;
-  purchaseType: PurchaseType;
+  programTypeCode: string;
 
   customerTypeCodes: string[];
 
@@ -100,7 +94,8 @@ type SetupResponse = {
 
   financialProviderCode: string | null;
 
-  conditionCode: ConditionCode;
+  conditionCode: string | null;
+  conditionTier: string | null;
 
   mileageCeiling: number | null;
 
@@ -125,17 +120,6 @@ type SetupResponse = {
 /* -------------------------------------------------------------------------- */
 /* Contract constants                                                         */
 /* -------------------------------------------------------------------------- */
-
-const PROGRAM_TYPE_CODES = ["CUSTOMER_CASH", "APR", "BONUS_CASH"] as const;
-
-const PURCHASE_TYPES = ["CASH", "FINANCE"] as const;
-
-const CONDITION_CODES = [
-  "CARBRAVO",
-  "MANUFACTURER_CERTIFIED",
-  "USED_INSPECTED",
-  "USED_AS_IS",
-] as const;
 
 const CREDIT_TIER_CODES = ["A_PLUS", "A1", "A2", "B"] as const;
 
@@ -239,11 +223,8 @@ function validateSetup(body: unknown): asserts body is SetupInput {
     );
   }
 
-  if (
-    typeof body.programTypeCode !== "string" ||
-    !PROGRAM_TYPE_CODES.includes(body.programTypeCode as ProgramTypeCode)
-  ) {
-    throw badRequest("VALIDATION_ERROR", "Invalid programTypeCode");
+  if (typeof body.programTypeCode !== "string" || !body.programTypeCode.trim()) {
+    throw badRequest("VALIDATION_ERROR", "programTypeCode is required");
   }
 
   // if (
@@ -374,6 +355,8 @@ function validateSetup(body: unknown): asserts body is SetupInput {
   for (const field of [
     "contactPhone",
     "financialProviderCode",
+    "conditionCode",
+    "conditionTier",
     "mfpnText",
     "disclosureText",
     "localeCode",
@@ -420,42 +403,25 @@ function validateSetup(body: unknown): asserts body is SetupInput {
   /* Finance terms                                                           */
   /* ---------------------------------------------------------------------- */
 
-  // if (body.financeTerms !== undefined) {
-  //   if (!Array.isArray(body.financeTerms)) {
-  //     throw badRequest("VALIDATION_ERROR", "financeTerms must be an array");
-  //   }
-
-  //   if (
-  //     body.financeTerms.some(
-  //       (value) => typeof value !== "number" || !Number.isInteger(value),
-  //     )
-  //   ) {
-  //     throw badRequest(
-  //       "VALIDATION_ERROR",
-  //       "financeTerms must contain integer values",
-  //     );
-  //   }
-  // }
+  if (body.financeTerms !== undefined) {
+    if (!Array.isArray(body.financeTerms) || body.financeTerms.some(
+      (value) => typeof value !== "number" || !Number.isInteger(value),
+    )) {
+      throw badRequest("VALIDATION_ERROR", "financeTerms must contain integer values");
+    }
+  }
 
   /* ---------------------------------------------------------------------- */
   /* Credit tiers                                                            */
   /* ---------------------------------------------------------------------- */
 
-  // if (body.creditTiers !== undefined) {
-  //   if (!Array.isArray(body.creditTiers)) {
-  //     throw badRequest("VALIDATION_ERROR", "creditTiers must be an array");
-  //   }
-
-  //   if (
-  //     body.creditTiers.some(
-  //       (value) =>
-  //         typeof value !== "string" ||
-  //         !CREDIT_TIER_CODES.includes(value as CreditTier),
-  //     )
-  //   ) {
-  //     throw badRequest("VALIDATION_ERROR", "Invalid creditTiers value");
-  //   }
-  // }
+  if (body.creditTiers !== undefined) {
+    if (!Array.isArray(body.creditTiers) || body.creditTiers.some(
+      (value) => typeof value !== "string",
+    )) {
+      throw badRequest("VALIDATION_ERROR", "creditTiers must contain string values");
+    }
+  }
 }
 
 /* -------------------------------------------------------------------------- */
@@ -480,8 +446,7 @@ function setupResponse(
 
     programName: setup.programName ?? program.name,
 
-    programTypeCode: setup.programTypeCode as ProgramTypeCode,
-    purchaseType: setup.purchaseType as PurchaseType,
+    programTypeCode: setup.programTypeCode ?? "",
 
     customerTypeCodes: [...(setup.customerTypeCodes ?? [])],
 
@@ -493,7 +458,8 @@ function setupResponse(
 
     financialProviderCode: setup.financialProviderCode ?? null,
 
-    conditionCode: setup.conditionCode as ConditionCode,
+    conditionCode: setup.conditionCode ?? null,
+    conditionTier: setup.conditionTier ?? null,
 
     mileageCeiling: setup.mileageCeiling ?? null,
 
@@ -579,6 +545,13 @@ setup.put("/programs/:programId/revisions/:revisionId/setup", async (c) => {
     );
   }
 
+  if (revision.isMinorRevision) {
+    throw conflict(
+      "REVISION_NOT_EDITABLE",
+      "Minor revisions can only update marketing text",
+    );
+  }
+
   const now = new Date().toISOString();
 
   /* -------------------------------------------------------------- */
@@ -589,14 +562,14 @@ setup.put("/programs/:programId/revisions/:revisionId/setup", async (c) => {
     ...revision.setup,
 
     programName: body.programName.trim(),
-    programTypeCode: body.programTypeCode,
-    purchaseType: body.purchaseType,
+    programTypeCode: body.programTypeCode as ProgramTypeCode,
     customerTypeCodes: [...body.customerTypeCodes],
     contactName: body.contactName ?? null,
     contactEmail: body.contactEmail ?? null,
     contactPhone: body.contactPhone ?? null,
     financialProviderCode: body.financialProviderCode ?? null,
-    conditionCode: body.conditionCode,
+    conditionCode: (body.conditionCode ?? null) as ConditionCode | null,
+    conditionTier: body.conditionTier ?? null,
     mileageCeiling: body.mileageCeiling ?? null,
     topOfDeal: body.topOfDeal ?? false,
     vinException: body.vinException ?? false,

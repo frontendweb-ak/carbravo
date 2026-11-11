@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Box } from "@mui/material";
+import { Box, Chip, Stack, Typography } from "@mui/material";
 import React, { useEffect } from "react";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 
@@ -9,6 +9,7 @@ import {
 } from "@/features/program/components/vehicle";
 
 import {
+	useProgramVehicles,
 	useResolveVehicleFilters,
 	useUpdateProgramVehicles,
 	useVehicleCatalog,
@@ -28,10 +29,12 @@ import {
 import { retainAvailableValues } from "../utils";
 
 export function VehiclesForm() {
-	const { programId, revisionId, isReadOnly, setSectionSaving } =
+	const { programId, revisionId, isReadOnly, isMinorRevision, setSectionSaving } =
 		useProgramEditor();
+	const canEdit = !isReadOnly && !isMinorRevision;
 	const [editingIndex, setEditingIndex] = React.useState<number | null>(null);
-
+	const savedVehiclesQuery = useProgramVehicles(programId, revisionId);
+	const savedVehicles = savedVehiclesQuery.data?.selectedVehicles ?? [];
 	const form = useForm<VehiclesFormValues>({
 		resolver: zodResolver(vehiclesFormSchema),
 		defaultValues: vehiclesDefaultValues,
@@ -126,7 +129,6 @@ export function VehiclesForm() {
 		useVehicleCatalog(selectedYears, selectedMakes, shouldLoadCatalog);
 	const catalogVehicles = catalogResponse?.vehicles ?? [];
 
-	console.log("catalogResponse", catalogResponse);
 	/* ------------------------------------------------------------------ */
 	/* Models                                                              */
 	/* ------------------------------------------------------------------ */
@@ -211,7 +213,7 @@ export function VehiclesForm() {
 	/* ------------------------------------------------------------------ */
 
 	const onEditRow = (index: number) => {
-		if (isReadOnly) {
+		if (!canEdit) {
 			return;
 		}
 
@@ -238,33 +240,6 @@ export function VehiclesForm() {
 		setEditingIndex(index);
 	};
 
-	const onDeleteRow = (index: number) => {
-		if (isReadOnly) {
-			return;
-		}
-
-		const nextRows = selectedRows.filter((_, rowIndex) => rowIndex !== index);
-
-		form.setValue("selectedRows", nextRows, {
-			shouldDirty: true,
-			shouldValidate: true,
-		});
-
-		if (editingIndex === index) {
-			setEditingIndex(null);
-
-			form.setValue("currentRow", {
-				...emptyVehicleFilterRow,
-			});
-
-			return;
-		}
-
-		if (editingIndex !== null && index < editingIndex) {
-			setEditingIndex((current) => (current === null ? null : current - 1));
-		}
-	};
-
 	const onCancelEdit = () => {
 		setEditingIndex(null);
 
@@ -288,26 +263,60 @@ export function VehiclesForm() {
 			 * Keep the rows in RHF. They will be available when the
 			 * program/revision has been created.
 			 */
-			if (programId == null || revisionId == null) {
+			if (!canEdit || programId == null || revisionId == null) {
 				return;
 			}
 
 			const resolved = await resolveVehicleFilters(rows);
 
-			const result = await updateVehiclesAsync({
+			const vehicleCatalogIds = [...new Set(resolved.vehicleCatalogIds)];
+			await updateVehiclesAsync({
 				programId,
 				revisionId,
-				payload: {
-					vehicleCatalogIds: resolved.vehicleCatalogIds,
-				},
+				payload: { vehicleCatalogIds },
 			});
-			console.log("RESULT VEHICLE SVAE", result);
 		},
-		[programId, revisionId, resolveVehicleFilters, updateVehiclesAsync],
+		[canEdit, programId, revisionId, resolveVehicleFilters, updateVehiclesAsync],
+	);
+
+	const onDeleteRow = React.useCallback(
+		async (index: number) => {
+			if (!canEdit || isUpdatingVehicles) return;
+
+			const nextRows = selectedRows.filter((_, rowIndex) => rowIndex !== index);
+			setSectionSaving(true);
+			try {
+				await persistRows(nextRows);
+				form.setValue("selectedRows", nextRows, {
+					shouldDirty: false,
+					shouldValidate: true,
+				});
+
+				if (editingIndex === index) {
+					setEditingIndex(null);
+					form.setValue("currentRow", { ...emptyVehicleFilterRow });
+				} else if (editingIndex !== null && index < editingIndex) {
+					setEditingIndex((current) => (current === null ? null : current - 1));
+				}
+			} catch (error) {
+				console.error("Failed to remove vehicle selection:", error);
+			} finally {
+				setSectionSaving(false);
+			}
+		},
+		[
+			canEdit,
+			editingIndex,
+			form,
+			isUpdatingVehicles,
+			persistRows,
+			selectedRows,
+			setSectionSaving,
+		],
 	);
 
 	const onCommitRow = async (values: VehiclesFormValues) => {
-		if (isReadOnly || isUpdatingVehicles) {
+		if (!canEdit || isUpdatingVehicles) {
 			return;
 		}
 
@@ -482,7 +491,7 @@ export function VehiclesForm() {
 				sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}
 			>
 				<VehicleFilterBuilder
-					disabled={isReadOnly}
+					disabled={!canEdit}
 					editing={editingIndex !== null}
 					onCancelEdit={onCancelEdit}
 					columns={[
@@ -581,9 +590,29 @@ export function VehiclesForm() {
 
 				<SelectedVehiclesSection
 					rows={selectedRows}
-					onEdit={isReadOnly ? undefined : onEditRow}
-					onDelete={isReadOnly ? undefined : onDeleteRow}
+					onEdit={canEdit ? onEditRow : undefined}
+					onDelete={canEdit ? onDeleteRow : undefined}
 				/>
+
+				{savedVehicles.length > 0 && (
+					<Box sx={{ border: 1, borderColor: "divider", borderRadius: 2, p: 2 }}>
+						<Typography variant="subtitle2" sx={{ mb: 1 }}>
+							Saved catalog vehicles ({savedVehicles.length})
+						</Typography>
+						<Stack direction="row" sx={{ flexWrap: "wrap", gap: 1 }}>
+							{savedVehicles.map((vehicle) => (
+								<Chip
+									key={vehicle.vehicleCatalogId}
+									label={[`${vehicle.year} ${vehicle.make} ${vehicle.model}`, vehicle.trimName]
+										.filter(Boolean)
+										.join(" · ")}
+									size="small"
+									variant="outlined"
+								/>
+							))}
+						</Stack>
+					</Box>
+				)}
 			</Box>
 		</FormProvider>
 	);
