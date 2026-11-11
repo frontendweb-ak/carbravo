@@ -134,7 +134,7 @@ export function programListItem(
 	const draft = getDraftRevision(db, program);
 
 	const currentRevision =
-		active ?? draft;
+		draft ?? active;
 
 	return {
 		programId: program.id,
