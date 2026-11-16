@@ -34,6 +34,7 @@ export const incentiveValuesDefaultValues: IncentiveValuesFormValues = {
 
 	stackableWith: [],
 	notStackableWith: [],
+	aprByTerm: [],
 
 	belongsTo: "",
 };

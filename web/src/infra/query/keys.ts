@@ -49,7 +49,6 @@ export const queryKeys = {
 			["vehicles", "search", params] as const,
 		byRevision: (programId: number, revisionId: number) =>
 			["programs", programId, "revisions", revisionId, "vehicles"] as const,
-		segments: () => ["vehicles", "segments"] as const,
 	},
 	geography: {
 		all: ["geography"] as const,

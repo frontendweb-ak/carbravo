@@ -21,6 +21,9 @@ export function geographyResponseToForm(
 	return {
 		currentRule: {
 			level: "REGION",
+			region: "",
+			state: "",
+			dma: "",
 			code: "",
 			name: "",
 		},

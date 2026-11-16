@@ -27,7 +27,7 @@ export function CoverageRuleItem({ rule, onRemove }: CoverageRuleItemProps) {
 			}
 		>
 			<ListItemText
-				primary={rule.value}
+				primary={rule.name}
 				secondary={<Chip size="small" label={rule.level} variant="outlined" />}
 			/>
 		</ListItem>

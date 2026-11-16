@@ -47,12 +47,10 @@ export function getProgramRevisionTabs(
 		},
 	];
 
-	if (
-		history.activeRevisionId != null &&
-		history.activeRevisionId !== currentRevision.id
-	) {
+	const activeRevisionId = program.activeRevision?.id ?? null;
+	if (activeRevisionId != null && activeRevisionId !== currentRevision.id) {
 		const activeRevision = history.revisions.find(
-			(revision) => revision.id === history.activeRevisionId,
+			(revision) => revision.id === activeRevisionId,
 		);
 
 		if (activeRevision) {
@@ -100,15 +98,10 @@ export function getSelectedRevision(
 			return getCurrentRevision(program);
 
 		case "active": {
-			if (history.activeRevisionId == null) {
-				return null;
-			}
+			const activeRevisionId = program.activeRevision?.id;
+			if (activeRevisionId == null) return null;
 
-			return (
-				history.revisions.find(
-					(revision) => revision.id === history.activeRevisionId,
-				) ?? null
-			);
+			return history.revisions.find((revision) => revision.id === activeRevisionId) ?? null;
 		}
 
 		case "history": {

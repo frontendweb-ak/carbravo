@@ -34,6 +34,7 @@ function VehicleFilterBuilder({
 	...props
 }: VehicleFilterBuilderProps) {
 	return (
+		<Box {...props}>
 		<ProgramSection
 			title="Add Vehicles"
 			description="Author one row with model year, make, model, fuel and segment. Use
@@ -82,6 +83,7 @@ function VehicleFilterBuilder({
 				</Stack>
 			</Stack>
 		</ProgramSection>
+		</Box>
 	);
 }
 

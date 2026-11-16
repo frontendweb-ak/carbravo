@@ -23,7 +23,6 @@ function ProgramTable({
 	onProgramClick,
 	onClone,
 }: ProgramTableProps) {
-	console.log("programs", programs);
 	return (
 		<TableContainer
 			sx={{

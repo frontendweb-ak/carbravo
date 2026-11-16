@@ -11,7 +11,8 @@ import type { DashboardProgramStatus } from "../model/dashboard.types";
 
 export interface ProgramStatusCardProps {
 	label: string;
-	value: number;
+	value: number | null;
+	href?: string;
 	status: DashboardProgramStatus;
 	loading?: boolean;
 	className?: string;
@@ -21,21 +22,22 @@ export interface ProgramStatusCardProps {
 function ProgramStatusCard({
 	label,
 	value,
+	href,
 	status,
 	loading = false,
 }: ProgramStatusCardProps) {
 	return (
-		<Link to={`/programs?status=${status}`} style={{ textDecoration: "none" }}>
-			<Card sx={{ p: 3, minHeight: 103, borderRadius: 2 }}>
+		<Link to={href ?? `/programs?status=${status}`} style={{ textDecoration: "none" }}>
+			<Card sx={{ p: 0, minHeight: 103, borderRadius: "16px" }}>
 				<CardContent
 					sx={{
-						p: 2,
+						p: "16px 18px",
 						height: "100%",
 						display: "flex",
 						flexDirection: "column",
 						justifyContent: "space-between",
 						gap: 1.5,
-						"&:last-child": { pb: 2 },
+						"&:last-child": { pb: "16px" },
 					}}
 				>
 					<Box
@@ -62,7 +64,7 @@ function ProgramStatusCard({
 						<Skeleton variant="rounded" width={48} height={32} />
 					) : (
 						<Typography variant="h3" sx={{ lineHeight: 1, fontWeight: 700 }}>
-							{value}
+							{value ?? "—"}
 						</Typography>
 					)}
 				</CardContent>

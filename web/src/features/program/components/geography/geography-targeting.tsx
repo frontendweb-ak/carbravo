@@ -13,12 +13,14 @@ interface GeographyTargetingProps {
 	control: Control<GeographyFormValues>;
 	setValue: UseFormSetValue<GeographyFormValues>;
 	onAdd: (mode: "include" | "exclude") => void;
+	disabled?: boolean;
 }
 
 export function GeographyTargeting({
 	control,
 	setValue,
 	onAdd,
+	disabled = false,
 }: GeographyTargetingProps) {
 	return (
 		<Card variant="outlined">
@@ -48,12 +50,13 @@ export function GeographyTargeting({
 					>
 						<FormSelect
 							control={control}
+							disabled={disabled}
 							name="currentRule.level"
 							label="Level"
 							options={GEOGRAPHY_LEVEL_OPTIONS}
 						/>
 
-						<GeographyValueSelect control={control} setValue={setValue} />
+						<GeographyValueSelect control={control} setValue={setValue} disabled={disabled} />
 
 						<Button
 							type="button"
@@ -61,6 +64,7 @@ export function GeographyTargeting({
 							soft
 							onClick={() => onAdd("include")}
 							startIcon={<Plus />}
+							disabled={disabled}
 						>
 							Include
 						</Button>
@@ -71,6 +75,7 @@ export function GeographyTargeting({
 							soft
 							onClick={() => onAdd("exclude")}
 							startIcon={<Minimize />}
+							disabled={disabled}
 						>
 							Exclude
 						</Button>

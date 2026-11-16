@@ -1,68 +1,30 @@
-import type {
-	DashboardProgramStatus,
-	DashboardStatusCount,
-} from "../model/dashboard.types";
+import type { DashboardStatusCount } from "../model/dashboard.types";
 
 export interface StatusCounts {
-	draft: number;
-	review: number;
-	approved: number;
-	active: number;
-	expired: number;
+  draft: number;
+  review: number;
+  approved: number | null;
+  active: number;
+  expired: number;
 }
+
 export function getStatusCounts(counts: DashboardStatusCount[]): StatusCounts {
-	const result: StatusCounts = {
-		draft: 0,
-		review: 0,
-		approved: 0,
-		active: 0,
-		expired: 0,
-	};
+  const byStatus = new Map(counts.map((item) => [item.status, item]));
+  const draftCount = byStatus.get("DRAFT");
+  const activeCount = byStatus.get("ACTIVE");
+  const expiredCount = byStatus.get("EXPIRED");
 
-	for (const item of counts) {
-		switch (item.status) {
-			case "DRAFT":
-				result.draft += item.total;
-				break;
+  const pendingReview =
+    (draftCount?.pendingApproval ?? 0) +
+    (activeCount?.pendingApproval ?? 0) +
+    (expiredCount?.pendingApproval ?? 0);
 
-			case "REVIEW":
-				result.review += item.total;
-				break;
-
-			case "APPROVED":
-				result.approved += item.total;
-				break;
-
-			case "ACTIVE":
-				result.active += item.total;
-				break;
-
-			case "EXPIRED":
-				result.expired += item.total;
-				break;
-		}
-	}
-
-	return result;
-}
-export function mapStatus(status: string): DashboardProgramStatus {
-	switch (status.toUpperCase()) {
-		case "DRAFT":
-			return "DRAFT";
-
-		case "REVIEW":
-			return "REVIEW";
-
-		case "APPROVED":
-			return "APPROVED";
-
-		case "ACTIVE":
-			return "ACTIVE";
-
-		case "EXPIRED":
-			return "EXPIRED";
-
-		default:
-			return "DRAFT";
-	}
+  return {
+    draft: Math.max(0, (draftCount?.total ?? 0) - (draftCount?.pendingApproval ?? 0)),
+    review: pendingReview,
+    // The OpenAPI dashboard summary has no approved aggregate.
+    approved: null,
+    active: Math.max(0, (activeCount?.total ?? 0) - (activeCount?.pendingApproval ?? 0)),
+    expired: expiredCount?.total ?? 0,
+  };
 }

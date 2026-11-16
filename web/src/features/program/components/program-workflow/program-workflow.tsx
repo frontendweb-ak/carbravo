@@ -14,13 +14,16 @@ function ProgramWorkflow({
 	requirements = [],
 	onSubmitForReview,
 	onApprove,
+	onReject,
 	onPostToProduction,
 	onExpire,
+	auditTimeline,
 	loading = false,
 }: ProgramWorkflowProps) {
 	const incompleteRequirements = requirements.filter((item) => !item.complete);
 
 	const canSubmit = status === "DRAFT" && incompleteRequirements.length === 0;
+	const canPublish = status === "APPROVED" && incompleteRequirements.length === 0;
 
 	return (
 		<Stack spacing={2.5}>
@@ -31,15 +34,17 @@ function ProgramWorkflow({
 				revisionId={revisionId}
 				status={status}
 				canSubmit={canSubmit}
+				canPublish={canPublish}
 				incompleteRequirements={incompleteRequirements}
 				onSubmitForReview={onSubmitForReview}
 				onApprove={onApprove}
+				onReject={onReject}
 				onPostToProduction={onPostToProduction}
 				onExpire={onExpire}
 				loading={loading}
 			/>
 
-			<WorkflowTimeline status={status} />
+			<WorkflowTimeline auditTimeline={auditTimeline ?? []} />
 		</Stack>
 	);
 }

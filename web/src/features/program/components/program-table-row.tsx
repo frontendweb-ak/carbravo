@@ -106,6 +106,8 @@ function ProgramTableRow({
 					</Button>
 
 					<Button
+						disabled={!onClone}
+						title={!onClone ? "Cloning is not defined by the current API contract" : undefined}
 						type="button"
 						variant="outlined"
 						size="small"

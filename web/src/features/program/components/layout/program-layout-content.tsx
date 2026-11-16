@@ -165,7 +165,7 @@ export function ProgramLayoutContent({
 
 	const headerStatus = (() => {
 		switch (programStatus) {
-			case "SUBMITTED":
+			case "REVIEW":
 				return "Submitted";
 
 			case "APPROVED":
@@ -177,7 +177,6 @@ export function ProgramLayoutContent({
 			case "EXPIRED":
 				return "Expired";
 
-			case "DRAFT":
 			default:
 				return "Draft";
 		}
@@ -221,7 +220,7 @@ export function ProgramLayoutContent({
 					saved={!isSaving}
 					saveLabel={isSaving ? "Saving..." : "Save draft"}
 					saveDisabled={revisionReadOnly || isSaving}
-					hideSave={revisionReadOnly}
+					hideSave={revisionReadOnly || activeSection === "summary"}
 					onSave={handleSave}
 				/>
 			</Box>
@@ -238,7 +237,7 @@ export function ProgramLayoutContent({
 					maxWidth: 1360,
 					mx: "auto",
 					mt: 4,
-					px: { xs: 2, sm: 3, lg: 4 },
+					px: { xs: 2, sm: 3, lg: "28px" },
 				}}
 			>
 				{isHistoryList ? (

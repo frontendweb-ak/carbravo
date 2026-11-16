@@ -12,7 +12,7 @@ import {
 export type ProgramEditorMode = "new" | "edit";
 export type ProgramWorkflowStatus =
 	| "DRAFT"
-	| "SUBMITTED"
+	| "REVIEW"
 	| "APPROVED"
 	| "ACTIVE"
 	| "EXPIRED";
@@ -43,6 +43,10 @@ export interface ProgramEditorContextValue {
 	programStatus?: ProgramWorkflowStatus;
 	isSubmitted: boolean;
 	approved: boolean;
+	summaryDraft: string;
+	setSummaryDraft: (value: string) => void;
+	eligibilityFootnotesDraft: string;
+	setEligibilityFootnotesDraft: (value: string) => void;
 	sections: ProgramEditorSection[];
 	completion: number;
 	activeSection: string;
@@ -56,6 +60,7 @@ export interface ProgramEditorContextValue {
 	setSectionSaving: (saving: boolean) => void;
 	isSaving: boolean;
 	isReadOnly: boolean;
+	isMinorRevision: boolean;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -97,7 +102,7 @@ export const PROGRAM_EDITOR_SECTION_DEFINITIONS = [
 		id: "marketing",
 		number: 6,
 		label: "Marketing & Disclosures",
-		requiredForSubmission: true,
+		requiredForSubmission: false,
 	},
 	{
 		id: "summary",
@@ -182,6 +187,7 @@ export interface ProgramEditorProviderProps {
 	 * is the working copy.
 	 */
 	programStatus?: ProgramWorkflowStatus;
+	isMinorRevision?: boolean;
 	initialSections?: ProgramEditorSection[];
 }
 
@@ -198,6 +204,7 @@ export function ProgramEditorProvider({
 	programName: initialProgramName,
 	revisionLabel: initialRevisionLabel,
 	programStatus: initialProgramStatus,
+	isMinorRevision: initialIsMinorRevision = false,
 	initialSections,
 }: ProgramEditorProviderProps) {
 	// Identity
@@ -221,6 +228,7 @@ export function ProgramEditorProvider({
 	const [programStatus, setProgramStatus] = useState<
 		ProgramWorkflowStatus | undefined
 	>(initialProgramStatus);
+	const [isMinorRevision, setIsMinorRevision] = useState(initialIsMinorRevision);
 
 	useEffect(() => {
 		setProgramId(initialProgramId);
@@ -229,6 +237,7 @@ export function ProgramEditorProvider({
 		setProgramName(initialProgramName);
 		setRevisionLabel(initialRevisionLabel);
 		setProgramStatus(initialProgramStatus);
+		setIsMinorRevision(initialIsMinorRevision);
 	}, [
 		initialProgramId,
 		initialRevisionId,
@@ -236,6 +245,7 @@ export function ProgramEditorProvider({
 		initialProgramName,
 		initialRevisionLabel,
 		initialProgramStatus,
+		initialIsMinorRevision,
 	]);
 
 	/* ---------------------------------------------------------------------- */
@@ -248,6 +258,20 @@ export function ProgramEditorProvider({
 	const [sections, setSections] = useState<ProgramEditorSection[]>(
 		() => initialSections ?? createInitialSections(),
 	);
+	const [summaryDraft, setSummaryDraft] = useState("");
+	const [eligibilityFootnotesDraft, setEligibilityFootnotesDraft] = useState("");
+
+
+	const editorKey = `${initialProgramId ?? "new"}:${initialRevisionId ?? "new"}`;
+	const previousEditorKeyRef = useRef(editorKey);
+
+	useEffect(() => {
+		if (previousEditorKeyRef.current === editorKey) return;
+		previousEditorKeyRef.current = editorKey;
+		setSections(initialSections ?? createInitialSections());
+		setSummaryDraft("");
+		setEligibilityFootnotesDraft("");
+	}, [editorKey, initialSections]);
 
 	/* ---------------------------------------------------------------------- */
 	/* Saving                                                                 */
@@ -354,7 +378,7 @@ export function ProgramEditorProvider({
 	/* ---------------------------------------------------------------------- */
 
 	const isSubmitted =
-		programStatus === "SUBMITTED" ||
+		programStatus === "REVIEW" ||
 		programStatus === "APPROVED" ||
 		programStatus === "ACTIVE" ||
 		programStatus === "EXPIRED";
@@ -387,6 +411,10 @@ export function ProgramEditorProvider({
 			programStatus,
 			isSubmitted,
 			approved,
+			summaryDraft,
+			setSummaryDraft,
+			eligibilityFootnotesDraft,
+			setEligibilityFootnotesDraft,
 
 			/* Sections */
 			sections,
@@ -404,6 +432,7 @@ export function ProgramEditorProvider({
 
 			/* Permissions */
 			isReadOnly,
+			isMinorRevision,
 		}),
 		[
 			mode,
@@ -416,6 +445,8 @@ export function ProgramEditorProvider({
 			programStatus,
 			isSubmitted,
 			approved,
+			summaryDraft,
+			eligibilityFootnotesDraft,
 			sections,
 			completion,
 			activeSection,
@@ -426,6 +457,7 @@ export function ProgramEditorProvider({
 			setSectionSaving,
 			isSaving,
 			isReadOnly,
+			isMinorRevision,
 		],
 	);
 

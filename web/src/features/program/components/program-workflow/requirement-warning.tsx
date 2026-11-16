@@ -9,74 +9,82 @@ import { Button, Typography } from "@/components/ui";
 import type { WorkflowRequirement } from "./types";
 
 interface RequirementWarningProps {
-	programId: number | undefined;
-	revisionId?: number | undefined;
-	items: WorkflowRequirement[];
+  programId: number | undefined;
+  revisionId?: number | undefined;
+  items: WorkflowRequirement[];
+  action?: "submitting" | "publishing";
 }
 
 const REQUIREMENT_ROUTES: Record<
-	WorkflowRequirement["key"],
-	(programId: string) => string
+  WorkflowRequirement["key"],
+  (programId: number) => string
 > = {
-	setup: (programId) => `/programs/${programId}/setup`,
-	vehicles: (programId) => `/programs/${programId}/vehicles`,
-	geography: (programId) => `/programs/${programId}/geography`,
-	"incentive-values": (programId) => `/programs/${programId}/incentive-values`,
-	summary: (programId) => `/programs/${programId}/summary`,
+  setup: (programId) => `/programs/${programId}/setup`,
+  vehicles: (programId) => `/programs/${programId}/vehicles`,
+  geography: (programId) => `/programs/${programId}/geography`,
+  "incentive-values": (programId) => `/programs/${programId}/incentive-values`,
+  eligibility: (programId) => `/programs/${programId}/eligibility`,
+  marketing: (programId) => `/programs/${programId}/marketing`,
+  summary: (programId) => `/programs/${programId}/summary`,
 };
 
-function RequirementWarning({ programId, items }: RequirementWarningProps) {
-	const navigate = useNavigate();
+function RequirementWarning({
+  programId,
+  items,
+  action = "submitting",
+}: RequirementWarningProps) {
+  const navigate = useNavigate();
 
-	const handleNavigate = (key: WorkflowRequirement["key"]) => {
-		navigate(REQUIREMENT_ROUTES[key](programId));
-	};
+  const handleNavigate = (key: WorkflowRequirement["key"]) => {
+    if (programId == null) return;
+    navigate(REQUIREMENT_ROUTES[key](programId));
+  };
 
-	return (
-		<Box
-			sx={{
-				mt: 1.5,
-				p: 1.5,
-				border: "1px solid",
-				borderColor: "warning.main",
-				borderRadius: 1.5,
-				backgroundColor: "warning.soft",
-			}}
-		>
-			<Typography variant="bodySmall" weight="bold" color="warning">
-				Complete these required sections before submitting:
-			</Typography>
+  return (
+    <Box
+      sx={{
+        mt: 1.5,
+        p: 1.5,
+        border: "1px solid",
+        borderColor: "warning.main",
+        borderRadius: 1.5,
+        backgroundColor: "warning.soft",
+      }}
+    >
+      <Typography variant="bodySmall" weight="bold" color="warning">
+        Complete these required sections before {action}:
+      </Typography>
 
-			<Stack
-				direction="row"
-				sx={{
-					mt: 1,
-					flexWrap: "wrap",
-					gap: 1,
-				}}
-			>
-				{items.map((item) => (
-					<Button
-						key={item.key}
-						type="button"
-						variant="outline"
-						size="small"
-						endIcon={<ArrowForwardIcon sx={{ fontSize: 14 }} />}
-						onClick={() => handleNavigate(item.key)}
-						sx={{
-							borderRadius: 999,
-							textTransform: "none",
-							fontSize: "0.75rem",
-							fontWeight: 700,
-							backgroundColor: "background.paper",
-						}}
-					>
-						{item.label}
-					</Button>
-				))}
-			</Stack>
-		</Box>
-	);
+      <Stack
+        direction="row"
+        sx={{
+          mt: 1,
+          flexWrap: "wrap",
+          gap: 1,
+        }}
+      >
+        {items.map((item) => (
+          <Button
+            key={item.key}
+            type="button"
+            variant="outline"
+            size="small"
+            endIcon={<ArrowForwardIcon sx={{ fontSize: 14 }} />}
+            onClick={() => handleNavigate(item.key)}
+            sx={{
+              borderRadius: 999,
+              textTransform: "none",
+              fontSize: "0.75rem",
+              fontWeight: 700,
+              backgroundColor: "background.paper",
+            }}
+          >
+            {item.label}
+          </Button>
+        ))}
+      </Stack>
+    </Box>
+  );
 }
 
 export { RequirementWarning };

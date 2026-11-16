@@ -1,219 +1,164 @@
 import type {
-	ProgramSetupDto,
-	ProgramSetupResponseDto,
+  ProgramSetupDto,
+  ProgramSetupResponseDto,
 } from "../api/setup.api";
-
 import type { SetupFormValues } from "../schema";
 
-/* -------------------------------------------------------------------------- */
-/* Date mapping                                                               */
-/* -------------------------------------------------------------------------- */
-
-function mapApiDateToFormDate(
-	value: string | null | undefined,
-): string {
-	if (!value) {
-		return "";
-	}
-
-	const date = value.slice(0, 10);
-	const [year, month, day] = date.split("-");
-
-	if (!year || !month || !day) {
-		return "";
-	}
-
-	return `${day}-${month}-${year}`;
+function mapApiDateToFormDate(value: string | null | undefined): string {
+  if (!value) return "";
+  const [year, month, day] = value.slice(0, 10).split("-");
+  return year && month && day ? `${day}-${month}-${year}` : "";
 }
 
-function mapFormDateToApiDate(
-	value: string | null | undefined,
-): string | null {
-	if (!value) {
-		return null;
-	}
-
-	const [day, month, year] = value.split("-");
-
-	if (!day || !month || !year) {
-		return value;
-	}
-
-	return `${year}-${month}-${day}`;
+function mapFormDateToApiDate(value: string | null | undefined): string {
+  if (!value) return "";
+  const [day, month, year] = value.split("-");
+  return day && month && year ? `${year}-${month}-${day}` : "";
 }
 
-/* -------------------------------------------------------------------------- */
-/* Condition mapping                                                          */
-/* -------------------------------------------------------------------------- */
+const FORM_TO_API_CONDITION: Record<string, string> = {
+  CARBRAVO_CERTIFIED: "CARBRAVO",
+  MANUFACTURER_CERTIFIED: "MANUFACTURER_CERTIFIED",
+  USED_INSPECTED: "USED_INSPECTED",
+  USED_AS_IS: "USED_AS_IS",
+};
 
-const FORM_TO_API_CONDITION = {
-	CARBRAVO_CERTIFIED: "CARBRAVO",
-	MANUFACTURER_CERTIFIED: "MANUFACTURER_CERTIFIED",
-	USED_INSPECTED: "USED_INSPECTED",
-	USED_AS_IS: "USED_AS_IS",
-} as const;
-
-const API_TO_FORM_CONDITION = {
-	CARBRAVO: "CARBRAVO_CERTIFIED",
-	MANUFACTURER_CERTIFIED: "MANUFACTURER_CERTIFIED",
-	USED_INSPECTED: "USED_INSPECTED",
-	USED_AS_IS: "USED_AS_IS",
-} as const;
-
-/* -------------------------------------------------------------------------- */
-/* API → Form                                                                 */
-/* -------------------------------------------------------------------------- */
-
-export function mapSetupResponseToForm(
-	data: ProgramSetupResponseDto,
-): SetupFormValues {
-	return {
-		/* ------------------------------------------------------------------ */
-		/* UI-only fields                                                      */
-		/* ------------------------------------------------------------------ */
-
-		programName: data.programName,
-
-		/*
-		 * These fields are not part of the current setup API contract.
-		 * They therefore cannot be populated from ProgramSetupResponseDto.
-		 */
-		programNumber: "",
-		incentiveCodes: "",
-		country: "",
-
-		deliveryStart: mapApiDateToFormDate(
-			data.deliveryStartDate,
-		),
-
-		deliveryEnd: mapApiDateToFormDate(
-			data.deliveryEndDate,
-		),
-
-		firstVisibleDate: "",
-		firstVisibleTime: "",
-
-		/* ------------------------------------------------------------------ */
-		/* Setup API → UI                                                      */
-		/* ------------------------------------------------------------------ */
-
-		programType: data.programTypeCode,
-
-		purchaseType: data.purchaseType,
-
-		mileageMaximum: data.mileageCeiling ?? 0,
-
-		conditionTier:
-			API_TO_FORM_CONDITION[
-				data.conditionCode as keyof typeof API_TO_FORM_CONDITION
-			] ?? data.conditionCode,
-
-		creditTiers: [...data.creditTiers],
-
-		financeTerms: [...data.financeTerms],
-
-		contact: data.contactName ?? "",
-
-		/* ------------------------------------------------------------------ */
-		/* UI-only flags                                                       */
-		/* ------------------------------------------------------------------ */
-
-		flags: {
-			vinException: data.vinException,
-			topOfDeal: data.topOfDeal,
-			noAddOns: false,
-		},
-	};
-}
-
-/* -------------------------------------------------------------------------- */
-/* Form → API                                                                 */
-/* -------------------------------------------------------------------------- */
+const API_TO_FORM_CONDITION: Record<string, string> = {
+  CARBRAVO: "CARBRAVO_CERTIFIED",
+  CARBRAVO_CERTIFIED: "CARBRAVO_CERTIFIED",
+  MANUFACTURER_CERTIFIED: "MANUFACTURER_CERTIFIED",
+  USED_INSPECTED: "USED_INSPECTED",
+  USED_AS_IS: "USED_AS_IS",
+};
 
 /**
- * Convert the UI form back to the OpenAPI setup DTO.
- *
- * `existing` is important for edit mode.
- *
- * The setup form does not expose every API field, so fields that are not
- * represented by the UI must be preserved from the existing API response
- * instead of being overwritten with null/empty values.
+ * Builds a complete SetupInput from the last API snapshot, then applies
+ * section-specific changes. This prevents a section save from erasing
+ * fields owned by another section.
  */
-export function mapSetupFormToDto(
-	values: SetupFormValues,
-	existing?: ProgramSetupResponseDto,
+export function mergeSetupResponseToDto(
+  existing: ProgramSetupResponseDto,
+  overrides: Partial<ProgramSetupDto>,
 ): ProgramSetupDto {
-	const conditionCode =
-		FORM_TO_API_CONDITION[
-			values.conditionTier as keyof typeof FORM_TO_API_CONDITION
-		] ?? values.conditionTier;
+  return {
+    programName: existing.programName,
+    programTypeCode: existing.programTypeCode,
+    customerTypeCodes: [...existing.customerTypeCodes],
+    contactName: existing.contactName,
+    contactEmail: existing.contactEmail,
+    contactPhone: existing.contactPhone,
+    financialProviderCode: existing.financialProviderCode,
+    conditionCode: existing.conditionCode,
+    conditionTier: existing.conditionTier,
+    mileageCeiling: existing.mileageCeiling,
+    topOfDeal: existing.topOfDeal,
+    vinException: existing.vinException,
+    mfpnText: existing.mfpnText,
+    disclosureText: existing.disclosureText,
+    localeCode: existing.localeCode,
+    deliveryStartDate: existing.deliveryStartDate,
+    deliveryEndDate: existing.deliveryEndDate,
+    effectiveStartDate: existing.effectiveStartDate,
+    effectiveEndDate: existing.effectiveEndDate,
+    financeTerms: [...existing.financeTerms],
+    creditTiers: [...existing.creditTiers],
+    ...overrides,
+  };
+}
 
-	return {
-		/* ------------------------------------------------------------------ */
-		/* Fields controlled by UI                                             */
-		/* ------------------------------------------------------------------ */
+export function mapSetupResponseToForm(
+  data: ProgramSetupResponseDto,
+): SetupFormValues {
+  return {
+    programName: data.programName,
+    // These are present in the reference UI but absent from the API contract.
+    programNumber: "",
+    incentiveCodes: "",
+    country: "US",
+    deliveryStart: mapApiDateToFormDate(data.deliveryStartDate),
+    deliveryEnd: mapApiDateToFormDate(data.deliveryEndDate),
+    firstVisibleDate: "",
+    firstVisibleTime: "",
+    programType: data.programTypeCode,
+    // Purchase type is UI-only; financeTerms is the only related API field.
+    purchaseType: data.financeTerms.length > 0 ? "FINANCE" : "CASH",
+    mileageMaximum: data.mileageCeiling ?? 0,
+    conditionTier:
+      API_TO_FORM_CONDITION[data.conditionTier ?? data.conditionCode ?? ""] ??
+      "CARBRAVO_CERTIFIED",
+    creditTiers: [...data.creditTiers],
+    financeTerms: [...data.financeTerms],
+    contact: data.contactName ?? "",
+    flags: {
+      vinException: data.vinException ?? false,
+      topOfDeal: data.topOfDeal ?? false,
+      noAddOns: false,
+    },
+  };
+}
 
-		programName: values.programName,
+export function mapSetupFormToDto(
+  values: SetupFormValues,
+  existing?: ProgramSetupResponseDto,
+): ProgramSetupDto {
+  const mappedConditionTier =
+    FORM_TO_API_CONDITION[values.conditionTier] ?? values.conditionTier;
 
-		programTypeCode: values.programType,
+  const base = existing
+    ? mergeSetupResponseToDto(existing, {})
+    : {
+        programName: values.programName,
+        programTypeCode: values.programType,
+        customerTypeCodes: ["GENERAL_CONSUMER"],
+        deliveryStartDate: "",
+        deliveryEndDate: "",
+      };
 
-		purchaseType: values.purchaseType,
+  return {
+    ...base,
+    programName: values.programName,
+    programTypeCode: values.programType,
+    conditionCode: mappedConditionTier,
+    conditionTier: mappedConditionTier,
+    mileageCeiling: values.mileageMaximum,
+    topOfDeal: values.flags.topOfDeal,
+    vinException: values.flags.vinException,
+    contactName: values.contact.trim() || null,
+    deliveryStartDate: mapFormDateToApiDate(values.deliveryStart),
+    deliveryEndDate: mapFormDateToApiDate(values.deliveryEnd),
+    financeTerms:
+      values.purchaseType === "FINANCE" ? [...values.financeTerms] : [],
+    creditTiers: [...values.creditTiers],
+  };
+}
 
-		mileageCeiling: values.mileageMaximum,
 
-		conditionCode,
-
-		topOfDeal: values.flags.topOfDeal,
-
-		vinException: values.flags.vinException,
-
-		deliveryStartDate:
-			mapFormDateToApiDate(values.deliveryStart),
-
-		deliveryEndDate:
-			mapFormDateToApiDate(values.deliveryEnd),
-
-		financeTerms:
-			values.purchaseType === "FINANCE"
-				? [...values.financeTerms]
-				: [],
-
-		creditTiers: [...values.creditTiers],
-
-		/* ------------------------------------------------------------------ */
-		/* API fields not currently represented by the UI                     */
-		/* ------------------------------------------------------------------ */
-
-		customerTypeCodes:
-			existing?.customerTypeCodes?.length
-				? [...existing.customerTypeCodes]
-				: ["STANDARD"],
-
-		contactName:
-			values.contact?.trim() || null,
-
-		contactEmail:
-			existing?.contactEmail ?? null,
-
-		contactPhone:
-			existing?.contactPhone ?? null,
-
-		financialProviderCode:
-			existing?.financialProviderCode ?? null,
-
-		mfpnText:
-			existing?.mfpnText ?? null,
-
-		disclosureText:
-			existing?.disclosureText ?? null,
-
-		localeCode:
-			existing?.localeCode ?? "en-US",
-
-		effectiveStartDate:
-			existing?.effectiveStartDate ?? null,
-
-		effectiveEndDate:
-			existing?.effectiveEndDate ?? null,
-	};
+/**
+ * Strip revision metadata from a Setup response before sending a complete
+ * SetupInput to PUT /setup.
+ */
+export function mapSetupResponseToDto(data: ProgramSetupResponseDto): ProgramSetupDto {
+  return {
+    programName: data.programName,
+    programTypeCode: data.programTypeCode,
+    customerTypeCodes: [...data.customerTypeCodes],
+    contactName: data.contactName,
+    contactEmail: data.contactEmail,
+    contactPhone: data.contactPhone,
+    financialProviderCode: data.financialProviderCode,
+    conditionCode: data.conditionCode,
+    conditionTier: data.conditionTier,
+    mileageCeiling: data.mileageCeiling,
+    topOfDeal: data.topOfDeal,
+    vinException: data.vinException,
+    mfpnText: data.mfpnText,
+    disclosureText: data.disclosureText,
+    localeCode: data.localeCode,
+    deliveryStartDate: data.deliveryStartDate,
+    deliveryEndDate: data.deliveryEndDate,
+    effectiveStartDate: data.effectiveStartDate,
+    effectiveEndDate: data.effectiveEndDate,
+    financeTerms: [...data.financeTerms],
+    creditTiers: [...data.creditTiers],
+  };
 }
