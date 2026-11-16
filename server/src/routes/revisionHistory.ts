@@ -1,162 +1,118 @@
 import { Hono } from "hono";
 
 import { currentUser } from "../lib/auth.js";
-import { notFound } from "../lib/errors.js";
-
+import { badRequest, notFound } from "../lib/errors.js";
 import { getProgramOrThrow } from "../lib/programs.js";
-
 import { readDb, revisionLabel } from "../store.js";
 
 export const revisionHistory = new Hono();
 
+function parsePage(value: string | undefined, fallback: number, name: string, min: number, max?: number): number {
+  if (value === undefined) return fallback;
+  if (!/^\\d+$/.test(value)) {
+    throw badRequest("VALIDATION_ERROR", `${name} must be an integer`);
+  }
+  const parsed = Number(value);
+  if (parsed < min || (max !== undefined && parsed > max)) {
+    throw badRequest("VALIDATION_ERROR", `${name} is outside the allowed range`);
+  }
+  return parsed;
+}
+
 /**
  * GET /api/programs/:programId/revisions
  *
- * Returns all revisions for a program.
+ * Paginated revision history matching the OpenAPI RevisionHistoryItem schema.
  */
 revisionHistory.get("/programs/:programId/revisions", async (c) => {
-	currentUser(c);
+  currentUser(c);
 
-	const db = await readDb();
+  const db = await readDb();
+  const programId = Number(c.req.param("programId"));
+  if (!Number.isInteger(programId) || programId <= 0) {
+    throw badRequest("VALIDATION_ERROR", "programId must be a positive integer");
+  }
 
-	const programId = Number(c.req.param("programId"));
+  const program = getProgramOrThrow(db, programId);
+  const page = parsePage(c.req.query("page"), 0, "page", 0);
+  const size = parsePage(c.req.query("size"), 25, "size", 1, 100);
 
-	const program = getProgramOrThrow(db, programId);
+  const revisions = db.revisions
+    .filter((revision) => revision.programId === program.id)
+    .sort((a, b) => {
+      if (a.majorRevision !== b.majorRevision) return b.majorRevision - a.majorRevision;
+      return b.minorRevision - a.minorRevision;
+    });
 
-	const revisions = db.revisions
-		.filter((revision) => revision.programId === program.id)
-		.sort((a, b) => {
-			if (a.majorRevision !== b.majorRevision) {
-				return b.majorRevision - a.majorRevision;
-			}
+  const totalElements = revisions.length;
+  const content = revisions
+    .slice(page * size, page * size + size)
+    .map((revision) => ({
+      revisionId: revision.id,
+      majorRevision: revision.majorRevision,
+      minorRevision: revision.minorRevision,
+      revisionLabel: revisionLabel(revision),
+      revisionStatus: revision.status,
+      isMinorRevision: revision.isMinorRevision,
+      isSubmitted: revision.approval.isSubmitted,
+      approved: revision.approval.approved,
+      postedAt: revision.postedAt,
+      postedBy: revision.postedBy,
+      createdAt: revision.createdAt,
+      createdBy: revision.createdBy,
+    }));
 
-			return b.minorRevision - a.minorRevision;
-		})
-		.map((revision) => ({
-			revisionId: revision.id,
-
-			revisionLabel: revisionLabel(revision),
-
-			majorRevision: revision.majorRevision,
-
-			minorRevision: revision.minorRevision,
-
-			status: revision.status,
-
-			isMinorRevision: revision.isMinorRevision,
-
-			createdAt: revision.createdAt,
-
-			createdBy: revision.createdBy,
-
-			postedAt: revision.postedAt,
-
-			postedBy: revision.postedBy,
-
-			isSubmitted: revision.approval.isSubmitted,
-
-			approved: revision.approval.approved,
-
-			approvedAt: revision.approval.approvedAt,
-
-			approvedBy: revision.approval.approvedBy,
-
-			rejectedAt: revision.approval.rejectedAt,
-
-			rejectedBy: revision.approval.rejectedBy,
-
-			rejectionReason: revision.approval.rejectionReason,
-
-			copiedFromRevisionId: revision.copiedFromRevisionId ?? null,
-		}));
-
-	return c.json({
-		programId: program.id,
-
-		programIdentifier: program.identifier,
-
-		programName: program.name,
-
-		activeRevisionId: program.activeRevisionId,
-
-		draftRevisionId: program.draftRevisionId,
-
-		revisions,
-	});
+  return c.json({
+    content,
+    pagination: {
+      page,
+      size,
+      totalElements,
+      totalPages: totalElements === 0 ? 0 : Math.ceil(totalElements / size),
+    },
+  });
 });
 
 /**
- * GET
- * /programs/:programId/revisions/:revisionId/detail
+ * GET /api/programs/:programId/revisions/:revisionId/detail
  *
- * Returns a complete revision snapshot.
+ * Returns the compact immutable revision detail described by OpenAPI.
  */
 revisionHistory.get(
-	"/programs/:programId/revisions/:revisionId/detail",
-	async (c) => {
-		currentUser(c);
+  "/programs/:programId/revisions/:revisionId/detail",
+  async (c) => {
+    currentUser(c);
 
-		const db = await readDb();
+    const programId = Number(c.req.param("programId"));
+    const revisionId = Number(c.req.param("revisionId"));
+    if (!Number.isInteger(programId) || programId <= 0 || !Number.isInteger(revisionId) || revisionId <= 0) {
+      throw badRequest("VALIDATION_ERROR", "programId and revisionId must be positive integers");
+    }
 
-		const programId = Number(c.req.param("programId"));
-		const revisionId = Number(c.req.param("revisionId"));
+    const db = await readDb();
+    const program = getProgramOrThrow(db, programId);
+    const revision = db.revisions.find(
+      (item) => item.id === revisionId && item.programId === program.id,
+    );
 
-		if (!Number.isInteger(programId) || !Number.isInteger(revisionId)) {
-			throw notFound("REVISION_NOT_FOUND", "Revision not found");
-		}
+    if (!revision) {
+      throw notFound("REVISION_NOT_FOUND", "Revision not found");
+    }
 
-		const program = getProgramOrThrow(db, programId);
-
-		const revision = db.revisions.find(
-			(item) => item.id === revisionId && item.programId === program.id,
-		);
-
-		if (!revision) {
-			throw notFound("REVISION_NOT_FOUND", "Revision not found");
-		}
-
-		return c.json({
-			programId: program.id,
-
-			programIdentifier: program.identifier,
-
-			programName: program.name,
-
-			revision: {
-				revisionId: revision.id,
-
-				revisionLabel: revisionLabel(revision),
-
-				majorRevision: revision.majorRevision,
-
-				minorRevision: revision.minorRevision,
-
-				status: revision.status,
-
-				isMinorRevision: revision.isMinorRevision,
-
-				createdAt: revision.createdAt,
-
-				createdBy: revision.createdBy,
-
-				postedAt: revision.postedAt,
-
-				postedBy: revision.postedBy,
-
-				copiedFromRevisionId: revision.copiedFromRevisionId ?? null,
-
-				setup: revision.setup,
-
-				vehicles: revision.vehicles,
-
-				geography: revision.geography,
-
-				values: revision.values,
-
-				summary: revision.summary,
-
-				approval: revision.approval,
-			},
-		});
-	},
+    return c.json({
+      revisionId: revision.id,
+      majorRevision: revision.majorRevision,
+      minorRevision: revision.minorRevision,
+      revisionLabel: revisionLabel(revision),
+      revisionStatus: revision.status,
+      isMinorRevision: revision.isMinorRevision,
+      programName: program.name,
+      programType: revision.setup.programTypeCode ?? program.programType ?? "",
+      vehicleCount: revision.vehicles.length,
+      createdAt: revision.createdAt,
+      createdBy: revision.createdBy,
+      postedAt: revision.postedAt,
+      postedBy: revision.postedBy,
+    });
+  },
 );

@@ -3,6 +3,7 @@ import { Hono } from "hono";
 import { requireRole } from "../lib/auth.js";
 import { badRequest, conflict, notFound } from "../lib/errors.js";
 import {
+  getActiveRevision,
   getDraftRevision,
   getProgramOrThrow,
   getRevisionForMajorRevision,
@@ -41,6 +42,10 @@ revisions.post("/programs/:programId/revise", async (c) => {
 
   const db = await readDb();
   const program = getProgramOrThrow(db, programId);
+
+  if (program.status !== "ACTIVE") {
+    throw conflict("PROGRAM_NOT_ACTIVE", "Only active programs can be revised");
+  }
 
   /*
    * A program may have only one working draft.
@@ -150,17 +155,12 @@ revisions.post("/programs/:programId/revise", async (c) => {
   return c.json(
     {
       programId: program.id,
-      programIdentifier: program.identifier,
-      programName: program.name,
-
       revisionId: revision.id,
-      revisionStatus: revision.status,
-
       majorRevision: revision.majorRevision,
       minorRevision: revision.minorRevision,
-
       revisionLabel: revisionLabel(revision),
-
+      revisionStatus: revision.status,
+      isMinorRevision: revision.isMinorRevision,
       copiedFromRevisionId: revision.copiedFromRevisionId,
     },
     201,
@@ -179,43 +179,22 @@ revisions.post("/programs/:programId/revise", async (c) => {
  * DRAFT 2.1
  */
 revisions.post(
-  "/programs/:programId/revisions/:revisionId/minor-revise",
+  "/programs/:programId/minor-revise",
   async (c) => {
     const user = requireRole(c, "AUTHOR", "ADMIN");
     const programId = Number(c.req.param("programId"));
-    const revisionId = Number(c.req.param("revisionId"));
-    if (!Number.isInteger(programId) || !Number.isInteger(revisionId)) {
-      throw badRequest(
-        "VALIDATION_ERROR",
-        "programId and revisionId must be integers",
-      );
+    if (!Number.isInteger(programId) || programId <= 0) {
+      throw badRequest("VALIDATION_ERROR", "programId must be a positive integer");
     }
-    const body = await c.req.json().catch(() => ({}));
-    const overwrite =
-      typeof body?.overwrite === "boolean" ? body.overwrite : false;
+    const overwrite = c.req.query("overwrite") === "true";
     const db = await readDb();
     const program = getProgramOrThrow(db, programId);
-
-    /**
-     * Source revision must belong to this program.
-     */
-    const sourceRevision = db.revisions.find(
-      (revision) =>
-        revision.id === revisionId && revision.programId === program.id,
-    );
+    const sourceRevision = getActiveRevision(db, program);
     if (!sourceRevision) {
-      throw notFound("REVISION_NOT_FOUND", "Revision not found");
+      throw conflict("PROGRAM_NOT_ACTIVE", "Only active programs can be revised");
     }
-
-    /**
-     * Minor revision should normally be created
-     * from the currently active revision.
-     */
-    if (sourceRevision.status !== "ACTIVE") {
-      throw conflict(
-        "REVISION_NOT_EDITABLE",
-        "Minor revision can only be created from an ACTIVE revision",
-      );
+    if (sourceRevision.minorRevision >= 99) {
+      throw conflict("MINOR_LIMIT_EXCEEDED", "Minor revision limit has been reached");
     }
 
     /**
@@ -327,23 +306,12 @@ revisions.post(
     return c.json(
       {
         programId: program.id,
-
-        programIdentifier: program.identifier,
-
-        programName: program.name,
-
         revisionId: revision.id,
-
-        revisionStatus: revision.status,
-
         majorRevision: revision.majorRevision,
-
         minorRevision: revision.minorRevision,
-
         revisionLabel: revisionLabel(revision),
-
+        revisionStatus: revision.status,
         isMinorRevision: revision.isMinorRevision,
-
         copiedFromRevisionId: revision.copiedFromRevisionId,
       },
       201,
@@ -351,431 +319,7 @@ revisions.post(
   },
 );
 
-/**
- * POST /api/programs/:programId/revisions/:revisionId/submit
- *
- * Submits a DRAFT revision for approval.
- */
-revisions.post(
-  "/programs/:programId/revisions/:revisionId/submit",
-  async (c) => {
-    const user = requireRole(c, "AUTHOR", "ADMIN");
-
-    const programId = Number(c.req.param("programId"));
-    const revisionId = Number(c.req.param("revisionId"));
-
-    if (!Number.isInteger(programId) || !Number.isInteger(revisionId)) {
-      throw badRequest(
-        "VALIDATION_ERROR",
-        "programId and revisionId must be integers",
-      );
-    }
-
-    const db = await readDb();
-
-    const program = getProgramOrThrow(db, programId);
-
-    const revision = db.revisions.find(
-      (item) => item.id === revisionId && item.programId === program.id,
-    );
-
-    if (!revision) {
-      throw notFound("REVISION_NOT_FOUND", "Revision not found");
-    }
-
-    /**
-     * Only DRAFT revisions can be submitted.
-     */
-    if (revision.status !== "DRAFT") {
-      throw conflict(
-        "REVISION_NOT_EDITABLE",
-        "Only a draft revision can be submitted",
-      );
-    }
-
-    /**
-     * Prevent submitting the same revision twice.
-     */
-    if (revision.approval.isSubmitted) {
-      throw conflict(
-        "ALREADY_SUBMITTED",
-        "Revision has already been submitted for approval",
-      );
-    }
-
-    /**
-     * Basic completion validation.
-     *
-     * The real Java backend can eventually perform
-     * more comprehensive business validation.
-     */
-    if (!revision.setup.programTypeCode) {
-      throw badRequest(
-        "VALIDATION_ERROR",
-        "Program type is required before submission",
-      );
-    }
-
-    if (!revision.setup.purchaseType) {
-      throw badRequest(
-        "VALIDATION_ERROR",
-        "Purchase type is required before submission",
-      );
-    }
-
-    if (!revision.setup.deliveryStartDate || !revision.setup.deliveryEndDate) {
-      throw badRequest(
-        "VALIDATION_ERROR",
-        "Delivery dates are required before submission",
-      );
-    }
-
-    if (!revision.setup.customerTypeCodes.length) {
-      throw badRequest(
-        "VALIDATION_ERROR",
-        "At least one customer type is required before submission",
-      );
-    }
-
-    if (!revision.vehicles.length) {
-      throw badRequest(
-        "VALIDATION_ERROR",
-        "At least one vehicle is required before submission",
-      );
-    }
-
-    if (!revision.geography.length) {
-      throw badRequest(
-        "VALIDATION_ERROR",
-        "At least one geography rule is required before submission",
-      );
-    }
-
-    const now = new Date().toISOString();
-
-    revision.approval.isSubmitted = true;
-    revision.approval.submittedAt = now;
-    revision.approval.submittedBy = user.username;
-
-    /**
-     * A new submission clears previous rejection state.
-     */
-    revision.approval.rejectedAt = null;
-    revision.approval.rejectedBy = null;
-    revision.approval.rejectionReason = null;
-
-    program.updatedAt = now;
-
-    db.activity.unshift({
-      id: getNextId(db.activity),
-
-      entityType: "INCENTIVE_REVISION",
-
-      entityId: revision.id,
-
-      operation: "SUBMIT",
-
-      changedBy: user.username,
-
-      changedAt: now,
-
-      programName: program.name,
-
-      programIdentifier: program.identifier,
-    });
-
-    await writeDb(db);
-
-    return c.json({
-      programId: program.id,
-
-      programIdentifier: program.identifier,
-
-      programName: program.name,
-
-      revisionId: revision.id,
-
-      revisionLabel: revisionLabel(revision),
-
-      revisionStatus: revision.status,
-
-      isMinorRevision: revision.isMinorRevision,
-
-      approval: {
-        isSubmitted: revision.approval.isSubmitted,
-
-        submittedAt: revision.approval.submittedAt,
-
-        submittedBy: revision.approval.submittedBy,
-
-        approved: revision.approval.approved,
-
-        approvedAt: revision.approval.approvedAt,
-
-        approvedBy: revision.approval.approvedBy,
-
-        approvalComment: revision.approval.approvalComment,
-
-        rejectedAt: revision.approval.rejectedAt,
-
-        rejectedBy: revision.approval.rejectedBy,
-
-        rejectionReason: revision.approval.rejectionReason,
-      },
-    });
-  },
-);
-
-/**
- * POST /api/programs/:programId/revisions/:revisionId/approve
- *
- * Approves a submitted draft revision.
- */
-revisions.post(
-  "/programs/:programId/revisions/:revisionId/approve",
-  async (c) => {
-    const user = requireRole(c, "APPROVER", "ADMIN");
-
-    const programId = Number(c.req.param("programId"));
-    const revisionId = Number(c.req.param("revisionId"));
-
-    if (!Number.isInteger(programId) || !Number.isInteger(revisionId)) {
-      throw badRequest(
-        "VALIDATION_ERROR",
-        "programId and revisionId must be integers",
-      );
-    }
-
-    const body = await c.req.json().catch(() => ({}));
-
-    const approvalComment =
-      typeof body?.approvalComment === "string"
-        ? body.approvalComment.trim()
-        : null;
-
-    const db = await readDb();
-
-    const program = getProgramOrThrow(db, programId);
-
-    const revision = db.revisions.find(
-      (item) => item.id === revisionId && item.programId === program.id,
-    );
-
-    if (!revision) {
-      throw notFound("REVISION_NOT_FOUND", "Revision not found");
-    }
-
-    /**
-     * Only draft revisions can be approved.
-     */
-    if (revision.status !== "DRAFT") {
-      throw conflict(
-        "REVISION_NOT_EDITABLE",
-        "Only a draft revision can be approved",
-      );
-    }
-
-    /**
-     * Revision must have been submitted first.
-     */
-    if (!revision.approval.isSubmitted) {
-      throw conflict(
-        "REVISION_NOT_SUBMITTED",
-        "Revision must be submitted before approval",
-      );
-    }
-
-    /**
-     * Prevent approving an already-approved revision.
-     */
-    if (revision.approval.approved) {
-      throw conflict("ALREADY_APPROVED", "Revision has already been approved");
-    }
-
-    const now = new Date().toISOString();
-
-    revision.approval.approved = true;
-    revision.approval.approvedAt = now;
-    revision.approval.approvedBy = user.username;
-    revision.approval.approvalComment = approvalComment;
-
-    /**
-     * A successful approval clears any rejection state.
-     */
-    revision.approval.rejectedAt = null;
-    revision.approval.rejectedBy = null;
-    revision.approval.rejectionReason = null;
-
-    program.updatedAt = now;
-
-    db.activity.unshift({
-      id: getNextId(db.activity),
-      entityType: "INCENTIVE_REVISION",
-      entityId: revision.id,
-      operation: "APPROVE",
-      changedBy: user.username,
-      changedAt: now,
-      programName: program.name,
-      programIdentifier: program.identifier,
-    });
-
-    await writeDb(db);
-    return c.json({
-      programId: program.id,
-      programIdentifier: program.identifier,
-      programName: program.name,
-      revisionId: revision.id,
-      revisionLabel: revisionLabel(revision),
-      revisionStatus: revision.status,
-      isMinorRevision: revision.isMinorRevision,
-      approval: {
-        isSubmitted: revision.approval.isSubmitted,
-        submittedAt: revision.approval.submittedAt,
-        submittedBy: revision.approval.submittedBy,
-        approved: revision.approval.approved,
-        approvedAt: revision.approval.approvedAt,
-        approvedBy: revision.approval.approvedBy,
-        approvalComment: revision.approval.approvalComment,
-        rejectedAt: revision.approval.rejectedAt,
-        rejectedBy: revision.approval.rejectedBy,
-        rejectionReason: revision.approval.rejectionReason,
-      },
-    });
-  },
-);
-
-
-/**
- * POST /api/programs/:programId/revisions/:revisionId/reject
- *
- * Rejects a submitted draft revision.
- */
-revisions.post(
-	"/programs/:programId/revisions/:revisionId/reject",
-	async (c) => {
-		const user = requireRole(c, "APPROVER", "ADMIN");
-
-		const programId = Number(c.req.param("programId"));
-		const revisionId = Number(c.req.param("revisionId"));
-
-		if (!Number.isInteger(programId) || !Number.isInteger(revisionId)) {
-			throw badRequest(
-				"VALIDATION_ERROR",
-				"programId and revisionId must be integers",
-			);
-		}
-
-		const body = await c.req.json().catch(() => ({}));
-
-		const rejectionReason =
-			typeof body?.rejectionReason === "string"
-				? body.rejectionReason.trim()
-				: "";
-
-		if (!rejectionReason) {
-			throw badRequest("VALIDATION_ERROR", "rejectionReason is required");
-		}
-
-		const db = await readDb();
-
-		const program = getProgramOrThrow(db, programId);
-
-		const revision = db.revisions.find(
-			(item) => item.id === revisionId && item.programId === program.id,
-		);
-
-		if (!revision) {
-			throw notFound("REVISION_NOT_FOUND", "Revision not found");
-		}
-
-		if (revision.status !== "DRAFT") {
-			throw conflict(
-				"REVISION_NOT_EDITABLE",
-				"Only a draft revision can be rejected",
-			);
-		}
-
-		if (!revision.approval.isSubmitted) {
-			throw conflict(
-				"REVISION_NOT_SUBMITTED",
-				"Revision must be submitted before it can be rejected",
-			);
-		}
-
-		if (revision.approval.approved) {
-			throw conflict(
-				"ALREADY_APPROVED",
-				"An approved revision cannot be rejected",
-			);
-		}
-
-		const now = new Date().toISOString();
-
-		revision.approval.isSubmitted = false;
-		revision.approval.submittedAt = null;
-		revision.approval.submittedBy = null;
-
-		revision.approval.approved = false;
-		revision.approval.approvedAt = null;
-		revision.approval.approvedBy = null;
-		revision.approval.approvalComment = null;
-
-		revision.approval.rejectedAt = now;
-		revision.approval.rejectedBy = user.username;
-		revision.approval.rejectionReason = rejectionReason;
-
-		program.updatedAt = now;
-
-		db.activity.unshift({
-			id: getNextId(db.activity),
-
-			entityType: "INCENTIVE_REVISION",
-
-			entityId: revision.id,
-
-			operation: "REJECT",
-
-			changedBy: user.username,
-
-			changedAt: now,
-
-			programName: program.name,
-
-			programIdentifier: program.identifier,
-		});
-
-		await writeDb(db);
-
-		return c.json({
-			programId: program.id,
-
-			programIdentifier: program.identifier,
-
-			programName: program.name,
-
-			revisionId: revision.id,
-
-			revisionLabel: revisionLabel(revision),
-
-			revisionStatus: revision.status,
-
-			isMinorRevision: revision.isMinorRevision,
-
-			approval: {
-				isSubmitted: revision.approval.isSubmitted,
-				submittedAt: revision.approval.submittedAt,
-				submittedBy: revision.approval.submittedBy,
-				approved: revision.approval.approved,
-				approvedAt: revision.approval.approvedAt,
-				approvedBy: revision.approval.approvedBy,
-				approvalComment: revision.approval.approvalComment,
-				rejectedAt: revision.approval.rejectedAt,
-				rejectedBy: revision.approval.rejectedBy,
-				rejectionReason: revision.approval.rejectionReason,
-			},
-		});
-	},
-);
+/* Submit, approve and reject are implemented in approval.ts. */
 
 /**
  * POST /api/programs/:programId/revisions/:revisionId/post
@@ -905,138 +449,53 @@ revisions.post(
 		await writeDb(db);
 
 		return c.json({
-			programId: program.id,
-
-			programIdentifier: program.identifier,
-
-			programName: program.name,
-
-			programStatus: program.status,
-
 			revisionId: revision.id,
-
-			revisionLabel: revisionLabel(revision),
-
-			revisionStatus: revision.status,
-
 			majorRevision: revision.majorRevision,
-
 			minorRevision: revision.minorRevision,
-
-			previousActiveRevisionId: previousActive?.id ?? null,
-
-			postedAt: revision.postedAt,
-
-			postedBy: revision.postedBy,
+			revisionLabel: revisionLabel(revision),
+			revisionStatus: revision.status,
+			isMinorRevision: revision.isMinorRevision,
 		});
 	},
 );
 /**
- * POST /api/programs/:programId/revisions/:revisionId/expire
+ * POST /api/programs/:programId/expire
  *
- * Manually expires an ACTIVE revision.
- *
- * Result:
- * - revision -> EXPIRED
- * - program -> EXPIRED
- * - activeRevisionId -> null
- * - draftRevisionId is preserved if a draft exists
+ * Expires the program lifecycle without changing its active revision
+ * snapshot, as defined by the OpenAPI contract.
  */
-revisions.post(
-	"/programs/:programId/revisions/:revisionId/expire",
-	async (c) => {
-		const user = requireRole(c, "ADMIN");
+revisions.post("/programs/:programId/expire", async (c) => {
+  const user = requireRole(c, "ADMIN");
+  const programId = Number(c.req.param("programId"));
 
-		const programId = Number(c.req.param("programId"));
-		const revisionId = Number(c.req.param("revisionId"));
+  if (!Number.isInteger(programId) || programId <= 0) {
+    throw badRequest("VALIDATION_ERROR", "programId must be a positive integer");
+  }
 
-		if (!Number.isInteger(programId) || !Number.isInteger(revisionId)) {
-			throw badRequest(
-				"VALIDATION_ERROR",
-				"programId and revisionId must be integers",
-			);
-		}
+  const db = await readDb();
+  const program = getProgramOrThrow(db, programId);
 
-		const db = await readDb();
+  if (program.status !== "ACTIVE") {
+    throw conflict("PROGRAM_NOT_ACTIVE", "Only active programs can be expired");
+  }
 
-		const program = getProgramOrThrow(db, programId);
+  const now = new Date().toISOString();
+  program.status = "EXPIRED";
+  program.updatedAt = now;
 
-		const revision = db.revisions.find(
-			(item) => item.id === revisionId && item.programId === program.id,
-		);
+  db.activity.unshift({
+    id: getNextId(db.activity),
+    entityType: "INCENTIVE_PROGRAM",
+    entityId: program.id,
+    operation: "EXPIRE",
+    changedBy: user.username,
+    changedAt: now,
+    comment: null,
+    programId: program.id,
+    programName: program.name,
+    programIdentifier: program.identifier,
+  });
 
-		if (!revision) {
-			throw notFound("REVISION_NOT_FOUND", "Revision not found");
-		}
-
-		/**
-		 * Only the active revision can be manually expired.
-		 */
-		if (revision.status !== "ACTIVE") {
-			throw conflict(
-				"REVISION_NOT_ACTIVE",
-				"Only an active revision can be expired",
-			);
-		}
-
-		const now = new Date().toISOString();
-
-		revision.status = "EXPIRED";
-
-		/**
-		 * Only clear the active pointer if this is
-		 * the program's current active revision.
-		 */
-		if (program.activeRevisionId === revision.id) {
-			program.activeRevisionId = null;
-		}
-
-		program.status = "EXPIRED";
-
-		program.updatedAt = now;
-
-		db.activity.unshift({
-			id: getNextId(db.activity),
-
-			entityType: "INCENTIVE_REVISION",
-
-			entityId: revision.id,
-
-			operation: "EXPIRE",
-
-			changedBy: user.username,
-
-			changedAt: now,
-
-			programName: program.name,
-
-			programIdentifier: program.identifier,
-		});
-
-		await writeDb(db);
-
-		return c.json({
-			programId: program.id,
-
-			programIdentifier: program.identifier,
-
-			programName: program.name,
-
-			programStatus: program.status,
-
-			revisionId: revision.id,
-
-			revisionLabel: revisionLabel(revision),
-
-			revisionStatus: revision.status,
-
-			activeRevisionId: program.activeRevisionId,
-
-			draftRevisionId: program.draftRevisionId,
-
-			expiredAt: now,
-
-			expiredBy: user.username,
-		});
-	},
-);
+  await writeDb(db);
+  return c.json({ programId: program.id, programStatus: program.status });
+});

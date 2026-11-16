@@ -7,7 +7,6 @@ import {
   getActiveRevision,
   getDraftRevision,
   getProgramOrThrow,
-  getProgramWorkflowStatus,
   programListItem,
   revisionRef,
 } from "../lib/programs.js";
@@ -25,7 +24,6 @@ export const programs = new Hono();
  * GET /api/programs
  */
 const PROGRAM_STATUSES = ["DRAFT", "ACTIVE", "EXPIRED"] as const;
-const PROGRAM_TYPES = ["CUSTOMER_CASH", "APR", "BONUS_CASH"] as const;
 
 function parseNonNegativeInt(
   value: string | undefined,
@@ -94,13 +92,6 @@ programs.get("/programs", async (c) => {
     throw badRequest("VALIDATION_ERROR", "Invalid program status");
   }
 
-  if (
-    programType &&
-    !PROGRAM_TYPES.includes(programType as (typeof PROGRAM_TYPES)[number])
-  ) {
-    throw badRequest("VALIDATION_ERROR", "Invalid program type");
-  }
-
   let list = db.programs.filter((program) => program.deletedAt === null);
   if (status) {
     list = list.filter((program) => program.status === status);
@@ -133,11 +124,11 @@ programs.get("/programs", async (c) => {
     );
   }
 
-  if (pendingApproval === true) {
+  if (pendingApproval !== undefined) {
     list = list.filter((program) => {
       const draft = getDraftRevision(db, program);
-
-      return Boolean(draft?.approval.isSubmitted && !draft.approval.approved);
+      const isPending = Boolean(draft?.approval.isSubmitted && !draft.approval.approved);
+      return pendingApproval ? isPending : !isPending;
     });
   }
 
@@ -237,6 +228,7 @@ programs.post("/programs", async (c) => {
     },
 
     setup: {
+      programName: programName,
       programTypeCode: null,
       purchaseType: null,
 
@@ -349,7 +341,7 @@ programs.get("/programs/:programId", async (c) => {
     programIdentifier: program.identifier,
     programName: program.name,
 
-    programStatus: getProgramWorkflowStatus(program, draftRevision),
+    programStatus: program.status,
 
     programType: program.programType,
 
@@ -406,7 +398,8 @@ programs.delete("/programs/:programId", async (c) => {
     entityType: "INCENTIVE_PROGRAM",
     entityId: program.id,
 
-    operation: "DELETE",
+    operation: "UPDATE",
+    comment: "Program soft-deleted",
     changedBy: user.username,
     changedAt: now,
 
@@ -416,134 +409,4 @@ programs.delete("/programs/:programId", async (c) => {
   });
   await writeDb(db);
   return c.body(null, 204);
-});
-
-/**
- * POST /programs/:programId/clone
- */
-programs.post("/programs/:programId/clone", async (c) => {
-  const user = requireRole(c, "AUTHOR", "ADMIN");
-
-  const sourceProgramId = Number(c.req.param("programId"));
-  if (!Number.isInteger(sourceProgramId) || sourceProgramId <= 0) {
-    throw badRequest(
-      "VALIDATION_ERROR",
-      "programId must be a positive integer",
-    );
-  }
-
-  const db = await readDb();
-
-  const sourceProgram = getProgramOrThrow(db, sourceProgramId);
-
-  /*
-   * Clone the canonical active revision when available.
-   *
-   * For a program that has never been posted, the draft
-   * revision is the only available revision.
-   */
-  const sourceRevision =
-    getDraftRevision(db, sourceProgram) ?? getActiveRevision(db, sourceProgram);
-  if (!sourceRevision) {
-    throw badRequest("PROGRAM_NOT_CLONABLE", "No revision available to clone");
-  }
-
-  const now = new Date().toISOString();
-  const newProgramId = getNextId(db.programs);
-  const newRevisionId = getNextId(db.revisions);
-
-  const identifier = `PROG-${new Date().getFullYear()}-${String(
-    newProgramId,
-  ).padStart(4, "0")}`;
-
-  const clonedRevision: MockRevision = {
-    ...structuredClone(sourceRevision),
-
-    id: newRevisionId,
-    programId: newProgramId,
-
-    majorRevision: 1,
-    minorRevision: 0,
-
-    status: "DRAFT",
-    isMinorRevision: false,
-
-    createdAt: now,
-    createdBy: user.username,
-
-    postedAt: null,
-    postedBy: null,
-
-    approval: {
-      revisionId: newRevisionId,
-
-      isSubmitted: false,
-      submittedAt: null,
-      submittedBy: null,
-
-      approved: false,
-      approvedAt: null,
-      approvedBy: null,
-      approvalComment: null,
-
-      rejectedAt: null,
-      rejectedBy: null,
-      rejectionReason: null,
-    },
-
-    copiedFromRevisionId: sourceRevision.id,
-  };
-
-  const clonedProgram = {
-    id: newProgramId,
-    identifier,
-    name: `${sourceProgram.name} Copy`,
-    status: "DRAFT" as const,
-    programType: sourceProgram.programType,
-    activeRevisionId: null,
-    draftRevisionId: newRevisionId,
-    deliveryStartDate: null,
-    deliveryEndDate: null,
-    createdAt: now,
-    updatedAt: now,
-    deletedAt: null,
-  };
-
-  db.programs.push(clonedProgram);
-  db.revisions.push(clonedRevision);
-
-  db.activity.unshift({
-    id: getNextId(db.activity),
-
-    entityType: "INCENTIVE_PROGRAM",
-    entityId: clonedProgram.id,
-
-    operation: "CREATE",
-
-    changedBy: user.username,
-    changedAt: now,
-
-    programId: clonedProgram.id,
-    programName: clonedProgram.name,
-    programIdentifier: clonedProgram.identifier,
-
-    comment: `Cloned from program ${sourceProgram.identifier}`,
-  });
-
-  await writeDb(db);
-  return c.json(
-    {
-      programId: clonedProgram.id,
-      programIdentifier: clonedProgram.identifier,
-      programStatus: clonedProgram.status,
-      revisionId: clonedRevision.id,
-      revisionStatus: clonedRevision.status,
-
-      majorRevision: clonedRevision.majorRevision,
-      minorRevision: clonedRevision.minorRevision,
-
-      revisionLabel: revisionLabel(clonedRevision),
-    },
-    201,
-  );
 });
