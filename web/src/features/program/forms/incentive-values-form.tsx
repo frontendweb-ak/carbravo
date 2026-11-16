@@ -170,9 +170,9 @@ export function IncentiveValuesForm() {
           title="Stackability"
           description="How this program combines with others on the same deal."
         >
-          <Alert severity="info" sx={{ mb: 2 }}>
-            Stackability and belongs-to fields appear in the UI reference but are not represented in the current OpenAPI values schema. They are shown for reference and are not sent to the API.
-          </Alert>
+          <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 2 }}>
+            These reference fields are not persisted by the current API.
+          </Typography>
           <Stack spacing={3}>
             <FormChoiceChipGroup
               control={form.control}
