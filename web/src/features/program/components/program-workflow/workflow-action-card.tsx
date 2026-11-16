@@ -144,7 +144,7 @@ function WorkflowActionCard({
           {onPostToProduction && (
             <>
               {incompleteRequirements.length > 0 && (
-                <RequirementWarning
+                <RequirementWarning action="publishing"
                   programId={programId}
                   revisionId={revisionId}
                   items={incompleteRequirements}
