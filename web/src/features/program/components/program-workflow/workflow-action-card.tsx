@@ -12,6 +12,7 @@ interface WorkflowActionCardProps {
   revisionId?: number;
   status: ProgramWorkflowStatus;
   canSubmit: boolean;
+  canPublish: boolean;
   incompleteRequirements: WorkflowRequirement[];
   onSubmitForReview?: () => void;
   onApprove?: () => void;
@@ -26,6 +27,7 @@ function WorkflowActionCard({
   revisionId,
   status,
   canSubmit,
+  canPublish,
   incompleteRequirements,
   onSubmitForReview,
   onApprove,
@@ -150,7 +152,7 @@ function WorkflowActionCard({
               )}
               <Button
                 color="success"
-                disabled={loading || !canSubmit}
+                disabled={loading || !canPublish}
                 onClick={onPostToProduction}
                 sx={{
                   mt: 2,
