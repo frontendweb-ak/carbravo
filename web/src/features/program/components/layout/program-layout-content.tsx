@@ -237,7 +237,7 @@ export function ProgramLayoutContent({
 					maxWidth: 1360,
 					mx: "auto",
 					mt: 4,
-					px: { xs: 2, sm: 3, lg: 4 },
+					px: { xs: 2, sm: 3, lg: "28px" },
 				}}
 			>
 				{isHistoryList ? (
