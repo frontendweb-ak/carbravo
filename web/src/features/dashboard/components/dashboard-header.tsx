@@ -26,9 +26,11 @@ function DashboardHeader({
 				<Typography
 					variant="overline"
 					sx={{
-						color: "primary.main",
-						fontWeight: 700,
-						letterSpacing: "0.08em",
+						color: "primary.dark",
+						fontSize: "10.5px",
+						fontWeight: 800,
+						letterSpacing: "0.14em",
+						mb: "7px",
 					}}
 				>
 					Welcome back, {userName}
@@ -37,7 +39,10 @@ function DashboardHeader({
 				<Typography
 					variant="h3"
 					sx={{
-						fontWeight: 700,
+						fontFamily: '"Sora", system-ui, sans-serif',
+						fontSize: "29px",
+						fontWeight: 800,
+						lineHeight: 1.2,
 						letterSpacing: "-0.02em",
 						color: "text.primary",
 					}}
@@ -53,7 +58,7 @@ function DashboardHeader({
 						color: "text.secondary",
 					}}
 				>
-					<Typography variant="body2">{rightContent}</Typography>
+					<Typography variant="body2" sx={{ fontSize: "12.5px" }}>{rightContent}</Typography>
 				</Box>
 			)}
 		</Box>
