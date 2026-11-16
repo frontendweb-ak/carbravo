@@ -17,7 +17,7 @@ import {
 } from "@/features/program";
 
 export default function ApprovalPage() {
-  const { programId, revisionId, programStatus, sections: editorSections } = useProgramEditor();
+  const { programId, revisionId, programStatus, sections: editorSections, eligibilityFootnotesDraft } = useProgramEditor();
   const { role } = useMockUserRole();
 
   const approvalQuery = useProgramApproval(programId, revisionId);
@@ -64,7 +64,7 @@ export default function ApprovalPage() {
     {
       key: "eligibility" as const,
       label: "Eligibility",
-      complete: Boolean(setup?.customerTypeCodes.length && setup.financialProviderCode),
+      complete: Boolean(setup?.customerTypeCodes.length && setup.financialProviderCode && eligibilityFootnotesDraft.trim()),
     },
     {
       key: "incentive-values" as const,
