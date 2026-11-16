@@ -58,9 +58,9 @@ function DashboardPage() {
 				sx={{
 					mt: 6,
 					display: "grid",
-					gap: 4,
+					gap: "18px",
 					alignItems: "start",
-					gridTemplateColumns: { xs: "1fr", lg: "1.52fr 1fr" },
+					gridTemplateColumns: { xs: "1fr", lg: "1.55fr 1fr" },
 				}}
 			>
 				<ExpiringPrograms programs={expiringQuery.data?.items ?? []} />
