@@ -46,7 +46,7 @@ export function SummaryForm() {
           onChange={(event) => handleSummaryChange(event.target.value)}
           placeholder="Summarize the program for dealers…"
           disabled={isReadOnly}
-          inputProps={{ "aria-describedby": "dealer-summary-status" }}
+          slotProps={{ htmlInput: { "aria-describedby": "dealer-summary-status" } }}
           sx={{
             "& .MuiOutlinedInput-root": {
               minHeight: "200px",
