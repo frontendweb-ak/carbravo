@@ -1,10 +1,20 @@
-import { useState } from "react";
 import { Box, TextField, Typography } from "@mui/material";
 
 import { ProgramSection } from "../components";
+import { useProgramEditor } from "../editor/program-editor-context";
 
 export function SummaryForm() {
-  const [summary, setSummary] = useState("");
+  const {
+    summaryDraft,
+    setSummaryDraft,
+    updateSectionStatus,
+    isReadOnly,
+  } = useProgramEditor();
+
+  const handleSummaryChange = (value: string) => {
+    setSummaryDraft(value);
+    updateSectionStatus("summary", value.trim() ? "completed" : "warning");
+  };
 
   return (
     <ProgramSection
@@ -32,9 +42,10 @@ export function SummaryForm() {
           fullWidth
           multiline
           minRows={8}
-          value={summary}
-          onChange={(event) => setSummary(event.target.value)}
+          value={summaryDraft}
+          onChange={(event) => handleSummaryChange(event.target.value)}
           placeholder="Summarize the program for dealers…"
+          disabled={isReadOnly}
           inputProps={{ "aria-describedby": "dealer-summary-status" }}
           sx={{
             "& .MuiOutlinedInput-root": {
@@ -56,24 +67,18 @@ export function SummaryForm() {
             },
           }}
         />
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "flex-end",
-            mt: "8px",
-          }}
-        >
+        <Box sx={{ display: "flex", justifyContent: "flex-end", mt: "8px" }}>
           <Typography
             id="dealer-summary-status"
             variant="caption"
             sx={{
-              color: summary.length > 2000 ? "error.main" : "text.muted",
+              color: summaryDraft.length > 2000 ? "error.main" : "text.muted",
               fontFamily: '"IBM Plex Mono", monospace',
               fontSize: "11.5px",
               fontVariantNumeric: "tabular-nums",
             }}
           >
-            {summary.length} / 2000
+            {summaryDraft.length} / 2000
           </Typography>
         </Box>
         <Typography
