@@ -375,8 +375,8 @@ export const tokens = {
 	spacing: 4,
 
 	font: {
-		family: '"Neulis Sans", "Sora", system-ui, sans-serif',
-		headingFamily: '"Neulis Sans", "Sora", system-ui, sans-serif',
+		family: '"Mulish", system-ui, sans-serif',
+		headingFamily: '"Sora", system-ui, sans-serif',
 		monoFamily: '"IBM Plex Mono", monospace',
 	},
 } as const;
