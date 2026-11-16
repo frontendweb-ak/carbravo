@@ -84,7 +84,7 @@ function ProgramContextHeader({
 					px: {
 						xs: 2,
 						sm: 3,
-						lg: 4,
+						lg: "28px",
 					},
 				}}
 			>
