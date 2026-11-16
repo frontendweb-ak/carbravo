@@ -6,7 +6,6 @@ import {
   type MockProgram,
   type MockRevision,
 } from "../store.js";
-import type { ProgramWorkflowStatus } from "../types/types.js";
 
 import { notFound } from "./errors.js";
 
@@ -14,32 +13,6 @@ import { notFound } from "./errors.js";
 /* Program workflow                                                           */
 /* -------------------------------------------------------------------------- */
 
-export function getProgramWorkflowStatus(
-	program: MockProgram,
-	draft: MockRevision | null,
-): ProgramWorkflowStatus {
-	/*
-	 * Program lifecycle always wins for posted programs.
-	 */
-	if (program.status === "ACTIVE") return "ACTIVE";
-	if (program.status === "EXPIRED") return "EXPIRED";
-
-	/*
-	 * A program that has never been posted is represented
-	 * by its draft revision workflow.
-	 */
-	if (!draft) return "DRAFT";
-
-	if (draft.approval.isSubmitted && draft.approval.approved) {
-		return "APPROVED";
-	}
-
-	if (draft.approval.isSubmitted && !draft.approval.approved) {
-		return "REVIEW";
-	}
-
-	return "DRAFT";
-}
 
 /* -------------------------------------------------------------------------- */
 /* Program lookup                                                             */
@@ -152,87 +125,6 @@ function getCurrentRevision(
 }
 
 /* -------------------------------------------------------------------------- */
-/* Vehicles                                                                   */
-/* -------------------------------------------------------------------------- */
-
-/**
- * Returns lightweight vehicle labels for the programs list.
- *
- * The list should not return the complete vehicle catalog object.
- */
-function mapVehicleLabels(
-	db: MockDb,
-	revision: MockRevision,
-) {
-	return revision.vehicles
-		.map((selection) => {
-			const vehicle = db.vehicles.find(
-				(item) =>
-					item.vehicleCatalogId === selection.vehicleCatalogId,
-			);
-
-			if (!vehicle) {
-				return null;
-			}
-
-			return {
-				vehicleCatalogId: vehicle.vehicleCatalogId,
-				label: `${vehicle.make} ${vehicle.model}`,
-			};
-		})
-		.filter(
-			(vehicle): vehicle is NonNullable<typeof vehicle> =>
-				vehicle !== null,
-		);
-}
-
-/* -------------------------------------------------------------------------- */
-/* Geography                                                                  */
-/* -------------------------------------------------------------------------- */
-
-/**
- * Converts stored geography rules into the compact geography summary
- * required by the programs list.
- *
- * Examples:
- *
- *   National
- *   Midwest
- *   Southeast
- *   CA, NY, WA
- */
-function mapGeographySummary(
-	revision: MockRevision,
-): string[] {
-	const includedRules = revision.geography.filter(
-		(rule) => rule.isIncluded,
-	);
-
-	if (includedRules.length === 0) {
-		return [];
-	}
-
-	/*
-	 * National is already a complete summary.
-	 */
-	const national = includedRules.find(
-		(rule) =>
-			rule.level === "REGION" &&
-			rule.code === "NATIONAL",
-	);
-
-	if (national) {
-		return [national.name ?? "National"];
-	}
-
-	return includedRules
-		.filter((rule) => rule.level === "STATE")
-		.map((rule) => rule.name ?? rule.code);
-}
-
-/* -------------------------------------------------------------------------- */
-/* Program list item                                                          */
-/* -------------------------------------------------------------------------- */
 
 export function programListItem(
 	db: MockDb,
@@ -242,23 +134,8 @@ export function programListItem(
 	const draft = getDraftRevision(db, program);
 
 	const currentRevision =
-		active ?? draft;
+		draft ?? active;
 
-	const workflowStatus = getProgramWorkflowStatus(
-		program,
-		draft,
-	);
-console.log("PROGRAM LIST MAPPER V2");
-console.log({
-	programId: program.id,
-	currentRevisionId: currentRevision?.id,
-	vehicles: currentRevision
-		? mapVehicleLabels(db, currentRevision)
-		: [],
-	geography: currentRevision
-		? mapGeographySummary(currentRevision)
-		: [],
-});
 	return {
 		programId: program.id,
 		programIdentifier: program.identifier,
@@ -274,7 +151,7 @@ console.log({
 		 * while the persisted program lifecycle only has:
 		 * DRAFT → ACTIVE → EXPIRED
 		 */
-		programStatus: workflowStatus,
+		programStatus: program.status,
 
 		programType:
 			program.programType ||
@@ -298,30 +175,6 @@ console.log({
 			currentRevision?.setup.deliveryEndDate ??
 			program.deliveryEndDate,
 
-		/*
-		 * Effective dates shown in the Programs table.
-		 */
-		effectiveStartDate:
-			currentRevision?.setup.effectiveStartDate ??
-			null,
-
-		effectiveEndDate:
-			currentRevision?.setup.effectiveEndDate ??
-			null,
-
-		/*
-		 * Lightweight vehicle summary.
-		 */
-		vehicles: currentRevision
-			? mapVehicleLabels(db, currentRevision)
-			: [],
-
-		/*
-		 * Lightweight geography summary.
-		 */
-		geography: currentRevision
-			? mapGeographySummary(currentRevision)
-			: [],
 
 		updatedAt: program.updatedAt,
 	};

@@ -6,6 +6,7 @@ import { currentUser } from "../lib/auth.js";
 import { notFound } from "../lib/errors.js";
 import { getProgramOrThrow } from "../lib/programs.js";
 import { readDb } from "../store.js";
+import type { ComponentRecord } from "../types/types.js";
 
 export const delta = new Hono();
 
@@ -207,22 +208,8 @@ function compareSetup<T extends object>(
 
 function compareComponents(
   changes: RevisionDeltaChange[],
-  before: Array<{
-    componentId: number;
-    componentCode: string;
-    componentName: string;
-    sequenceNo: number;
-    attributes: unknown[];
-    vehicleOverrides: Record<string, unknown>[];
-  }>,
-  after: Array<{
-    componentId: number;
-    componentCode: string;
-    componentName: string;
-    sequenceNo: number;
-    attributes: unknown[];
-    vehicleOverrides: Record<string, unknown>[];
-  }>,
+  before: ComponentRecord[],
+  after: ComponentRecord[],
 ) {
   const beforeByCode = new Map(
     before.map((component) => [component.componentCode, component]),

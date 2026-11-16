@@ -121,7 +121,6 @@ dashboard.get("/dashboard/expiring", async (c) => {
           (item) => item.vehicleCatalogId === revisionVehicle.vehicleCatalogId,
         );
         return {
-          revisionVehicleId: revisionVehicle.revisionVehicleId,
           vehicleCatalogId: revisionVehicle.vehicleCatalogId,
           label: vehicle
             ? vehicleLabel(vehicle)

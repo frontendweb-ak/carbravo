@@ -19,8 +19,6 @@ reference.get("/reference/setup", async (c) => {
 	return c.json({
 		programTypes: db.referenceSetup.programTypes,
 
-		purchaseTypes: db.referenceSetup.purchaseTypes,
-
 		customerTypes: db.referenceSetup.customerTypes,
 
 		conditionCodes: db.referenceSetup.conditionCodes,
