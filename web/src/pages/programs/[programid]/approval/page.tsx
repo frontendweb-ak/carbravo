@@ -17,7 +17,7 @@ import {
 } from "@/features/program";
 
 export default function ApprovalPage() {
-  const { programId, revisionId, programStatus } = useProgramEditor();
+  const { programId, revisionId, programStatus, sections: editorSections } = useProgramEditor();
   const { role } = useMockUserRole();
 
   const approvalQuery = useProgramApproval(programId, revisionId);
@@ -72,9 +72,11 @@ export default function ApprovalPage() {
       complete: components.some((component) => component.attributes.length > 0),
     },
     {
-      key: "marketing" as const,
-      label: "Marketing & Disclosures",
-      complete: Boolean(setup?.mfpnText?.trim() && setup.disclosureText?.trim()),
+      key: "summary" as const,
+      label: "10-Point Summary",
+      complete: editorSections.some(
+        (section) => section.id === "summary" && section.status === "completed",
+      ),
     },
   ];
 
