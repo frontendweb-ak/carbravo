@@ -43,6 +43,8 @@ export interface ProgramEditorContextValue {
 	programStatus?: ProgramWorkflowStatus;
 	isSubmitted: boolean;
 	approved: boolean;
+	summaryDraft: string;
+	setSummaryDraft: (value: string) => void;
 	sections: ProgramEditorSection[];
 	completion: number;
 	activeSection: string;
@@ -98,13 +100,13 @@ export const PROGRAM_EDITOR_SECTION_DEFINITIONS = [
 		id: "marketing",
 		number: 6,
 		label: "Marketing & Disclosures",
-		requiredForSubmission: true,
+		requiredForSubmission: false,
 	},
 	{
 		id: "summary",
 		number: 7,
 		label: "10-Point Summary",
-		requiredForSubmission: false,
+		requiredForSubmission: true,
 	},
 	{
 		id: "approval",
@@ -254,6 +256,18 @@ export function ProgramEditorProvider({
 	const [sections, setSections] = useState<ProgramEditorSection[]>(
 		() => initialSections ?? createInitialSections(),
 	);
+	const [summaryDraft, setSummaryDraft] = useState("");
+
+
+	const editorKey = `${initialProgramId ?? "new"}:${initialRevisionId ?? "new"}`;
+	const previousEditorKeyRef = useRef(editorKey);
+
+	useEffect(() => {
+		if (previousEditorKeyRef.current === editorKey) return;
+		previousEditorKeyRef.current = editorKey;
+		setSections(initialSections ?? createInitialSections());
+		setSummaryDraft("");
+	}, [editorKey, initialSections]);
 
 	/* ---------------------------------------------------------------------- */
 	/* Saving                                                                 */
@@ -393,6 +407,8 @@ export function ProgramEditorProvider({
 			programStatus,
 			isSubmitted,
 			approved,
+			summaryDraft,
+			setSummaryDraft,
 
 			/* Sections */
 			sections,
@@ -423,6 +439,7 @@ export function ProgramEditorProvider({
 			programStatus,
 			isSubmitted,
 			approved,
+			summaryDraft,
 			sections,
 			completion,
 			activeSection,
