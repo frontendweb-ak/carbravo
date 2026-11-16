@@ -28,6 +28,7 @@ function ExpiringPrograms({
 				height: "100%",
 				minWidth: 0,
 				p: 0,
+				borderRadius: "18px",
 				display: "flex",
 				flexDirection: "column",
 			}}
@@ -36,7 +37,7 @@ function ExpiringPrograms({
 			<AppCardHeader
 				title="Expiring soon"
 				divider
-				sx={{ p: 4 }}
+				sx={{ px: "20px", py: "17px" }}
 				action={
 					<Chip
 						label={`Next ${days} days`}
@@ -64,8 +65,8 @@ function ExpiringPrograms({
 					gridTemplateColumns,
 					alignItems: "center",
 					minHeight: 34,
-					py: 3,
-					px: 4,
+					py: 0,
+					px: "20px",
 					backgroundColor: "action.hover",
 					borderBottom: 1,
 					borderColor: "divider",
@@ -153,7 +154,7 @@ function ExpiringProgramRow({ program, last }: ExpiringProgramRowProps) {
 				gridTemplateColumns,
 				alignItems: "center",
 				minHeight: 44,
-				px: 4,
+				px: "20px",
 				py: 1,
 				borderBottom: last ? 0 : 1,
 				borderColor: "divider",
