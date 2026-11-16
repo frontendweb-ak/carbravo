@@ -28,16 +28,16 @@ function ProgramStatusCard({
 }: ProgramStatusCardProps) {
 	return (
 		<Link to={href ?? `/programs?status=${status}`} style={{ textDecoration: "none" }}>
-			<Card sx={{ p: 3, minHeight: 103, borderRadius: 2 }}>
+			<Card sx={{ p: 0, minHeight: 103, borderRadius: "16px" }}>
 				<CardContent
 					sx={{
-						p: 2,
+						p: "16px 18px",
 						height: "100%",
 						display: "flex",
 						flexDirection: "column",
 						justifyContent: "space-between",
 						gap: 1.5,
-						"&:last-child": { pb: 2 },
+						"&:last-child": { pb: "16px" },
 					}}
 				>
 					<Box
