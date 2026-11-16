@@ -202,7 +202,7 @@ function ProgramContextHeader({
 					width: "100%",
 					maxWidth: 1360,
 					mx: "auto",
-					px: { xs: 2, sm: 3, lg: 4 },
+					px: { xs: 2, sm: 3, lg: "28px" },
 				}}
 			>
 				<Divider sx={{ borderColor: "divider" }} />
