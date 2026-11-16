@@ -45,6 +45,8 @@ export interface ProgramEditorContextValue {
 	approved: boolean;
 	summaryDraft: string;
 	setSummaryDraft: (value: string) => void;
+	eligibilityFootnotesDraft: string;
+	setEligibilityFootnotesDraft: (value: string) => void;
 	sections: ProgramEditorSection[];
 	completion: number;
 	activeSection: string;
@@ -257,6 +259,7 @@ export function ProgramEditorProvider({
 		() => initialSections ?? createInitialSections(),
 	);
 	const [summaryDraft, setSummaryDraft] = useState("");
+	const [eligibilityFootnotesDraft, setEligibilityFootnotesDraft] = useState("");
 
 
 	const editorKey = `${initialProgramId ?? "new"}:${initialRevisionId ?? "new"}`;
@@ -267,6 +270,7 @@ export function ProgramEditorProvider({
 		previousEditorKeyRef.current = editorKey;
 		setSections(initialSections ?? createInitialSections());
 		setSummaryDraft("");
+		setEligibilityFootnotesDraft("");
 	}, [editorKey, initialSections]);
 
 	/* ---------------------------------------------------------------------- */
@@ -409,6 +413,8 @@ export function ProgramEditorProvider({
 			approved,
 			summaryDraft,
 			setSummaryDraft,
+			eligibilityFootnotesDraft,
+			setEligibilityFootnotesDraft,
 
 			/* Sections */
 			sections,
@@ -440,6 +446,7 @@ export function ProgramEditorProvider({
 			isSubmitted,
 			approved,
 			summaryDraft,
+			eligibilityFootnotesDraft,
 			sections,
 			completion,
 			activeSection,
