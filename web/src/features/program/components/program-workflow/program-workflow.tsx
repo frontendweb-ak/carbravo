@@ -23,6 +23,7 @@ function ProgramWorkflow({
 	const incompleteRequirements = requirements.filter((item) => !item.complete);
 
 	const canSubmit = status === "DRAFT" && incompleteRequirements.length === 0;
+	const canPublish = status === "APPROVED" && incompleteRequirements.length === 0;
 
 	return (
 		<Stack spacing={2.5}>
@@ -33,6 +34,7 @@ function ProgramWorkflow({
 				revisionId={revisionId}
 				status={status}
 				canSubmit={canSubmit}
+				canPublish={canPublish}
 				incompleteRequirements={incompleteRequirements}
 				onSubmitForReview={onSubmitForReview}
 				onApprove={onApprove}
