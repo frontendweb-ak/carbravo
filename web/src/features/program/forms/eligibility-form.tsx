@@ -1,7 +1,7 @@
 import { useCallback, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Alert, Box } from "@mui/material";
-import { FormProvider, useForm } from "react-hook-form";
+import { FormProvider, useForm, useWatch } from "react-hook-form";
 
 import {
   Button,
@@ -31,6 +31,8 @@ export function EligibilityForm() {
     registerSaveHandler,
     setSectionSaving,
     updateSectionStatus,
+    eligibilityFootnotesDraft,
+    setEligibilityFootnotesDraft,
   } = useProgramEditor();
 
   const setupQuery = useProgramSetup(programId, revisionId);
@@ -39,9 +41,21 @@ export function EligibilityForm() {
 
   const form = useForm<EligibilityFormValues>({
     resolver: zodResolver(eligibilityFormSchema),
-    defaultValues: eligibilityDefaultValues,
+    defaultValues: {
+      ...eligibilityDefaultValues,
+      footnotes: eligibilityFootnotesDraft,
+    },
     mode: "onBlur",
   });
+
+  const footnotesValue = useWatch({
+    control: form.control,
+    name: "footnotes",
+  });
+
+  useEffect(() => {
+    setEligibilityFootnotesDraft(footnotesValue ?? "");
+  }, [footnotesValue, setEligibilityFootnotesDraft]);
 
   useEffect(() => {
     if (!setupQuery.data || form.formState.isDirty) return;
@@ -49,9 +63,9 @@ export function EligibilityForm() {
       financialProviderCode: setupQuery.data.financialProviderCode ?? "",
       tierRate: false,
       customerTypeCodes: [...setupQuery.data.customerTypeCodes],
-      footnotes: setupQuery.data.disclosureText ?? "",
+      footnotes: eligibilityFootnotesDraft,
     });
-  }, [setupQuery.data, form]);
+  }, [setupQuery.data, form, eligibilityFootnotesDraft]);
 
   const onSubmit = useCallback(async (values: EligibilityFormValues) => {
     if (!canEdit || programId == null || revisionId == null || !setupQuery.data) {
@@ -67,7 +81,6 @@ export function EligibilityForm() {
           ...mapSetupResponseToDto(setupQuery.data),
           financialProviderCode: values.financialProviderCode || null,
           customerTypeCodes: [...values.customerTypeCodes],
-          disclosureText: values.footnotes.trim() || null,
         },
       });
       updateSectionStatus("eligibility", "completed");
@@ -179,7 +192,7 @@ export function EligibilityForm() {
 
         <ProgramSection
           title="Eligibility footnotes"
-          description="The current API contract stores these in the shared disclosureText field also used by Marketing & Disclosures."
+          description="Local draft only. The API does not expose a separate eligibility-footnotes field."
         >
           <FormTextarea
             control={form.control}
