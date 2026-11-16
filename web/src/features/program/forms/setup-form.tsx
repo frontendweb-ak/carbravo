@@ -522,9 +522,9 @@ export function SetupForm({
 							disabled
 						/>
 					</Box>
-					<Alert severity="info" sx={{ mt: 2 }}>
-						Program number, incentive codes and country are displayed for context but are not writable in the current OpenAPI Setup contract.
-					</Alert>
+					<Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 1 }}>
+						Program number, incentive codes and country are reference-only in the current API.
+					</Typography>
 				</ProgramSection>
 
 				{/* ============================================================ */}
@@ -581,16 +581,9 @@ export function SetupForm({
 						<Box />
 					</Box>
 
-					<Alert
-						severity="info"
-						variant="standard"
-						sx={{
-							mt: 2,
-							borderRadius: 2,
-						}}
-					>
-						First-visible date and time are displayed to match the reference UI but are not writable in the current OpenAPI Setup contract.
-					</Alert>
+					<Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 1 }}>
+						First-visible date and time are reference-only in the current API.
+					</Typography>
 				</ProgramSection>
 
 				{/* ============================================================ */}
