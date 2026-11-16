@@ -7,6 +7,7 @@ export const typography: TypographyVariantsOptions = {
 	fontFamily: tokens.font.family,
 
 	h1: {
+		fontFamily: tokens.font.headingFamily,
 		fontSize: "2.25rem",
 		fontWeight: 700,
 		lineHeight: 1.2,
@@ -14,6 +15,7 @@ export const typography: TypographyVariantsOptions = {
 	},
 
 	h2: {
+		fontFamily: tokens.font.headingFamily,
 		fontSize: "1.875rem",
 		fontWeight: 700,
 		lineHeight: 1.25,
@@ -21,24 +23,28 @@ export const typography: TypographyVariantsOptions = {
 	},
 
 	h3: {
+		fontFamily: tokens.font.headingFamily,
 		fontSize: "1.5rem",
 		fontWeight: 700,
 		lineHeight: 1.3,
 	},
 
 	h4: {
+		fontFamily: tokens.font.headingFamily,
 		fontSize: "1.25rem",
 		fontWeight: 600,
 		lineHeight: 1.35,
 	},
 
 	h5: {
+		fontFamily: tokens.font.headingFamily,
 		fontSize: "1.125rem",
 		fontWeight: 600,
 		lineHeight: 1.4,
 	},
 
 	h6: {
+		fontFamily: tokens.font.headingFamily,
 		fontSize: "1rem",
 		fontWeight: 600,
 		lineHeight: 1.4,
