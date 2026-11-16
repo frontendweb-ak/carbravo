@@ -1,4 +1,5 @@
-pnpm exec rg '@base-ui/react|@radix-ui/react-slot|class-variance-authority|tailwind-merge' src
+> **Frontend engineering standards:** Follow [Frontend Coding Guidelines](./docs/frontend-coding-guidelines.md) for component size, page composition, reusable logic, naming, feature boundaries, API integration, and testing. These guidelines describe the current implementation and take precedence over aspirational architecture examples elsewhere in this document. MUI is the current UI library; do not introduce a second UI library or extra architecture layers without an explicit decision.
+
 # CarBravo Incentives Frontend
 
 Production-grade frontend application for the **CarBravo Incentives Authoring Platform**.
