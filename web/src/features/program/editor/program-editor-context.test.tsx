@@ -1,5 +1,6 @@
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { useEffect } from "react";
+import type { ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 import {
@@ -24,10 +25,11 @@ function EditorConsumer({
 		approved,
 		sections,
 		completion,
-				isSaving,
+		isSaving,
 		isReadOnly,
 		isMinorRevision,
-						updateSectionStatus,
+		updateSectionStatus,
+		setSaveStatus,
 		setSummaryDraft,
 		summaryDraft,
 		setEligibilityFootnotesDraft,
@@ -38,7 +40,19 @@ function EditorConsumer({
 
 	useEffect(() => {
 		if (!onSave) return;
-		registerSaveHandler(onSave);
+		registerSaveHandler(async () => {
+			setSaveStatus("saving");
+			try {
+				await onSave();
+				setSaveStatus("saved");
+			} catch (error) {
+				setSaveStatus(
+					"error",
+					error instanceof Error ? error.message : "Save failed.",
+				);
+				throw error;
+			}
+		});
 		return () => registerSaveHandler(null);
 	}, [onSave, registerSaveHandler]);
 
