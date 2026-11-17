@@ -135,7 +135,7 @@ export function getRevisionId(search: string): number | null {
 	const params = new URLSearchParams(search);
 	const value = params.get("revision");
 
-	if (value == null || !/^\\d+$/.test(value)) {
+	if (value == null || !/^\d+$/.test(value)) {
 		return null;
 	}
 
@@ -179,7 +179,7 @@ export function getProgramRevisionSelection(
 	const revisionId = revisionParam == null ? null : Number(revisionParam);
 	const isValidRevisionId =
 		revisionParam != null &&
-		/^\\d+$/.test(revisionParam) &&
+		/^\d+$/.test(revisionParam) &&
 		Number.isSafeInteger(revisionId) &&
 		revisionId > 0;
 
