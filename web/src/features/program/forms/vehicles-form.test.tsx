@@ -28,7 +28,7 @@ vi.mock("../hooks/use-program-vehicles", () => ({
 
 vi.mock("@/features/program/components/vehicle", async () => {
 	const actual = await vi.importActual<
-		type typeof import("@/features/program/components/vehicle")
+		type import("@/features/program/components/vehicle")
 	>("@/features/program/components/vehicle");
 	const { VehicleFilterBuilderTestDouble } = await import(
 		"./vehicles-form-test-controls"
@@ -39,16 +39,6 @@ vi.mock("@/features/program/components/vehicle", async () => {
 		VehicleFilterBuilder: VehicleFilterBuilderTestDouble,
 	};
 });
-
-const savedVehicle = {
-	revisionVehicleId: 1,
-	vehicleCatalogId: 1001,
-	year: 2026,
-	make: "Chevrolet",
-	model: "Silverado",
-	trimName: "LT",
-	segment: "Truck",
-};
 
 function renderVehiclesForm({
 	mode = "edit",
