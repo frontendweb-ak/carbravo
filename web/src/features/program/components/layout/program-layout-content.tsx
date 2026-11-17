@@ -1,4 +1,5 @@
 import type { ProgramWorkflowStatus } from "@/config/constants";
+import { Alert, Button } from "@mui/material";
 import { ProgramSectionSidebar } from "@/features/program";
 import { PROGRAM_SIDE_MENU } from "@/features/program/constants";
 import { useProgramEditor } from "@/features/program/editor/program-editor-context";
@@ -21,12 +22,16 @@ interface ProgramLayoutContentProps {
 	revisionTabs: ProgramRevisionTab[];
 	revisionHistory?: ProgramRevisionHistoryState;
 	currentRevisionId?: number;
+	revisionHistoryError?: boolean;
+	onRetryRevisionHistory?: () => void;
 }
 
 export function ProgramLayoutContent({
 	revisionTabs,
 	revisionHistory,
 	currentRevisionId,
+	revisionHistoryError = false,
+	onRetryRevisionHistory,
 }: ProgramLayoutContentProps) {
 	const navigate = useNavigate();
 	const location = useLocation();
@@ -224,6 +229,34 @@ export function ProgramLayoutContent({
 					onSave={handleSave}
 				/>
 			</Box>
+
+			{revisionHistoryError && (
+				<Container
+					maxWidth={false}
+					sx={{
+						width: "100%",
+						maxWidth: 1360,
+						mx: "auto",
+						px: { xs: 2, sm: 3, lg: "28px" },
+						pt: 2,
+					}}
+				>
+					<Alert
+						severity="warning"
+						action={
+							<Button
+								color="inherit"
+								size="small"
+								onClick={() => onRetryRevisionHistory?.()}
+							>
+								Retry
+							</Button>
+						}
+					>
+						Revision history could not be loaded. The current or active revision remains available.
+					</Alert>
+				</Container>
+			)}
 
 			{/* ---------------------------------------------------------- */}
 			{/* Content                                                     */}
