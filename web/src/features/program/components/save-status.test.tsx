@@ -8,7 +8,7 @@ describe("SaveStatus", () => {
 		["idle", "Not saved yet"],
 		["unsaved", "Unsaved changes"],
 		["saving", "Saving..."],
-		["saved", "All changes saved"],
+		["saved", "Saved to program"],
 		["invalid", "Fix validation errors"],
 		["error", "Save failed: Network unavailable"],
 	] as const)("communicates the %s state", (status, message) => {
@@ -27,7 +27,7 @@ describe("SaveStatus", () => {
 		render(<SaveStatus status="idle" />);
 
 		expect(screen.getByRole("status")).toHaveTextContent("Not saved yet");
-		expect(screen.queryByText("All changes saved")).not.toBeInTheDocument();
+		expect(screen.queryByText("Saved to program")).not.toBeInTheDocument();
 	});
 
 	it("does not show the save action when save is intentionally hidden", () => {
