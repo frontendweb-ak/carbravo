@@ -190,6 +190,8 @@ describe("ProgramEditorProvider", () => {
 			revisionLabel: "1.0",
 			programStatus: "DRAFT",
 			completion: 0,
+			saveStatus: "idle",
+			saveError: null,
 			isSubmitted: false,
 			approved: false,
 			isReadOnly: false,
