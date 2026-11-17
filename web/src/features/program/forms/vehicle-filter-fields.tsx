@@ -1,5 +1,7 @@
 import type { UseFormReturn } from "react-hook-form";
 
+import { useProgramEditor } from "../editor/program-editor-context";
+
 import {
 	VehicleFilterBuilder,
 	type VehicleFilterColumn,
