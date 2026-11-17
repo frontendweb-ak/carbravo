@@ -285,16 +285,10 @@ export function useSetupFormPersistence({
 				saveTimerRef.current = null;
 				if (!mountedRef.current) return;
 
-				if (latestValuesRef.current) {
-					void form.handleSubmit(
-						async (validatedValues) => {
-							await persistSetupRef.current(validatedValues);
-						},
-						() => {
-							setSetupStatus("warning");
-							setSaveStatus("invalid");
-						},
-					)();
+				const latestValues = latestValuesRef.current;
+				if (latestValues) {
+					// Autosave intentionally persists incomplete draft data.
+					void persistSetupRef.current(latestValues);
 				}
 			}, AUTO_SAVE_DELAY);
 		});
