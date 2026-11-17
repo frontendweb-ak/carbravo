@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import {
 	useMutation,
 	useQueries,
@@ -43,7 +44,7 @@ export interface ResolveVehicleFiltersResult {
  *   [123, 456, 789]
  */
 export function useResolveVehicleFilters() {
-	return async (
+	return useCallback(async (
 		rows: VehicleFilterRow[],
 	): Promise<ResolveVehicleFiltersResult> => {
 		const resolvedRows = await Promise.all(
@@ -118,7 +119,7 @@ export function useResolveVehicleFilters() {
 			rows: resolvedRows,
 			vehicleCatalogIds,
 		};
-	};
+	}, []);
 }
 
 function normalizeFilterValues(values: string[]): string[] {
