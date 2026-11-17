@@ -17,7 +17,7 @@ export function VehiclesForm() {
 		revisionId,
 		isReadOnly,
 		isMinorRevision,
-		setSectionSaving,
+		setSaveStatus,
 	} = useProgramEditor();
 	const canEdit = !isReadOnly && !isMinorRevision;
 
@@ -31,7 +31,7 @@ export function VehiclesForm() {
 		programId,
 		revisionId,
 		canEdit,
-		setSectionSaving,
+		setSaveStatus,
 	});
 	const options = useVehicleFilterOptions(rows.currentRow, form);
 	const { data: savedVehiclesResponse } = useProgramVehicles(programId, revisionId);
