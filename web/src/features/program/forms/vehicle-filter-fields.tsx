@@ -1,4 +1,3 @@
-import { Box } from "@mui/material";
 import type { UseFormReturn } from "react-hook-form";
 
 import {
@@ -123,16 +122,11 @@ export function VehicleFilterFields({
 	];
 
 	return (
-		<Box
-			component="section"
-			sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}
-		>
-			<VehicleFilterBuilder
-				disabled={disabled}
-				editing={editing}
-				onCancelEdit={onCancelEdit}
-				columns={columns}
-			/>
-		</Box>
+		<VehicleFilterBuilder
+			disabled={disabled}
+			editing={editing}
+			onCancelEdit={onCancelEdit}
+			columns={columns}
+		/>
 	);
 }
