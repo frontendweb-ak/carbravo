@@ -1,10 +1,9 @@
 import type { ProgramWorkflowStatus } from "@/config/constants";
-import { Alert, Button } from "@mui/material";
 import { ProgramSectionSidebar } from "@/features/program";
 import { PROGRAM_SIDE_MENU } from "@/features/program/constants";
 import { useProgramEditor } from "@/features/program/editor/program-editor-context";
 import type { ProgramRevisionHistoryState } from "@/features/program/model/revisions.types";
-import { Box, Container, Paper, Typography } from "@mui/material";
+import { Alert, Box, Button, Container, Paper, Typography } from "@mui/material";
 import { Navigate, Outlet, useLocation, useNavigate } from "react-router-dom";
 
 import {
