@@ -160,6 +160,21 @@ describe("getProgramRevisionTabs", () => {
 		).toEqual([]);
 	});
 
+	it("shows Current and Active while history is still unavailable", () => {
+		expect(getProgramRevisionTabs(program)).toEqual([
+			{
+				id: "current",
+				label: "Current",
+				subtitle: "Rev 1.1",
+			},
+			{
+				id: "active",
+				label: "Active",
+				subtitle: "Rev 1.0",
+			},
+		]);
+	});
+
 	it("does not offer History for a single-revision program", () => {
 		const singleRevisionHistory = {
 			...history,
