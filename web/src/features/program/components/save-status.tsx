@@ -21,7 +21,7 @@ function getStatusMessage(status: ProgramSaveStatus, error?: string | null) {
 		case "saving":
 			return "Saving...";
 		case "saved":
-			return "All changes saved";
+			return "Saved to program";
 		case "invalid":
 			return "Fix validation errors";
 		case "error":
