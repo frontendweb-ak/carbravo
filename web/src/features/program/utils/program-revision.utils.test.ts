@@ -188,6 +188,11 @@ describe("getProgramRevisionTabs", () => {
 				label: "Current",
 				subtitle: "Rev 1.1",
 			},
+			{
+				id: "active",
+				label: "Active",
+				subtitle: "Rev 1.0",
+			},
 		]);
 	});
 });
