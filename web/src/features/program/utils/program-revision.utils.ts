@@ -79,7 +79,7 @@ export function getProgramRevisionTabs(
  *   Draft revision, falling back to active revision.
  *
  * Active:
- *   The API's activeRevisionId.
+ *   The program detail's activeRevision.
  *
  * History:
  *   The revision explicitly selected by the user.
