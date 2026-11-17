@@ -28,7 +28,7 @@ vi.mock("../hooks/use-program-vehicles", () => ({
 
 vi.mock("@/features/program/components/vehicle", async () => {
 	const actual = await vi.importActual<
-		type import("@/features/program/components/vehicle")
+		typeof import("@/features/program/components/vehicle")
 	>("@/features/program/components/vehicle");
 	const { VehicleFilterBuilderTestDouble } = await import(
 		"./vehicles-form-test-controls"
