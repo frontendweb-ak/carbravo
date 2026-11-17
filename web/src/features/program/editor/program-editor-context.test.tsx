@@ -70,7 +70,9 @@ function EditorConsumer({
 					isSubmitted,
 					approved,
 					completion,
-									isSaving,
+					isSaving,
+					saveStatus,
+					saveError,
 					isReadOnly,
 					isMinorRevision,
 					summaryDraft,
@@ -163,6 +165,8 @@ function getState() {
 		approved: boolean;
 		completion: number;
 		isSaving: boolean;
+		saveStatus: string;
+		saveError: string | null;
 		isReadOnly: boolean;
 		isMinorRevision: boolean;
 		summaryDraft: string;
