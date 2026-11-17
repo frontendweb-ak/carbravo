@@ -164,6 +164,7 @@ describe("getProgramRevisionTabs", () => {
 		const singleRevisionHistory = {
 			...history,
 			revisions: [draftHistoryRevision],
+			pagination: { ...history.pagination, totalElements: 1 },
 		};
 
 		expect(getProgramRevisionTabs(program, singleRevisionHistory)).toEqual([
@@ -187,14 +188,14 @@ describe("getSelectedRevision", () => {
 		).toBe(draftRevision);
 	});
 
-	it("resolves Active to the active history revision", () => {
+	it("resolves Active directly from program details", () => {
 		expect(
-			getSelectedRevision(program, history, {
+			getSelectedRevision(program, undefined, {
 				view: "active",
 				revisionId: null,
 				invalidRevision: false,
 			}),
-		).toBe(activeHistoryRevision);
+		).toBe(activeRevision);
 	});
 
 	it("resolves a selected historical revision by ID", () => {
@@ -255,7 +256,22 @@ describe("program revision URL parsing", () => {
 		},
 	);
 
-	it("parses a numeric revision ID", () => {
+	it.each(["?revision=0", "?revision=-1", "?revision=9007199254740992"])(
+		"rejects non-positive or unsafe revision IDs (%s)",
+		(search) => {
+			expect(getRevisionId(search)).toBeNull();
+		},
+	);
+
+	it("marks a malformed explicit revision parameter as invalid", () => {
+		expect(getProgramRevisionSelection("?view=history&revision=abc")).toEqual({
+			view: "history",
+			revisionId: null,
+			invalidRevision: true,
+		});
+	});
+
+	it("parses a positive numeric revision ID", () => {
 		expect(getRevisionId("?revision=99")).toBe(99);
 	});
 });
