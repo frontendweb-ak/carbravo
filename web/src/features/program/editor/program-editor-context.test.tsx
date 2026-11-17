@@ -1,6 +1,5 @@
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { useEffect } from "react";
-import type { ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 import {
