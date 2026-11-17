@@ -120,7 +120,7 @@ function EditorConsumer({
 			>
 				Set eligibility draft
 			</button>
-			<button type="button" onClick={() => void saveCurrentSection()}>
+			<button type="button" onClick={() => void saveCurrentSection().catch(() => undefined)}>
 				Save current section
 			</button>
 		</div>
