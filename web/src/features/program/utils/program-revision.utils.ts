@@ -31,7 +31,7 @@ export function getCurrentRevision(program: ProgramDetail) {
  */
 export function getProgramRevisionTabs(
 	program: ProgramDetail,
-	history: ProgramRevisionHistoryState,
+	history?: ProgramRevisionHistoryState,
 ): ProgramRevisionTab[] {
 	const currentRevision = getCurrentRevision(program);
 
@@ -47,26 +47,25 @@ export function getProgramRevisionTabs(
 		},
 	];
 
-	const activeRevisionId = program.activeRevision?.id ?? null;
-	if (activeRevisionId != null && activeRevisionId !== currentRevision.id) {
-		const activeRevision = history.revisions.find(
-			(revision) => revision.id === activeRevisionId,
-		);
-
-		if (activeRevision) {
-			tabs.push({
-				id: "active",
-				label: "Active",
-				subtitle: `Rev ${activeRevision.label}`,
-			});
-		}
+	const activeRevision = program.activeRevision;
+	if (
+		activeRevision?.id != null &&
+		activeRevision.id !== currentRevision.id
+	) {
+		tabs.push({
+			id: "active",
+			label: "Active",
+			subtitle: `Rev ${activeRevision.label}`,
+		});
 	}
 
-	if (history.revisions.length > 1) {
+	const revisionCount =
+		history?.pagination.totalElements ?? history?.revisions.length ?? 0;
+	if (revisionCount > 1) {
 		tabs.push({
 			id: "history",
 			label: "History",
-			subtitle: `${history.revisions.length} revisions`,
+			subtitle: `${revisionCount} revisions`,
 		});
 	}
 
@@ -87,7 +86,7 @@ export function getProgramRevisionTabs(
  */
 export function getSelectedRevision(
 	program: ProgramDetail,
-	history: ProgramRevisionHistoryState,
+	history: ProgramRevisionHistoryState | undefined,
 	selection: ProgramRevisionSelection,
 ):
 	| ProgramRevisionHistoryItem
@@ -97,15 +96,11 @@ export function getSelectedRevision(
 		case "current":
 			return getCurrentRevision(program);
 
-		case "active": {
-			const activeRevisionId = program.activeRevision?.id;
-			if (activeRevisionId == null) return null;
-
-			return history.revisions.find((revision) => revision.id === activeRevisionId) ?? null;
-		}
+		case "active":
+			return program.activeRevision;
 
 		case "history": {
-			if (selection.revisionId == null) {
+			if (selection.revisionId == null || !history) {
 				return null;
 			}
 
@@ -140,13 +135,12 @@ export function getRevisionId(search: string): number | null {
 	const params = new URLSearchParams(search);
 	const value = params.get("revision");
 
-	if (!value) {
+	if (value == null || !/^\\d+$/.test(value)) {
 		return null;
 	}
 
 	const revisionId = Number(value);
-
-	return Number.isInteger(revisionId) ? revisionId : null;
+	return Number.isSafeInteger(revisionId) && revisionId > 0 ? revisionId : null;
 }
 
 /**
@@ -169,6 +163,7 @@ export function getRevisionId(search: string): number | null {
 export interface ProgramRevisionSelection {
 	view: ProgramRevisionView;
 	revisionId: number | null;
+	invalidRevision: boolean;
 }
 export function getProgramRevisionSelection(
 	search: string,
@@ -181,17 +176,16 @@ export function getProgramRevisionSelection(
 	const view: ProgramRevisionView =
 		viewParam === "active" || viewParam === "history" ? viewParam : "current";
 
-	if (!revisionParam) {
-		return {
-			view,
-			revisionId: null,
-		};
-	}
-
-	const revisionId = Number(revisionParam);
+	const revisionId = revisionParam == null ? null : Number(revisionParam);
+	const isValidRevisionId =
+		revisionParam != null &&
+		/^\\d+$/.test(revisionParam) &&
+		Number.isSafeInteger(revisionId) &&
+		revisionId > 0;
 
 	return {
 		view,
-		revisionId: Number.isInteger(revisionId) ? revisionId : null,
+		revisionId: isValidRevisionId ? revisionId : null,
+		invalidRevision: revisionParam != null && !isValidRevisionId,
 	};
 }
