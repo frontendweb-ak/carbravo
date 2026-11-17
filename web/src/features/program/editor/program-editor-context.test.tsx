@@ -24,13 +24,10 @@ function EditorConsumer({
 		approved,
 		sections,
 		completion,
-		activeSection,
-		isSaving,
+				isSaving,
 		isReadOnly,
 		isMinorRevision,
-		setProgramIdentity,
-		setActiveSection,
-		updateSectionStatus,
+						updateSectionStatus,
 		setSummaryDraft,
 		summaryDraft,
 		setEligibilityFootnotesDraft,
@@ -59,8 +56,7 @@ function EditorConsumer({
 					isSubmitted,
 					approved,
 					completion,
-					activeSection,
-					isSaving,
+									isSaving,
 					isReadOnly,
 					isMinorRevision,
 					summaryDraft,
@@ -68,18 +64,6 @@ function EditorConsumer({
 					sectionStatuses: sections.map(({ id, status }) => ({ id, status })),
 				})}
 			</output>
-			<button
-				type="button"
-				onClick={() => setProgramIdentity({
-					programId: 101,
-					revisionId: 202,
-					programIdentifier: "CB-101",
-					programName: "Spring Event",
-					revisionLabel: "2.1",
-				})}
-			>
-				Set identity
-			</button>
 			<button
 				type="button"
 				onClick={() => {
@@ -104,12 +88,6 @@ function EditorConsumer({
 				onClick={() => updateSectionStatus("unknown", "completed")}
 			>
 				Complete unknown section
-			</button>
-			<button type="button" onClick={() => setActiveSection("vehicles")}>
-				Go to vehicles section
-			</button>
-			<button type="button" onClick={() => setActiveSection("unknown")}>
-				Go to unknown section
 			</button>
 			<button type="button" onClick={() => setSummaryDraft("Local summary")}>
 				Set summary draft
@@ -170,7 +148,6 @@ function getState() {
 		isSubmitted: boolean;
 		approved: boolean;
 		completion: number;
-		activeSection: string;
 		isSaving: boolean;
 		isReadOnly: boolean;
 		isMinorRevision: boolean;
@@ -193,7 +170,6 @@ describe("ProgramEditorProvider", () => {
 			revisionLabel: "1.0",
 			programStatus: "DRAFT",
 			completion: 0,
-			activeSection: "setup",
 			isSubmitted: false,
 			approved: false,
 			isReadOnly: false,
@@ -202,10 +178,22 @@ describe("ProgramEditorProvider", () => {
 		expect(getState().sectionStatuses.every((section) => section.status === "pending")).toBe(true);
 	});
 
-	it("updates identity fields after a new program and revision are created", () => {
-		renderEditor();
+	it("reflects new provider identity props without mirrored state", () => {
+		const view = renderEditor();
 
-		fireEvent.click(screen.getByRole("button", { name: "Set identity" }));
+		view.rerender(
+			<ProgramEditorProvider
+				mode="edit"
+				programId={101}
+				revisionId={202}
+				programIdentifier="CB-101"
+				programName="Spring Event"
+				revisionLabel="2.1"
+				programStatus="DRAFT"
+			>
+				<EditorConsumer />
+			</ProgramEditorProvider>,
+		);
 
 		expect(getState()).toMatchObject({
 			programId: 101,
@@ -226,17 +214,13 @@ describe("ProgramEditorProvider", () => {
 		expect(getState().completion).toBe(100);
 	});
 
-	it("ignores unknown section IDs for status and navigation updates", () => {
+	it("ignores unknown section IDs when updating completion", () => {
 		renderEditor();
 
 		fireEvent.click(screen.getByRole("button", { name: "Complete unknown section" }));
-		fireEvent.click(screen.getByRole("button", { name: "Go to unknown section" }));
 
 		expect(getState().completion).toBe(0);
-		expect(getState().activeSection).toBe("setup");
-
-		fireEvent.click(screen.getByRole("button", { name: "Go to vehicles section" }));
-		expect(getState().activeSection).toBe("vehicles");
+		expect(getState().sectionStatuses.every((section) => section.status === "pending")).toBe(true);
 	});
 
 	it.each([
