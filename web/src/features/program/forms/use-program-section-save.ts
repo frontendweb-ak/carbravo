@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, type FormEvent } from "react";
 import type {
 	FieldValues,
 	SubmitHandler,
@@ -84,7 +84,7 @@ export function useProgramSectionSave<
 
 	return {
 		submit,
-		handleSubmit: (event: React.FormEvent<HTMLFormElement>) => {
+		handleSubmit: (event: FormEvent<HTMLFormElement>) => {
 			event.preventDefault();
 			void submit();
 		},
