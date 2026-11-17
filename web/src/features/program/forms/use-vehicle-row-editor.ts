@@ -86,8 +86,12 @@ export function useVehicleRowEditor({
 	const onCancelEdit = useCallback(() => {
 		setEditingIndex(null);
 		form.setValue("currentRow", { ...emptyVehicleFilterRow });
-		setSaveStatus(selectedRows.length > 0 ? "saved" : "idle");
-	}, [form, selectedRows.length, setSaveStatus]);
+		setSaveStatus(
+			programId != null && revisionId != null
+				? selectedRows.length > 0 ? "saved" : "idle"
+				: selectedRows.length > 0 ? "unsaved" : "idle",
+		);
+	}, [form, programId, revisionId, selectedRows.length, setSaveStatus]);
 
 	const onDeleteRow = useCallback(
 		async (index: number) => {
