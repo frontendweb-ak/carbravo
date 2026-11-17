@@ -182,6 +182,7 @@ describe("getSelectedRevision", () => {
 			getSelectedRevision(program, history, {
 				view: "current",
 				revisionId: null,
+				invalidRevision: false,
 			}),
 		).toBe(draftRevision);
 	});
@@ -191,6 +192,7 @@ describe("getSelectedRevision", () => {
 			getSelectedRevision(program, history, {
 				view: "active",
 				revisionId: null,
+				invalidRevision: false,
 			}),
 		).toBe(activeHistoryRevision);
 	});
@@ -200,6 +202,7 @@ describe("getSelectedRevision", () => {
 			getSelectedRevision(program, history, {
 				view: "history",
 				revisionId: 99,
+				invalidRevision: false,
 			}),
 		).toBe(olderRevision);
 	});
@@ -209,6 +212,7 @@ describe("getSelectedRevision", () => {
 			getSelectedRevision(program, history, {
 				view: "history",
 				revisionId: 1234,
+				invalidRevision: false,
 			}),
 		).toBeNull();
 	});
@@ -218,7 +222,7 @@ describe("getSelectedRevision", () => {
 			getSelectedRevision(
 				{ ...program, activeRevision: null },
 				history,
-				{ view: "active", revisionId: null },
+				{ view: "active", revisionId: null, invalidRevision: false },
 			),
 		).toBeNull();
 	});
@@ -226,11 +230,11 @@ describe("getSelectedRevision", () => {
 
 describe("program revision URL parsing", () => {
 	it.each([
-		["", { view: "current", revisionId: null }],
-		["?view=current", { view: "current", revisionId: null }],
-		["?view=active", { view: "active", revisionId: null }],
-		["?view=history", { view: "history", revisionId: null }],
-		["?view=history&revision=99", { view: "history", revisionId: 99 }],
+		["", { view: "current", revisionId: null, invalidRevision: false }],
+		["?view=current", { view: "current", revisionId: null, invalidRevision: false }],
+		["?view=active", { view: "active", revisionId: null, invalidRevision: false }],
+		["?view=history", { view: "history", revisionId: null, invalidRevision: false }],
+		["?view=history&revision=99", { view: "history", revisionId: 99, invalidRevision: false }],
 	])("parses %s into a revision selection", (search, expected) => {
 		expect(getProgramRevisionSelection(search)).toEqual(expected);
 	});
