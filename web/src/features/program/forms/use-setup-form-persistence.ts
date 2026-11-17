@@ -257,6 +257,7 @@ export function useSetupFormPersistence({
 			updateSetup,
 			onCreated,
 			setSetupStatus,
+			setSaveStatus,
 		],
 	);
 
@@ -299,7 +300,7 @@ export function useSetupFormPersistence({
 				saveTimerRef.current = null;
 			}
 		};
-	}, [canEdit, form, setSetupStatus]);
+	}, [canEdit, form, setSetupStatus, setSaveStatus]);
 
 	useEffect(() => {
 		if (!canEdit) {
