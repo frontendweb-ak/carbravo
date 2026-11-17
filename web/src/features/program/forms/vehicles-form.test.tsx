@@ -175,7 +175,11 @@ describe("VehiclesForm", () => {
 
 		await addVehicleRow();
 
-		expect(screen.getByText(/MY 2026 · Make Chevrolet · Model Silverado/)).toBeInTheDocument();
+		await waitFor(() => {
+			expect(
+				screen.getByText(/MY 2026 · Make Chevrolet · Model Silverado/),
+			).toBeInTheDocument();
+		});
 		expect(mocks.resolveVehicleFilters).not.toHaveBeenCalled();
 		expect(mocks.updateVehicles).not.toHaveBeenCalled();
 	});
