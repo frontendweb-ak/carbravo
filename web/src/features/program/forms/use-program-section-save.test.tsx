@@ -15,7 +15,7 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 function createWrapper() {
-	return function Wrapper({ children }: { children: React.ReactNode }) {
+	return function Wrapper({ children }: { children: ReactNode }) {
 		return (
 			<ProgramEditorProvider mode="new">
 				{children}
