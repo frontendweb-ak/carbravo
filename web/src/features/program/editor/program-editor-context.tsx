@@ -17,19 +17,13 @@ export type ProgramWorkflowStatus =
 	| "ACTIVE"
 	| "EXPIRED";
 export type ProgramSectionStatus = "pending" | "warning" | "completed";
+
 export interface ProgramEditorSection {
 	id: string;
 	number: number;
 	label: string;
 	status: ProgramSectionStatus;
 	requiredForSubmission: boolean;
-}
-export interface ProgramIdentity {
-	programId: number;
-	revisionId: number;
-	programIdentifier?: string;
-	programName?: string;
-	revisionLabel?: string;
 }
 
 export interface ProgramEditorContextValue {
@@ -39,7 +33,6 @@ export interface ProgramEditorContextValue {
 	programIdentifier?: string;
 	programName?: string;
 	revisionLabel?: string;
-	setProgramIdentity: (identity: ProgramIdentity) => void;
 	programStatus?: ProgramWorkflowStatus;
 	isSubmitted: boolean;
 	approved: boolean;
@@ -49,8 +42,6 @@ export interface ProgramEditorContextValue {
 	setEligibilityFootnotesDraft: (value: string) => void;
 	sections: ProgramEditorSection[];
 	completion: number;
-	activeSection: string;
-	setActiveSection: (sectionId: string) => void;
 	updateSectionStatus: (
 		sectionId: string,
 		status: ProgramSectionStatus,
@@ -62,10 +53,6 @@ export interface ProgramEditorContextValue {
 	isReadOnly: boolean;
 	isMinorRevision: boolean;
 }
-
-/* -------------------------------------------------------------------------- */
-/* Static section definitions                                                 */
-/* -------------------------------------------------------------------------- */
 
 export const PROGRAM_EDITOR_SECTION_DEFINITIONS = [
 	{
@@ -125,18 +112,12 @@ function createInitialSections(): ProgramEditorSection[] {
 	}));
 }
 
-/* -------------------------------------------------------------------------- */
-/* Completion                                                                 */
-/* -------------------------------------------------------------------------- */
-
 function calculateCompletion(sections: ProgramEditorSection[]): number {
 	const requiredSections = sections.filter(
 		(section) => section.requiredForSubmission,
 	);
 
-	if (requiredSections.length === 0) {
-		return 0;
-	}
+	if (requiredSections.length === 0) return 0;
 
 	const completedSections = requiredSections.filter(
 		(section) => section.status === "completed",
@@ -145,180 +126,62 @@ function calculateCompletion(sections: ProgramEditorSection[]): number {
 	return Math.round((completedSections / requiredSections.length) * 100);
 }
 
-/* -------------------------------------------------------------------------- */
-/* Context                                                                    */
-/* -------------------------------------------------------------------------- */
-
 const ProgramEditorContext = createContext<ProgramEditorContextValue | null>(
 	null,
 );
 
-/* -------------------------------------------------------------------------- */
-/* Provider props                                                             */
-/* -------------------------------------------------------------------------- */
-
 export interface ProgramEditorProviderProps {
 	children: ReactNode;
-
 	mode: ProgramEditorMode;
-
 	programId?: number;
 	revisionId?: number;
-
 	programIdentifier?: string;
 	programName?: string;
 	revisionLabel?: string;
-
 	/**
-	 * Workflow status of the revision currently being edited.
-	 *
-	 * IMPORTANT:
-	 * This is revision status, not the parent program status.
-	 *
-	 * Example:
-	 *
-	 * Program:
-	 *   ACTIVE
-	 *
-	 * Draft revision:
-	 *   DRAFT
-	 *
-	 * The editor must remain editable because the DRAFT revision
-	 * is the working copy.
+	 * Status of the selected revision, not necessarily the parent program.
+	 * A draft revision of an active program remains editable.
 	 */
 	programStatus?: ProgramWorkflowStatus;
 	isMinorRevision?: boolean;
 	initialSections?: ProgramEditorSection[];
 }
 
-/* -------------------------------------------------------------------------- */
-/* Provider                                                                   */
-/* -------------------------------------------------------------------------- */
-
 export function ProgramEditorProvider({
 	children,
 	mode,
-	programId: initialProgramId,
-	revisionId: initialRevisionId,
-	programIdentifier: initialProgramIdentifier,
-	programName: initialProgramName,
-	revisionLabel: initialRevisionLabel,
-	programStatus: initialProgramStatus,
-	isMinorRevision: initialIsMinorRevision = false,
+	programId,
+	revisionId,
+	programIdentifier,
+	programName,
+	revisionLabel,
+	programStatus,
+	isMinorRevision = false,
 	initialSections,
 }: ProgramEditorProviderProps) {
-	// Identity
-	const [programId, setProgramId] = useState<number | undefined>(
-		initialProgramId,
-	);
-	const [revisionId, setRevisionId] = useState<number | undefined>(
-		initialRevisionId,
-	);
-	const [programIdentifier, setProgramIdentifier] = useState<
-		string | undefined
-	>(initialProgramIdentifier);
-
-	const [programName, setProgramName] = useState<string | undefined>(
-		initialProgramName,
-	);
-
-	const [revisionLabel, setRevisionLabel] = useState<string | undefined>(
-		initialRevisionLabel,
-	);
-	const [programStatus, setProgramStatus] = useState<
-		ProgramWorkflowStatus | undefined
-	>(initialProgramStatus);
-	const [isMinorRevision, setIsMinorRevision] = useState(initialIsMinorRevision);
-
-	useEffect(() => {
-		setProgramId(initialProgramId);
-		setRevisionId(initialRevisionId);
-		setProgramIdentifier(initialProgramIdentifier);
-		setProgramName(initialProgramName);
-		setRevisionLabel(initialRevisionLabel);
-		setProgramStatus(initialProgramStatus);
-		setIsMinorRevision(initialIsMinorRevision);
-	}, [
-		initialProgramId,
-		initialRevisionId,
-		initialProgramIdentifier,
-		initialProgramName,
-		initialRevisionLabel,
-		initialProgramStatus,
-		initialIsMinorRevision,
-	]);
-
-	/* ---------------------------------------------------------------------- */
-	/* Active section                                                         */
-	/* ---------------------------------------------------------------------- */
-	const [activeSection, setActiveSectionState] = useState("setup");
-	/* ---------------------------------------------------------------------- */
-	/* Section state                                                          */
-	/* ---------------------------------------------------------------------- */
 	const [sections, setSections] = useState<ProgramEditorSection[]>(
 		() => initialSections ?? createInitialSections(),
 	);
 	const [summaryDraft, setSummaryDraft] = useState("");
 	const [eligibilityFootnotesDraft, setEligibilityFootnotesDraft] = useState("");
+	const [isSaving, setIsSaving] = useState(false);
+	const saveHandlerRef = useRef<(() => Promise<void>) | null>(null);
 
-
-	const editorKey = `${initialProgramId ?? "new"}:${initialRevisionId ?? "new"}`;
+	const editorKey = `${programId ?? "new"}:${revisionId ?? "new"}`;
 	const previousEditorKeyRef = useRef(editorKey);
 
 	useEffect(() => {
 		if (previousEditorKeyRef.current === editorKey) return;
+
 		previousEditorKeyRef.current = editorKey;
 		setSections(initialSections ?? createInitialSections());
 		setSummaryDraft("");
 		setEligibilityFootnotesDraft("");
 	}, [editorKey, initialSections]);
 
-	/* ---------------------------------------------------------------------- */
-	/* Saving                                                                 */
-	/* ---------------------------------------------------------------------- */
-	const [isSaving, setIsSaving] = useState(false);
-	const saveHandlerRef = useRef<(() => Promise<void>) | null>(null);
-
 	const setSectionSaving = useCallback((saving: boolean) => {
 		setIsSaving(saving);
 	}, []);
-	/* ---------------------------------------------------------------------- */
-	/* Program identity                                                       */
-	/* ---------------------------------------------------------------------- */
-
-	const setProgramIdentity = useCallback((identity: ProgramIdentity) => {
-		setProgramId(identity.programId);
-		setRevisionId(identity.revisionId);
-
-		if (identity.programIdentifier !== undefined) {
-			setProgramIdentifier(identity.programIdentifier);
-		}
-
-		if (identity.programName !== undefined) {
-			setProgramName(identity.programName);
-		}
-
-		if (identity.revisionLabel !== undefined) {
-			setRevisionLabel(identity.revisionLabel);
-		}
-	}, []);
-
-	/* ---------------------------------------------------------------------- */
-	/* Navigation                                                             */
-	/* ---------------------------------------------------------------------- */
-
-	const setActiveSection = useCallback(
-		(sectionId: string) => {
-			const exists = sections.some((section) => section.id === sectionId);
-			if (!exists) return;
-			setActiveSectionState(sectionId);
-		},
-		[sections],
-	);
-
-	/* ---------------------------------------------------------------------- */
-	/* Save handler registration                                              */
-	/* ---------------------------------------------------------------------- */
 
 	const registerSaveHandler = useCallback(
 		(handler: (() => Promise<void>) | null) => {
@@ -327,87 +190,50 @@ export function ProgramEditorProvider({
 		[],
 	);
 
-	/* ---------------------------------------------------------------------- */
-	/* Save current section                                                   */
-	/* ---------------------------------------------------------------------- */
-
 	const saveCurrentSection = useCallback(async () => {
 		const handler = saveHandlerRef.current;
+		if (!handler || isSaving) return;
 
-		if (!handler || isSaving) {
-			return;
-		}
-
+		setIsSaving(true);
 		try {
-			setIsSaving(true);
-
 			await handler();
 		} finally {
 			setIsSaving(false);
 		}
 	}, [isSaving]);
 
-	/* ---------------------------------------------------------------------- */
-	/* Section status                                                         */
-	/* ---------------------------------------------------------------------- */
-
 	const updateSectionStatus = useCallback(
 		(sectionId: string, status: ProgramSectionStatus) => {
 			setSections((current) =>
 				current.map((section) =>
-					section.id === sectionId
-						? {
-								...section,
-								status,
-							}
-						: section,
+					section.id === sectionId ? { ...section, status } : section,
 				),
 			);
 		},
 		[],
 	);
 
-	/* ---------------------------------------------------------------------- */
-	/* Completion                                                             */
-	/* ---------------------------------------------------------------------- */
-
 	const completion = useMemo(() => calculateCompletion(sections), [sections]);
-
-	/* ---------------------------------------------------------------------- */
-	/* Workflow flags                                                         */
-	/* ---------------------------------------------------------------------- */
-
 	const isSubmitted =
 		programStatus === "REVIEW" ||
 		programStatus === "APPROVED" ||
 		programStatus === "ACTIVE" ||
 		programStatus === "EXPIRED";
-
 	const approved =
 		programStatus === "APPROVED" ||
 		programStatus === "ACTIVE" ||
 		programStatus === "EXPIRED";
-
-	// Raad only
 	const isReadOnly =
 		mode === "edit" && programStatus !== undefined && programStatus !== "DRAFT";
 
-	// Context value
 	const value = useMemo<ProgramEditorContextValue>(
 		() => ({
-			/* Identity */
 			mode,
-
 			programId,
 			revisionId,
-
 			programIdentifier,
 			programName,
 			revisionLabel,
-
-			setProgramIdentity,
-
-			/* Workflow */
 			programStatus,
 			isSubmitted,
 			approved,
@@ -415,22 +241,13 @@ export function ProgramEditorProvider({
 			setSummaryDraft,
 			eligibilityFootnotesDraft,
 			setEligibilityFootnotesDraft,
-
-			/* Sections */
 			sections,
 			completion,
-
-			activeSection,
-			setActiveSection,
 			updateSectionStatus,
-
-			/* Saving */
-			isSaving,
 			saveCurrentSection,
 			registerSaveHandler,
 			setSectionSaving,
-
-			/* Permissions */
+			isSaving,
 			isReadOnly,
 			isMinorRevision,
 		}),
@@ -441,7 +258,6 @@ export function ProgramEditorProvider({
 			programIdentifier,
 			programName,
 			revisionLabel,
-			setProgramIdentity,
 			programStatus,
 			isSubmitted,
 			approved,
@@ -449,8 +265,6 @@ export function ProgramEditorProvider({
 			eligibilityFootnotesDraft,
 			sections,
 			completion,
-			activeSection,
-			setActiveSection,
 			updateSectionStatus,
 			saveCurrentSection,
 			registerSaveHandler,
@@ -467,10 +281,6 @@ export function ProgramEditorProvider({
 		</ProgramEditorContext.Provider>
 	);
 }
-
-/* -------------------------------------------------------------------------- */
-/* Hooks                                                                      */
-/* -------------------------------------------------------------------------- */
 
 export function useProgramEditor() {
 	const context = useContext(ProgramEditorContext);
