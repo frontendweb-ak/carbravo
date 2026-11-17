@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react";
+import type { ReactNode } from "react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -21,7 +22,7 @@ vi.mock("@/features/program/editor/program-editor-context", () => ({
 		children,
 		...props
 	}: {
-		children: React.ReactNode;
+		children: ReactNode;
 		[key: string]: unknown;
 	}) => {
 		mocks.providerProps(props);
