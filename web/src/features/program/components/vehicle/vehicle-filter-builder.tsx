@@ -8,8 +8,9 @@ import {
 	FilterSelectCard,
 	type FilterSelectCardProps,
 } from "./filter-select-card";
+import type { VehicleFilterOption } from "../../utils/vehicle-options";
 
-export type VehicleFilterColumn = FilterSelectCardProps<any> & {
+export type VehicleFilterColumn = FilterSelectCardProps<VehicleFilterOption> & {
 	id: string;
 };
 
