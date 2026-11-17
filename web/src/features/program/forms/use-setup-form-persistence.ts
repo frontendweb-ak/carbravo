@@ -285,9 +285,16 @@ export function useSetupFormPersistence({
 				saveTimerRef.current = null;
 				if (!mountedRef.current) return;
 
-				const latestValues = latestValuesRef.current;
-				if (latestValues) {
-					void persistSetupRef.current(latestValues);
+				if (latestValuesRef.current) {
+					void form.handleSubmit(
+						async (validatedValues) => {
+							await persistSetupRef.current(validatedValues);
+						},
+						() => {
+							setSetupStatus("warning");
+							setSaveStatus("invalid");
+						},
+					)();
 				}
 			}, AUTO_SAVE_DELAY);
 		});
