@@ -17,6 +17,13 @@ export type ProgramWorkflowStatus =
 	| "ACTIVE"
 	| "EXPIRED";
 export type ProgramSectionStatus = "pending" | "warning" | "completed";
+export type ProgramSaveStatus =
+	| "idle"
+	| "unsaved"
+	| "saving"
+	| "saved"
+	| "invalid"
+	| "error";
 
 export interface ProgramEditorSection {
 	id: string;
@@ -48,7 +55,9 @@ export interface ProgramEditorContextValue {
 	) => void;
 	saveCurrentSection: () => Promise<void>;
 	registerSaveHandler: (handler: (() => Promise<void>) | null) => void;
-	setSectionSaving: (saving: boolean) => void;
+	setSaveStatus: (status: ProgramSaveStatus, error?: string | null) => void;
+	saveStatus: ProgramSaveStatus;
+	saveError: string | null;
 	isSaving: boolean;
 	isReadOnly: boolean;
 	isMinorRevision: boolean;
@@ -164,7 +173,8 @@ export function ProgramEditorProvider({
 	);
 	const [summaryDraft, setSummaryDraft] = useState("");
 	const [eligibilityFootnotesDraft, setEligibilityFootnotesDraft] = useState("");
-	const [isSaving, setIsSaving] = useState(false);
+	const [saveStatus, setSaveStatusState] = useState<ProgramSaveStatus>("idle");
+	const [saveError, setSaveError] = useState<string | null>(null);
 	const saveHandlerRef = useRef<(() => Promise<void>) | null>(null);
 
 	const editorKey = `${programId ?? "new"}:${revisionId ?? "new"}`;
@@ -177,11 +187,19 @@ export function ProgramEditorProvider({
 		setSections(initialSections ?? createInitialSections());
 		setSummaryDraft("");
 		setEligibilityFootnotesDraft("");
+		setSaveStatusState("idle");
+		setSaveError(null);
 	}, [editorKey, initialSections]);
 
-	const setSectionSaving = useCallback((saving: boolean) => {
-		setIsSaving(saving);
-	}, []);
+	const setSaveStatus = useCallback(
+		(status: ProgramSaveStatus, error: string | null = null) => {
+			setSaveStatusState(status);
+			setSaveError(status === "error" ? error : null);
+		},
+		[],
+	);
+
+	const isSaving = saveStatus === "saving";
 
 	const registerSaveHandler = useCallback(
 		(handler: (() => Promise<void>) | null) => {
@@ -194,12 +212,7 @@ export function ProgramEditorProvider({
 		const handler = saveHandlerRef.current;
 		if (!handler || isSaving) return;
 
-		setIsSaving(true);
-		try {
-			await handler();
-		} finally {
-			setIsSaving(false);
-		}
+		await handler();
 	}, [isSaving]);
 
 	const updateSectionStatus = useCallback(
@@ -246,7 +259,9 @@ export function ProgramEditorProvider({
 			updateSectionStatus,
 			saveCurrentSection,
 			registerSaveHandler,
-			setSectionSaving,
+			setSaveStatus,
+			saveStatus,
+			saveError,
 			isSaving,
 			isReadOnly,
 			isMinorRevision,
@@ -268,7 +283,9 @@ export function ProgramEditorProvider({
 			updateSectionStatus,
 			saveCurrentSection,
 			registerSaveHandler,
-			setSectionSaving,
+			setSaveStatus,
+			saveStatus,
+			saveError,
 			isSaving,
 			isReadOnly,
 			isMinorRevision,
