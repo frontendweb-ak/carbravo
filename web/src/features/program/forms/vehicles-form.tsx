@@ -73,7 +73,7 @@ export function VehiclesForm() {
 							{savedVehicles.map((vehicle) => (
 								<Chip
 									key={vehicle.vehicleCatalogId}
-									label={[\`${vehicle.year} ${vehicle.make} ${vehicle.model}\`, vehicle.trimName]
+									label={[`${vehicle.year} ${vehicle.make} ${vehicle.model}`, vehicle.trimName]
 										.filter(Boolean)
 										.join(" · ")}
 									size="small"
