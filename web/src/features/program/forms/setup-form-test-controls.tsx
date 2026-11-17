@@ -10,8 +10,24 @@ type FieldProps<T extends FieldValues> = {
 	control: Control<T>;
 	name: Path<T>;
 	label?: ReactNode;
+	description?: ReactNode;
+	rightElement?: ReactNode;
+	required?: boolean;
 	disabled?: boolean;
 	type?: string;
+	placeholder?: string;
+	parseMode?: string;
+	transform?: string;
+	selectionMode?: "single" | "multiple";
+	color?: string;
+	variant?: string;
+	showCheck?: boolean;
+	borderRadius?: number | string;
+	minHeight?: number;
+	paddingX?: number | string;
+	fontSize?: number | string;
+	fontWeight?: number;
+	gap?: number;
 	options?: readonly { value: string | number; label: ReactNode }[];
 };
 
@@ -36,7 +52,7 @@ function TextControl<T extends FieldValues>({
 						id={id}
 						type={type}
 						disabled={disabled}
-						value={field.value ?? ""}
+						value={String(field.value ?? "")}
 					/>
 				</label>
 			)}
