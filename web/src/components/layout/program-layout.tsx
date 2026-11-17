@@ -1,124 +1,40 @@
-import { useLocation, useParams } from "react-router-dom";
-
-import { useProgram, useProgramRevisionHistory } from "@/features/program";
-
 import {
 	type ProgramEditorMode,
 	ProgramEditorProvider,
 } from "@/features/program/editor/program-editor-context";
-
-import {
-	getCurrentRevision,
-	getProgramRevisionSelection,
-	getProgramRevisionTabs,
-	getSelectedRevision,
-} from "@/features/program/utils";
-
 import { ProgramLayoutContent } from "@/features/program/components";
-import { PageState } from "../ui";
+
+import { ProgramLayoutStatus } from "./program-layout-status";
+import { useProgramLayoutState } from "./use-program-layout-state";
 
 interface ProgramLayoutProps {
 	mode?: ProgramEditorMode;
 }
 
 function ProgramLayout({ mode = "edit" }: ProgramLayoutProps) {
-	const { programId } = useParams<{ programId: string }>();
-	const location = useLocation();
+	const state = useProgramLayoutState(mode);
 
-	const numericProgramId = programId ? Number(programId) : undefined;
-	const programQuery = useProgram(
-		mode === "edit" ? numericProgramId : undefined,
-	);
-
-	const revisionHistoryQuery = useProgramRevisionHistory(
-		mode === "edit" ? numericProgramId : undefined,
-	);
-
-	/*
-	 * Existing program must be resolved before
-	 * initializing the editor provider.
-	 */
-	if (mode === "edit") {
-		if (programQuery.isLoading) {
-			return <PageState status="loading" loadingMessage="Loading program..." />;
-		}
-
-		if (programQuery.isError) {
-			return (
-				<PageState
-					status="error"
-					errorTitle="Failed to load program"
-					errorDescription="We couldn't load this program. Please try again."
-					onRetry={programQuery.refetch}
-				/>
-			);
-		}
-
-		if (!programQuery.data) {
-			return (
-				<PageState
-					status="empty"
-					emptyTitle="Program not found"
-					emptyDescription="The requested program could not be found."
-				/>
-			);
-		}
+	if (state.status !== "ready") {
+		return <ProgramLayoutStatus state={state} />;
 	}
-
-	const program = programQuery.data;
-	const revisionHistory = revisionHistoryQuery.data;
-	/*
-	 * Determine which revision view the URL requests.
-	 */
-	const revisionSelection = getProgramRevisionSelection(location.search);
-	/*
-	 * Current revision.
-	 */
-	const currentRevision =
-		mode === "edit" && program ? getCurrentRevision(program) : null;
-	/*
-	 * Build tabs from API data.
-	 */
-	const revisionTabs =
-		mode === "edit" && program && revisionHistory
-			? getProgramRevisionTabs(program, revisionHistory)
-			: [];
-	/*
-	 * Resolve actual revision.
-	 */
-	const selectedRevision =
-		mode === "edit" && program && revisionHistory
-			? getSelectedRevision(program, revisionHistory, revisionSelection)
-			: null;
-	const revisionId = selectedRevision?.id ?? undefined;
-	const selectedWorkflowStatus = (() => {
-		if (mode === "edit" && program?.status === "EXPIRED") return "EXPIRED" as const;
-		if (!selectedRevision) return undefined;
-		if (selectedRevision.status === "ACTIVE" || selectedRevision.status === "EXPIRED") {
-			return selectedRevision.status;
-		}
-		if (selectedRevision.approved) return "APPROVED" as const;
-		if (selectedRevision.isSubmitted) return "REVIEW" as const;
-		return "DRAFT" as const;
-	})();
 
 	return (
 		<ProgramEditorProvider
 			mode={mode}
-			programId={mode === "edit" ? program?.id : undefined}
-			revisionId={revisionId}
-			programIdentifier={mode === "edit" ? program?.identifier : undefined}
-			programName={mode === "edit" ? program?.name : undefined}
-			revisionLabel={
-				mode === "edit" ? (selectedRevision?.label ?? undefined) : undefined
-			}
-			programStatus={mode === "edit" ? selectedWorkflowStatus : undefined}
-			isMinorRevision={mode === "edit" ? (selectedRevision?.isMinorRevision ?? false) : false}
+			programId={state.programId}
+			revisionId={state.revisionId}
+			programIdentifier={state.programIdentifier}
+			programName={state.programName}
+			revisionLabel={state.revisionLabel}
+			programStatus={state.programStatus}
+			isMinorRevision={state.isMinorRevision}
 		>
 			<ProgramLayoutContent
-				revisionTabs={revisionTabs}
-				revisionHistory={revisionHistory}
-				currentRevisionId={currentRevision?.id ?? undefined}
+				revisionTabs={state.revisionTabs}
+				revisionHistory={state.revisionHistory}
+				currentRevisionId={state.currentRevisionId}
+				revisionHistoryError={state.revisionHistoryError}
+				onRetryRevisionHistory={state.onRetryRevisionHistory}
 			/>
 		</ProgramEditorProvider>
 	);
