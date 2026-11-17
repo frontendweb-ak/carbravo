@@ -14,6 +14,7 @@ import {
 } from "../hooks";
 import { mapSetupResponseToDto } from "../model/setup.mapper";
 import { type MarketingFormValues, marketingFormSchema } from "../schema";
+import { useProgramSectionSave } from "./use-program-section-save";
 
 export function MarketingForm() {
   const {
@@ -21,8 +22,6 @@ export function MarketingForm() {
     revisionId,
     isReadOnly,
     isMinorRevision,
-    registerSaveHandler,
-    setSectionSaving,
     updateSectionStatus,
   } = useProgramEditor();
 
@@ -45,61 +44,50 @@ export function MarketingForm() {
 
   const onSubmit = useCallback(async (values: MarketingFormValues) => {
     if (isReadOnly || programId == null || revisionId == null || !setupQuery.data) {
-      return;
+      throw new Error("Marketing data is not ready to save.");
     }
 
-    setSectionSaving(true);
-    try {
-      if (isMinorRevision) {
-        await updateMinorText.mutateAsync({
-          programId,
-          revisionId,
-          payload: {
-            mfpnText: values.mfpnText.trim(),
-            disclosureText: values.disclosureText.trim(),
-          },
-        });
-      } else {
-        await updateSetup.mutateAsync({
-          programId,
-          revisionId,
-          payload: {
-            ...mapSetupResponseToDto(setupQuery.data),
-            mfpnText: values.mfpnText.trim(),
-            disclosureText: values.disclosureText.trim(),
-          },
-        });
-      }
-      updateSectionStatus("marketing", "completed");
-      form.reset(values);
-    } finally {
-      setSectionSaving(false);
+    if (isMinorRevision) {
+      await updateMinorText.mutateAsync({
+        programId,
+        revisionId,
+        payload: {
+          mfpnText: values.mfpnText.trim(),
+          disclosureText: values.disclosureText.trim(),
+        },
+      });
+    } else {
+      await updateSetup.mutateAsync({
+        programId,
+        revisionId,
+        payload: {
+          ...mapSetupResponseToDto(setupQuery.data),
+          mfpnText: values.mfpnText.trim(),
+          disclosureText: values.disclosureText.trim(),
+        },
+      });
     }
+    updateSectionStatus("marketing", "completed");
+    form.reset(values);
   }, [
     form,
     isMinorRevision,
     isReadOnly,
     programId,
     revisionId,
-    setSectionSaving,
     setupQuery.data,
     updateMinorText,
     updateSectionStatus,
     updateSetup,
   ]);
 
-  useEffect(() => {
-    registerSaveHandler(async () => {
-      await form.handleSubmit(onSubmit)();
-    });
-    return () => registerSaveHandler(null);
-  }, [form, onSubmit, registerSaveHandler]);
+  const { handleSubmit } = useProgramSectionSave({ form, onSave: onSubmit, enabled: !isReadOnly });
 
   return (
     <FormProvider {...form}>
       <Box
         component="form"
-        onSubmit={form.handleSubmit(onSubmit)}
+        onSubmit={handleSubmit}
         sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}
       >
         {isMinorRevision && (
