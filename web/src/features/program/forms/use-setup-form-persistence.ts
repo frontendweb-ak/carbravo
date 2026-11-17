@@ -18,7 +18,6 @@ import {
 	mapSetupFormToDto,
 	mapSetupResponseToForm,
 } from "../model/setup.mapper";
-import { setupFormSchema } from "../schema";
 import type { SetupFormInput, SetupFormOutput } from "./setup-form.types";
 
 const AUTO_SAVE_DELAY = 1000;
