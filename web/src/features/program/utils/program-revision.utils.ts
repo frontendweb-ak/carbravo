@@ -180,6 +180,7 @@ export function getProgramRevisionSelection(
 	const isValidRevisionId =
 		revisionParam != null &&
 		/^\d+$/.test(revisionParam) &&
+		revisionId != null &&
 		Number.isSafeInteger(revisionId) &&
 		revisionId > 0;
 
