@@ -248,10 +248,10 @@ describe("ProgramEditorProvider", () => {
 
 		expect(getState()).toMatchObject({
 			mode: "new",
-			programId: undefined,
-			revisionId: undefined,
 			isReadOnly: false,
 		});
+		expect(getState()).not.toHaveProperty("programId");
+		expect(getState()).not.toHaveProperty("revisionId");
 	});
 
 	it("retains local drafts while the editor remains on the same revision", () => {
