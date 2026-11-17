@@ -51,6 +51,7 @@ export function ProgramLayoutContent({
 		saveError,
 		isSaving,
 		isReadOnly,
+		isMinorRevision,
 	} = useProgramEditor();
 
 	/*
@@ -93,7 +94,10 @@ export function ProgramLayoutContent({
 	 */
 	const isRevisionEditor = !isHistoryList;
 
-	const revisionReadOnly = isReadOnly || revisionSelection.view !== "current";
+	const revisionReadOnly =
+		isReadOnly ||
+		revisionSelection.view !== "current" ||
+		(isMinorRevision && activeSection !== "marketing");
 
 	const handleSectionChange = (sectionId: string) => {
 		if (mode === "new") {
@@ -230,6 +234,7 @@ export function ProgramLayoutContent({
 					hideSave={
 						revisionReadOnly ||
 						activeSection === "summary" ||
+						activeSection === "vehicles" ||
 						activeSection === "vehicles"
 					}
 					onSave={handleSave}
