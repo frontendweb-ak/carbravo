@@ -8,9 +8,8 @@ import {
 } from "@/components/ui";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Alert, Box, Button, Stack, Typography } from "@mui/material";
-import { useCallback, useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
-import { z } from "zod";
 
 import { ProgramSection } from "../components";
 import {
@@ -28,11 +27,9 @@ import {
 	useProgramSetup,
 	useUpdateProgramSetup,
 } from "../hooks";
-import {
-	mapSetupFormToDto,
-	mapSetupResponseToForm,
-} from "../model/setup.mapper";
 import { setupFormSchema } from "../schema";
+import type { SetupFormInput, SetupFormOutput } from "./setup-form.types";
+import { useSetupFormPersistence } from "./use-setup-form-persistence";
 
 interface SetupFormProps {
 	mode: "new" | "edit";
@@ -42,11 +39,6 @@ interface SetupFormProps {
 	onCreated?: (result: { programId: number; revisionId: number }) => void;
 }
 
-type SetupFormInput = z.input<typeof setupFormSchema>;
-type SetupFormOutput = z.output<typeof setupFormSchema>;
-
-const AUTO_SAVE_DELAY = 1000;
-
 export function SetupForm({
 	mode,
 	programId,
@@ -54,12 +46,13 @@ export function SetupForm({
 	readOnly = false,
 	onCreated,
 }: SetupFormProps) {
-	const { registerSaveHandler, updateSectionStatus, isMinorRevision } = useProgramEditor();
+	const { registerSaveHandler, updateSectionStatus, isMinorRevision } =
+		useProgramEditor();
 	const isExistingRevision =
 		mode === "edit" && programId != null && revisionId != null;
-	const canEdit = mode === "new" || (isExistingRevision && !readOnly && !isMinorRevision);
+	const canEdit =
+		mode === "new" || (isExistingRevision && !readOnly && !isMinorRevision);
 
-	// Api
 	const {
 		data: setup,
 		isLoading: isSetupLoading,
@@ -69,336 +62,44 @@ export function SetupForm({
 	const { mutateAsync: createProgramAsync } = useCreateProgram();
 	const { mutateAsync: updateSetupAsync } = useUpdateProgramSetup();
 
-	// Form
 	const form = useForm<SetupFormInput, unknown, SetupFormOutput>({
 		resolver: zodResolver(setupFormSchema),
 		defaultValues: setupDefaultValues,
 		mode: "onBlur",
 		reValidateMode: "onBlur",
 	});
-
 	const purchaseType = useWatch({
 		control: form.control,
 		name: "purchaseType",
 	});
 
-	// Persistence state
-	const persistenceRef = useRef<{
-		programId: number | undefined;
-		revisionId: number | undefined;
-	}>({ programId, revisionId });
-
-	useEffect(() => {
-		if (mode !== "edit") return;
-		persistenceRef.current = { programId, revisionId };
-	}, [mode, programId, revisionId]);
-
-	//  Lifecycle
-	const mountedRef = useRef(false);
-	useEffect(() => {
-		mountedRef.current = true;
-		return () => {
-			mountedRef.current = false;
-		};
-	}, []);
-
-	//  Hydration
-	const hydratedRef = useRef(false);
-	const hydratedRevisionRef = useRef<string | null>(null);
-	useEffect(() => {
-		if (!isExistingRevision || !setup) return;
-
-		const hydrationKey = `${programId}:${revisionId}`;
-		if (hydratedRevisionRef.current === hydrationKey) {
-			return;
-		}
-
-		hydratedRevisionRef.current = hydrationKey;
-		hydratedRef.current = false;
-		const values = mapSetupResponseToForm(setup);
-		form.reset(values);
-		hydratedRef.current = true;
-		updateSectionStatus("setup", "completed");
-	}, [
-		isExistingRevision,
-		setup,
+	useSetupFormPersistence({
+		mode,
 		programId,
 		revisionId,
+		isExistingRevision,
+		canEdit,
+		setup,
 		form,
+		createProgram: createProgramAsync,
+		updateSetup: updateSetupAsync,
+		onCreated,
 		updateSectionStatus,
-	]);
-
-	// New program hydration
-	useEffect(() => {
-		if (mode !== "new") return;
-		hydratedRef.current = true;
-		hydratedRevisionRef.current = "new";
-	}, [mode]);
-
-	// Autosave state
-	const saveTimerRef = useRef<number | null>(null);
-	const savingRef = useRef(false);
-	const pendingSaveRef = useRef<SetupFormOutput | null>(null);
-	const createInFlightRef = useRef(false);
-	const changeVersionRef = useRef(0);
-	const latestValuesRef = useRef<SetupFormOutput | null>(null);
-
-	// Section status
-	const sectionStatusRef = useRef<string | null>(null);
-	const setSetupStatus = useCallback(
-		(status: "completed" | "warning") => {
-			if (!mountedRef.current) return;
-			if (sectionStatusRef.current === status) return;
-			sectionStatusRef.current = status;
-			updateSectionStatus("setup", status);
-		},
-		[updateSectionStatus],
-	);
-
-	// Persistence
-	const persistSetup = useCallback(
-		async (values: SetupFormOutput) => {
-			if (!canEdit || !mountedRef.current) {
-				return;
-			}
-
-			pendingSaveRef.current = values;
-			if (savingRef.current) {
-				return;
-			}
-			savingRef.current = true;
-			try {
-				while (mountedRef.current && pendingSaveRef.current != null) {
-					const latestValues = pendingSaveRef.current;
-					pendingSaveRef.current = null;
-					const versionAtStart = changeVersionRef.current;
-					const payload = mapSetupFormToDto(latestValues, setup);
-					// CREATE NEW PROGRAM
-					if (mode === "new" && persistenceRef.current.programId == null) {
-						if (createInFlightRef.current) {
-							pendingSaveRef.current = latestValues;
-							break;
-						}
-						createInFlightRef.current = true;
-						try {
-							const created = await createProgramAsync({
-								programName: latestValues.programName,
-							});
-							if (created.programId == null || created.revisionId == null) {
-								throw new Error(
-									"Create program response did not contain programId and revisionId.",
-								);
-							}
-							persistenceRef.current = {
-								programId: created.programId,
-								revisionId: created.revisionId,
-							};
-						} finally {
-							createInFlightRef.current = false;
-						}
-					}
-
-					/* ====================================================== */
-					/* UPDATE SETUP                                           */
-					/* ====================================================== */
-
-					const currentProgramId = persistenceRef.current.programId;
-					const currentRevisionId = persistenceRef.current.revisionId;
-					if (currentProgramId == null || currentRevisionId == null) {
-						throw new Error(
-							"Cannot save setup without programId and revisionId.",
-						);
-					}
-
-					await updateSetupAsync({
-						programId: currentProgramId,
-						revisionId: currentRevisionId,
-						payload,
-					});
-
-					/* ====================================================== */
-					/* NEW PROGRAM CREATED                                    */
-					/* ====================================================== */
-
-					if (mode === "new" && versionAtStart === changeVersionRef.current) {
-						const createdProgramId = persistenceRef.current.programId;
-						const createdRevisionId = persistenceRef.current.revisionId;
-						if (createdProgramId != null && createdRevisionId != null) {
-							onCreated?.({
-								programId: createdProgramId,
-								revisionId: createdRevisionId,
-							});
-						}
-					}
-
-					if (
-						changeVersionRef.current !== versionAtStart &&
-						latestValuesRef.current != null &&
-						pendingSaveRef.current == null
-					) {
-						pendingSaveRef.current = latestValuesRef.current;
-					}
-				}
-
-				if (mountedRef.current) {
-					setSetupStatus("completed");
-				}
-			} catch (error) {
-				console.error("[SetupForm] autosave failed", error);
-
-				if (mountedRef.current) {
-					setSetupStatus("warning");
-				}
-			} finally {
-				savingRef.current = false;
-
-				if (
-					mountedRef.current &&
-					pendingSaveRef.current != null &&
-					!savingRef.current
-				) {
-					queueMicrotask(() => {
-						if (mountedRef.current && pendingSaveRef.current != null) {
-							void persistSetup(pendingSaveRef.current);
-						}
-					});
-				}
-			}
-		},
-		[
-			canEdit,
-			mode,
-			setup,
-			createProgramAsync,
-			updateSetupAsync,
-			onCreated,
-			setSetupStatus,
-		],
-	);
-
-	/* ---------------------------------------------------------------------- */
-	/* Persistence ref                                                         */
-	/* ---------------------------------------------------------------------- */
-
-	const persistSetupRef = useRef<typeof persistSetup>(persistSetup);
+		registerSaveHandler,
+	});
 
 	useEffect(() => {
-		persistSetupRef.current = persistSetup;
-	}, [persistSetup]);
+		if (purchaseType === "FINANCE") return;
 
-	/* ---------------------------------------------------------------------- */
-	/* Auto-save subscription                                                  */
-	/* ---------------------------------------------------------------------- */
-
-	useEffect(() => {
-		if (!canEdit) {
-			return;
-		}
-
-		const subscription = form.watch((values) => {
-			if (!hydratedRef.current) {
-				return;
-			}
-
-			if (!mountedRef.current) {
-				return;
-			}
-
-			const nextValues = values as SetupFormOutput;
-			latestValuesRef.current = nextValues;
-			changeVersionRef.current += 1;
-			setSetupStatus("warning");
-			if (saveTimerRef.current !== null) {
-				window.clearTimeout(saveTimerRef.current);
-			}
-			saveTimerRef.current = window.setTimeout(() => {
-				saveTimerRef.current = null;
-				if (!mountedRef.current) {
-					return;
-				}
-				const latest = latestValuesRef.current;
-				if (!latest) {
-					return;
-				}
-				void persistSetupRef.current(latest);
-			}, AUTO_SAVE_DELAY);
-		});
-
-		return () => {
-			subscription.unsubscribe();
-			if (saveTimerRef.current !== null) {
-				window.clearTimeout(saveTimerRef.current);
-				saveTimerRef.current = null;
-			}
-		};
-	}, [canEdit, form, setSetupStatus]);
-
-	/* ---------------------------------------------------------------------- */
-	/* Conditional finance terms                                               */
-	/* ---------------------------------------------------------------------- */
-
-	useEffect(() => {
-		if (purchaseType === "FINANCE") {
-			return;
-		}
 		const currentTerms = form.getValues("financeTerms");
-		if (currentTerms.length === 0) {
-			return;
-		}
+		if (currentTerms.length === 0) return;
+
 		form.setValue("financeTerms", [], {
 			shouldDirty: true,
 			shouldTouch: false,
 			shouldValidate: false,
 		});
 	}, [purchaseType, form]);
-
-	/* ---------------------------------------------------------------------- */
-	/* Manual Save Draft                                                       */
-	/* ---------------------------------------------------------------------- */
-
-	const saveSetupRef = useRef<(() => Promise<void>) | null>(null);
-
-	saveSetupRef.current = async () => {
-		if (!canEdit) {
-			return;
-		}
-
-		await form.handleSubmit(
-			async (values) => {
-				if (saveTimerRef.current !== null) {
-					window.clearTimeout(saveTimerRef.current);
-					saveTimerRef.current = null;
-				}
-				latestValuesRef.current = values;
-				changeVersionRef.current += 1;
-				await persistSetupRef.current(values);
-			},
-			() => {
-				setSetupStatus("warning");
-			},
-		)();
-	};
-
-	/* ---------------------------------------------------------------------- */
-	/* Register Save Draft                                                     */
-	/* ---------------------------------------------------------------------- */
-
-	const stableSaveHandlerRef = useRef(async () => {
-		await saveSetupRef.current?.();
-	});
-
-	useEffect(() => {
-		if (!canEdit) {
-			registerSaveHandler(null);
-			return;
-		}
-
-		registerSaveHandler(stableSaveHandlerRef.current);
-
-		return () => {
-			registerSaveHandler(null);
-		};
-	}, [canEdit, registerSaveHandler]);
 
 	/* ---------------------------------------------------------------------- */
 	/* Loading                                                                  */
