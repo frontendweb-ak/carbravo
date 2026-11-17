@@ -24,10 +24,12 @@ type SetupFormControl = Control<SetupFormInput, unknown, SetupFormOutput>;
 
 interface ProgramDetailsSectionProps {
 	control: SetupFormControl;
+	canEdit: boolean;
 }
 
 export function ProgramDetailsSection({
 	control,
+	canEdit,
 }: ProgramDetailsSectionProps) {
 	return (
 		<ProgramSection
@@ -50,6 +52,7 @@ export function ProgramDetailsSection({
 					label="Program Name"
 					required
 					placeholder="e.g. Summer Finance Event"
+					disabled={!canEdit}
 				/>
 				<FormInput
 					control={control}
