@@ -41,7 +41,7 @@ export function VehiclesForm() {
 		<FormProvider {...form}>
 			<Box
 				component="form"
-				onSubmit={form.handleSubmit(rows.onCommitRow)}
+				onSubmit={form.handleSubmit(rows.onCommitRow, () => setSaveStatus("invalid"))}
 				sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}
 			>
 				<VehicleFilterFields
