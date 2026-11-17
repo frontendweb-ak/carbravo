@@ -3,11 +3,9 @@ import { Box, Chip, Stack, Typography } from "@mui/material";
 import { FormProvider, useForm } from "react-hook-form";
 
 import { SelectedVehiclesSection } from "../components/vehicle";
-import { emptyVehicleFilterRow, vehiclesDefaultValues } from "../constants";
+import { vehiclesDefaultValues } from "../constants";
 import { useProgramEditor } from "../editor/program-editor-context";
-import {
-	useProgramVehicles,
-} from "../hooks/use-program-vehicles";
+import { useProgramVehicles } from "../hooks/use-program-vehicles";
 import { vehiclesFormSchema, type VehiclesFormValues } from "../schema";
 import { useVehicleFilterOptions } from "./use-vehicle-filter-options";
 import { useVehicleRowEditor } from "./use-vehicle-row-editor";
