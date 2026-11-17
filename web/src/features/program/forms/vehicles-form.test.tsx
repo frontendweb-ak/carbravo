@@ -170,6 +170,16 @@ describe("VehiclesForm", () => {
 		expect(screen.getByText(/MY 2026 · Make Chevrolet · Model Silverado/)).toBeInTheDocument();
 	});
 
+	it("keeps selected rows locally for a new program until Setup creates its revision", async () => {
+		renderVehiclesForm({ mode: "new" });
+
+		await addVehicleRow();
+
+		expect(screen.getByText(/MY 2026 · Make Chevrolet · Model Silverado/)).toBeInTheDocument();
+		expect(mocks.resolveVehicleFilters).not.toHaveBeenCalled();
+		expect(mocks.updateVehicles).not.toHaveBeenCalled();
+	});
+
 	it("does not persist a row when required filters are missing", async () => {
 		renderVehiclesForm();
 
