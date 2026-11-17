@@ -81,7 +81,7 @@ async function addVehicleRow({
 } = {}) {
 	fireEvent.click(screen.getByRole("button", { name: "2026" }));
 	fireEvent.click(screen.getByRole("button", { name: "Chevrolet" }));
-	fireEvent.click(screen.getByRole("button", { name }));
+	fireEvent.click(screen.getByRole("button", { name: model }));
 	fireEvent.click(screen.getByRole("button", { name: "Gasoline" }));
 
 	if (includeSegment) {
@@ -208,7 +208,7 @@ describe("VehiclesForm", () => {
 				revisionId: 420,
 				payload: { vehicleCatalogIds: [1001] },
 			});
-			expect(screen.getByText(/Model Equinox/)).toBeInTheDocument();
+			expect(screen.getByText(/Model Silverado, Equinox/)).toBeInTheDocument();
 		});
 	});
 
