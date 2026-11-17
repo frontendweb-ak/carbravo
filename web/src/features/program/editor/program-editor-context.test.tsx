@@ -30,6 +30,8 @@ function EditorConsumer({
 		isMinorRevision,
 		updateSectionStatus,
 		setSaveStatus,
+		saveStatus,
+		saveError,
 		setSummaryDraft,
 		summaryDraft,
 		setEligibilityFootnotesDraft,
@@ -54,7 +56,7 @@ function EditorConsumer({
 			}
 		});
 		return () => registerSaveHandler(null);
-	}, [onSave, registerSaveHandler]);
+	}, [onSave, registerSaveHandler, setSaveStatus]);
 
 	return (
 		<div>
