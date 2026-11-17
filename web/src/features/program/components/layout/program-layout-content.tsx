@@ -234,7 +234,6 @@ export function ProgramLayoutContent({
 					hideSave={
 						revisionReadOnly ||
 						activeSection === "summary" ||
-						activeSection === "vehicles" ||
 						activeSection === "vehicles"
 					}
 					onSave={handleSave}
