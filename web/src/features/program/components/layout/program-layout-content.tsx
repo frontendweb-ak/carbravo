@@ -221,10 +221,15 @@ export function ProgramLayoutContent({
 						active: tab.id === revisionSelection.view,
 					}))}
 					onRevisionChange={handleRevisionChange}
-					saved={!isSaving}
-					saveLabel={isSaving ? "Saving..." : "Save draft"}
+					saveStatus={saveStatus}
+					saveError={saveError}
+					saveLabel={saveStatus === "error" ? "Retry save" : "Save draft"}
 					saveDisabled={revisionReadOnly || isSaving}
-					hideSave={revisionReadOnly || activeSection === "summary"}
+					hideSave={
+						revisionReadOnly ||
+						activeSection === "summary" ||
+						activeSection === "vehicles"
+					}
 					onSave={handleSave}
 				/>
 			</Box>
