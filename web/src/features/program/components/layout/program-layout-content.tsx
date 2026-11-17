@@ -47,6 +47,8 @@ export function ProgramLayoutContent({
 		sections,
 		completion,
 		saveCurrentSection,
+		saveStatus,
+		saveError,
 		isSaving,
 		isReadOnly,
 	} = useProgramEditor();
