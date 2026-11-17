@@ -155,7 +155,7 @@ export function SetupForm({
 				noValidate
 				onSubmit={(event) => event.preventDefault()}
 			>
-				<ProgramDetailsSection control={form.control} />
+				<ProgramDetailsSection control={form.control} canEdit={canEdit} />
 				<ControllingDatesSection control={form.control} canEdit={canEdit} />
 				<ProgramConfigurationSection
 					control={form.control}
