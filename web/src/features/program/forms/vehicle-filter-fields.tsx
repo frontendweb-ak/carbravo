@@ -38,6 +38,15 @@ export function VehicleFilterFields({
 	editing,
 	onCancelEdit,
 }: VehicleFilterFieldsProps) {
+	const { setSaveStatus } = useProgramEditor();
+	const updateSelection = (name: keyof VehicleFilterRow, value: string[]) => {
+		form.setValue(`currentRow.${name}`, value, {
+			shouldDirty: true,
+			shouldValidate: false,
+		});
+		setSaveStatus("unsaved");
+	};
+
 	const columns: VehicleFilterColumn[] = [
 		{
 			id: "model-year",
@@ -45,10 +54,7 @@ export function VehicleFilterFields({
 			options: yearOptions,
 			value: currentRow.modelYears,
 			onValueChange: (value) =>
-				form.setValue("currentRow.modelYears", value, {
-					shouldDirty: true,
-					shouldValidate: false,
-				}),
+				updateSelection("modelYears", value),
 			getValue: (option: VehicleFilterOption) => option.value,
 			getLabel: (option: VehicleFilterOption) => option.label,
 			searchPlaceholder: "Search model year...",
@@ -61,10 +67,7 @@ export function VehicleFilterFields({
 			options: makeOptions,
 			value: currentRow.makes,
 			onValueChange: (value) =>
-				form.setValue("currentRow.makes", value, {
-					shouldDirty: true,
-					shouldValidate: false,
-				}),
+				updateSelection("makes", value),
 			getValue: (option: VehicleFilterOption) => option.value,
 			getLabel: (option: VehicleFilterOption) => option.label,
 			searchPlaceholder: "Search make...",
@@ -77,10 +80,7 @@ export function VehicleFilterFields({
 			options: modelOptions,
 			value: currentRow.models,
 			onValueChange: (value) =>
-				form.setValue("currentRow.models", value, {
-					shouldDirty: true,
-					shouldValidate: false,
-				}),
+				updateSelection("models", value),
 			getValue: (option: VehicleFilterOption) => option.value,
 			getLabel: (option: VehicleFilterOption) => option.label,
 			searchPlaceholder: "Search model...",
@@ -93,10 +93,7 @@ export function VehicleFilterFields({
 			options: fuelOptions,
 			value: currentRow.fuelTypes,
 			onValueChange: (value) =>
-				form.setValue("currentRow.fuelTypes", value, {
-					shouldDirty: true,
-					shouldValidate: false,
-				}),
+				updateSelection("fuelTypes", value),
 			getValue: (option: VehicleFilterOption) => option.value,
 			getLabel: (option: VehicleFilterOption) => option.label,
 			searchPlaceholder: "Search fuel type...",
@@ -109,10 +106,7 @@ export function VehicleFilterFields({
 			options: segmentOptions,
 			value: currentRow.segments,
 			onValueChange: (value) =>
-				form.setValue("currentRow.segments", value, {
-					shouldDirty: true,
-					shouldValidate: false,
-				}),
+				updateSelection("segments", value),
 			getValue: (option: VehicleFilterOption) => option.value,
 			getLabel: (option: VehicleFilterOption) => option.label,
 			searchPlaceholder: "Search segment...",
