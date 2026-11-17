@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import type { UseFormReturn } from "react-hook-form";
+import { useWatch, type UseFormReturn } from "react-hook-form";
 
 import {
 	useResolveVehicleFilters,
@@ -28,8 +28,8 @@ export function useVehicleRowEditor({
 	const { mutateAsync: updateVehiclesAsync, isPending: isUpdatingVehicles } =
 		useUpdateProgramVehicles();
 
-	const selectedRows = form.watch("selectedRows") ?? [];
-	const currentRow = form.watch("currentRow") ?? emptyVehicleFilterRow;
+	const selectedRows = useWatch({ control: form.control, name: "selectedRows" }) ?? [];
+	const currentRow = useWatch({ control: form.control, name: "currentRow" }) ?? emptyVehicleFilterRow;
 
 	const persistRows = useCallback(
 		async (rows: VehicleFilterRow[]) => {
