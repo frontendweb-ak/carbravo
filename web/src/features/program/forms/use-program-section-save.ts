@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useRef, type FormEvent } from "react";
-import type {
-	FieldValues,
-	SubmitHandler,
-	UseFormReturn,
+import {
+	useFormState,
+	type FieldValues,
+	type SubmitHandler,
+	type UseFormReturn,
 } from "react-hook-form";
 
 import { useProgramEditor } from "../editor/program-editor-context";
@@ -37,6 +38,7 @@ export function useProgramSectionSave<
 	TTransformedValues
 >) {
 	const { registerSaveHandler, setSaveStatus } = useProgramEditor();
+	const { isDirty } = useFormState({ control: form.control });
 	const onSaveRef = useRef(onSave);
 	onSaveRef.current = onSave;
 
@@ -71,16 +73,10 @@ export function useProgramSectionSave<
 	}, [enabled, registerSaveHandler, submit]);
 
 	useEffect(() => {
-		if (!enabled) return;
-
-		const subscription = form.watch(() => {
-			if (form.formState.isDirty) {
-				setSaveStatus("unsaved");
-			}
-		});
-
-		return () => subscription.unsubscribe();
-	}, [enabled, form, setSaveStatus]);
+		if (enabled && isDirty) {
+			setSaveStatus("unsaved");
+		}
+	}, [enabled, isDirty, setSaveStatus]);
 
 	return {
 		submit,
