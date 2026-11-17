@@ -135,6 +135,19 @@ describe("SetupForm", () => {
 		});
 	});
 
+	it("does not autosave setup values that fail validation", async () => {
+		renderSetupForm();
+
+		fireEvent.change(screen.getByLabelText("Program Name"), {
+			target: { value: " " },
+		});
+
+		await flushAutosave();
+
+		expect(mocks.createProgram).not.toHaveBeenCalled();
+		expect(mocks.updateSetup).not.toHaveBeenCalled();
+	});
+
 	it("debounces successive changes and persists the latest program name", async () => {
 		renderSetupForm();
 
