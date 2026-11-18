@@ -1,4 +1,5 @@
 ---
+description: CarBravo product purpose, frontend ownership, mock backend boundary, and implementation expectations
 applyTo: "**/*"
 ---
 

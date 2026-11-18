@@ -1,4 +1,5 @@
 ---
+description: Naming rules and file conventions for components, hooks, functions, API modules, models, schemas, and utilities
 applyTo: "web/src/**/*"
 ---
 

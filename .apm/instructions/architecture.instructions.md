@@ -1,4 +1,5 @@
 ---
+description: Feature-first frontend architecture, module ownership, dependency direction, and reuse boundaries
 applyTo: "web/src/**/*"
 ---
 

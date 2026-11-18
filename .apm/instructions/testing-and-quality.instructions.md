@@ -1,4 +1,5 @@
 ---
+description: Testing strategy, accessibility validation, CI quality gates, and safe change discipline
 applyTo: "**/*"
 ---
 

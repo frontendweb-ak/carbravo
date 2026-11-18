@@ -1,4 +1,5 @@
 ---
+description: React component composition, state ownership, accessibility, and UI implementation standards
 applyTo: "web/src/**/*.tsx"
 ---
 

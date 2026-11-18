@@ -2,6 +2,20 @@ name: carbravo
 version: 1.0.0
 description: CarBravo frontend application with portable feature modules and governed AI development workflows
 
+# Keep generated context consistent across contributors, including contributors
+# who use a different coding-agent environment.
+targets:
+  - copilot
+  - claude
+  - grok-build
+  - cursor
+  - opencode
+  - codex
+  - gemini
+  - windsurf
+  - kiro
+  - antigravity
+
 includes: auto
 
 dependencies:

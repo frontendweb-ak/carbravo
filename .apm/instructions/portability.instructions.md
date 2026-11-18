@@ -1,4 +1,5 @@
 ---
+description: Keep CarBravo feature modules independent from mock infrastructure and ready for future host-application integration
 applyTo: "web/src/**/*"
 ---
 

@@ -1,4 +1,5 @@
 ---
+description: OpenAPI contract alignment, HTTP transport boundaries, feature API modules, DTO mapping, and query efficiency
 applyTo: "web/src/**/*api*.*,web/src/infra/api/**/*,web/src/features/**/model/**/*"
 ---
 
