@@ -6,6 +6,7 @@ import {
 	useUpdateProgramVehicles,
 } from "../hooks/use-program-vehicles";
 import { emptyVehicleFilterRow } from "../constants";
+import type { ProgramSaveStatus } from "../editor/program-editor-context";
 import type { VehicleFilterRow, VehiclesFormValues } from "../schema";
 
 interface UseVehicleRowEditorOptions {
@@ -13,7 +14,13 @@ interface UseVehicleRowEditorOptions {
 	programId?: number;
 	revisionId?: number;
 	canEdit: boolean;
-	setSectionSaving: (saving: boolean) => void;
+	setSaveStatus: (status: ProgramSaveStatus, error?: string | null) => void;
+}
+
+function getErrorMessage(error: unknown): string {
+	return error instanceof Error
+		? error.message
+		: "Vehicle selection could not be saved.";
 }
 
 export function useVehicleRowEditor({
@@ -21,20 +28,23 @@ export function useVehicleRowEditor({
 	programId,
 	revisionId,
 	canEdit,
-	setSectionSaving,
+	setSaveStatus,
 }: UseVehicleRowEditorOptions) {
 	const [editingIndex, setEditingIndex] = useState<number | null>(null);
 	const resolveVehicleFilters = useResolveVehicleFilters();
 	const { mutateAsync: updateVehiclesAsync, isPending: isUpdatingVehicles } =
 		useUpdateProgramVehicles();
 
-	const selectedRows = useWatch({ control: form.control, name: "selectedRows" }) ?? [];
-	const currentRow = useWatch({ control: form.control, name: "currentRow" }) ?? emptyVehicleFilterRow;
+	const selectedRows =
+		useWatch({ control: form.control, name: "selectedRows" }) ?? [];
+	const currentRow =
+		useWatch({ control: form.control, name: "currentRow" }) ??
+		emptyVehicleFilterRow;
 
 	const persistRows = useCallback(
-		async (rows: VehicleFilterRow[]) => {
-			// New programs do not have a revision ID until Setup is created.
-			if (!canEdit || programId == null || revisionId == null) return;
+		async (rows: VehicleFilterRow[]): Promise<boolean> => {
+			// New programs keep vehicle selections local until Setup creates a revision.
+			if (!canEdit || programId == null || revisionId == null) return false;
 
 			const resolved = await resolveVehicleFilters(rows);
 			const vehicleCatalogIds = [...new Set(resolved.vehicleCatalogIds)];
@@ -44,6 +54,7 @@ export function useVehicleRowEditor({
 				revisionId,
 				payload: { vehicleCatalogIds },
 			});
+			return true;
 		},
 		[canEdit, programId, revisionId, resolveVehicleFilters, updateVehiclesAsync],
 	);
@@ -67,24 +78,30 @@ export function useVehicleRowEditor({
 				{ shouldDirty: false },
 			);
 			setEditingIndex(index);
+			setSaveStatus("unsaved");
 		},
-		[canEdit, form, selectedRows],
+		[canEdit, form, selectedRows, setSaveStatus],
 	);
 
 	const onCancelEdit = useCallback(() => {
 		setEditingIndex(null);
 		form.setValue("currentRow", { ...emptyVehicleFilterRow });
-	}, [form]);
+		setSaveStatus(
+			programId != null && revisionId != null
+				? selectedRows.length > 0 ? "saved" : "idle"
+				: selectedRows.length > 0 ? "unsaved" : "idle",
+		);
+	}, [form, programId, revisionId, selectedRows.length, setSaveStatus]);
 
 	const onDeleteRow = useCallback(
 		async (index: number) => {
 			if (!canEdit || isUpdatingVehicles) return;
 
 			const nextRows = selectedRows.filter((_, rowIndex) => rowIndex !== index);
-			setSectionSaving(true);
+			setSaveStatus("saving");
 
 			try {
-				await persistRows(nextRows);
+				const persisted = await persistRows(nextRows);
 				form.setValue("selectedRows", nextRows, {
 					shouldDirty: false,
 					shouldValidate: true,
@@ -98,10 +115,11 @@ export function useVehicleRowEditor({
 						current === null ? null : current - 1,
 					);
 				}
+
+				setSaveStatus(persisted ? "saved" : "unsaved");
 			} catch (error) {
+				setSaveStatus("error", getErrorMessage(error));
 				console.error("Failed to remove vehicle selection:", error);
-			} finally {
-				setSectionSaving(false);
 			}
 		},
 		[
@@ -111,7 +129,7 @@ export function useVehicleRowEditor({
 			isUpdatingVehicles,
 			persistRows,
 			selectedRows,
-			setSectionSaving,
+			setSaveStatus,
 		],
 	);
 
@@ -127,6 +145,7 @@ export function useVehicleRowEditor({
 				row.fuelTypes.length === 0;
 
 			if (missingRequired) {
+				setSaveStatus("invalid");
 				form.setError("currentRow.modelYears", {
 					type: "manual",
 					message: "Model year, make, model and fuel type are required.",
@@ -148,12 +167,13 @@ export function useVehicleRowEditor({
 							index === editingIndex ? nextRow : existingRow,
 						);
 
-			setSectionSaving(true);
+			setSaveStatus("saving");
 
 			try {
-				await persistRows(nextRows);
+				const persisted = await persistRows(nextRows);
 
-				// Update local committed rows only after the API save succeeds.
+				// Update local committed rows only after a remote save succeeds,
+				// or after the new-program selection is intentionally kept local.
 				form.setValue("selectedRows", nextRows, {
 					shouldDirty: false,
 					shouldValidate: true,
@@ -165,10 +185,10 @@ export function useVehicleRowEditor({
 				);
 				setEditingIndex(null);
 				form.clearErrors();
+				setSaveStatus(persisted ? "saved" : "unsaved");
 			} catch (error) {
+				setSaveStatus("error", getErrorMessage(error));
 				console.error("Failed to save vehicle selection:", error);
-			} finally {
-				setSectionSaving(false);
 			}
 		},
 		[
@@ -177,7 +197,7 @@ export function useVehicleRowEditor({
 			form,
 			isUpdatingVehicles,
 			persistRows,
-			setSectionSaving,
+			setSaveStatus,
 		],
 	);
 

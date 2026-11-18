@@ -35,7 +35,7 @@ export function SetupForm({
 	readOnly = false,
 	onCreated,
 }: SetupFormProps) {
-	const { registerSaveHandler, updateSectionStatus, isMinorRevision } =
+	const { registerSaveHandler, updateSectionStatus, setSaveStatus, isMinorRevision } =
 		useProgramEditor();
 	const isExistingRevision =
 		mode === "edit" && programId != null && revisionId != null;
@@ -75,6 +75,7 @@ export function SetupForm({
 		onCreated,
 		updateSectionStatus,
 		registerSaveHandler,
+		setSaveStatus,
 	});
 
 	useEffect(() => {

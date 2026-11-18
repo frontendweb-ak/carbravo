@@ -47,8 +47,11 @@ export function ProgramLayoutContent({
 		sections,
 		completion,
 		saveCurrentSection,
+		saveStatus,
+		saveError,
 		isSaving,
 		isReadOnly,
+		isMinorRevision,
 	} = useProgramEditor();
 
 	/*
@@ -91,7 +94,10 @@ export function ProgramLayoutContent({
 	 */
 	const isRevisionEditor = !isHistoryList;
 
-	const revisionReadOnly = isReadOnly || revisionSelection.view !== "current";
+	const revisionReadOnly =
+		isReadOnly ||
+		revisionSelection.view !== "current" ||
+		(isMinorRevision && activeSection !== "marketing");
 
 	const handleSectionChange = (sectionId: string) => {
 		if (mode === "new") {
@@ -221,10 +227,15 @@ export function ProgramLayoutContent({
 						active: tab.id === revisionSelection.view,
 					}))}
 					onRevisionChange={handleRevisionChange}
-					saved={!isSaving}
-					saveLabel={isSaving ? "Saving..." : "Save draft"}
+					saveStatus={saveStatus}
+					saveError={saveError}
+					saveLabel={saveStatus === "error" ? "Retry save" : "Save draft"}
 					saveDisabled={revisionReadOnly || isSaving}
-					hideSave={revisionReadOnly || activeSection === "summary"}
+					hideSave={
+						revisionReadOnly ||
+						activeSection === "summary" ||
+						activeSection === "vehicles"
+					}
 					onSave={handleSave}
 				/>
 			</Box>

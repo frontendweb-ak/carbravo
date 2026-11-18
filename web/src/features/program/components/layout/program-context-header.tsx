@@ -11,6 +11,7 @@ import {
 import type { ReactNode } from "react";
 
 import type { ProgramWorkflowStatus } from "@/config/constants";
+import type { ProgramSaveStatus } from "../../editor/program-editor-context";
 import { ProgramIdentityHeader } from "@/features/program/components/program-identity-header";
 import { RevisionChips } from "@/features/program/components/revision-chips";
 import { SaveStatus } from "@/features/program/components/save-status";
@@ -29,7 +30,8 @@ export interface ProgramContextHeaderProps {
 	revision?: ReactNode;
 	status?: ProgramWorkflowStatus;
 
-	saved?: boolean;
+	saveStatus: ProgramSaveStatus;
+	saveError?: string | null;
 	saveLabel?: ReactNode;
 	onSave?: () => void;
 
@@ -53,7 +55,8 @@ function ProgramContextHeader({
 	revision = "1.0",
 	status = "DRAFT",
 
-	saved = true,
+	saveStatus,
+	saveError,
 	saveLabel = "Save draft",
 	onSave,
 
@@ -118,7 +121,8 @@ function ProgramContextHeader({
 					{/* Save status */}
 					<Box sx={{ flexShrink: 0 }}>
 						<SaveStatus
-							saved={saved}
+							status={saveStatus}
+							error={saveError}
 							hideSave={hideSave}
 							saveDisabled={saveDisabled}
 							saveLabel={String(saveLabel ?? "Save draft")}

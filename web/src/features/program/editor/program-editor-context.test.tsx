@@ -24,10 +24,13 @@ function EditorConsumer({
 		approved,
 		sections,
 		completion,
-				isSaving,
+		isSaving,
 		isReadOnly,
 		isMinorRevision,
-						updateSectionStatus,
+		updateSectionStatus,
+		setSaveStatus,
+		saveStatus,
+		saveError,
 		setSummaryDraft,
 		summaryDraft,
 		setEligibilityFootnotesDraft,
@@ -38,9 +41,21 @@ function EditorConsumer({
 
 	useEffect(() => {
 		if (!onSave) return;
-		registerSaveHandler(onSave);
+		registerSaveHandler(async () => {
+			setSaveStatus("saving");
+			try {
+				await onSave();
+				setSaveStatus("saved");
+			} catch (error) {
+				setSaveStatus(
+					"error",
+					error instanceof Error ? error.message : "Save failed.",
+				);
+				throw error;
+			}
+		});
 		return () => registerSaveHandler(null);
-	}, [onSave, registerSaveHandler]);
+	}, [onSave, registerSaveHandler, setSaveStatus]);
 
 	return (
 		<div>
@@ -56,7 +71,9 @@ function EditorConsumer({
 					isSubmitted,
 					approved,
 					completion,
-									isSaving,
+					isSaving,
+					saveStatus,
+					saveError,
 					isReadOnly,
 					isMinorRevision,
 					summaryDraft,
@@ -149,6 +166,8 @@ function getState() {
 		approved: boolean;
 		completion: number;
 		isSaving: boolean;
+		saveStatus: string;
+		saveError: string | null;
 		isReadOnly: boolean;
 		isMinorRevision: boolean;
 		summaryDraft: string;
@@ -170,6 +189,8 @@ describe("ProgramEditorProvider", () => {
 			revisionLabel: "1.0",
 			programStatus: "DRAFT",
 			completion: 0,
+			saveStatus: "idle",
+			saveError: null,
 			isSubmitted: false,
 			approved: false,
 			isReadOnly: false,

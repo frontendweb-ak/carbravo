@@ -17,7 +17,7 @@ export function VehiclesForm() {
 		revisionId,
 		isReadOnly,
 		isMinorRevision,
-		setSectionSaving,
+		setSaveStatus,
 	} = useProgramEditor();
 	const canEdit = !isReadOnly && !isMinorRevision;
 
@@ -31,7 +31,7 @@ export function VehiclesForm() {
 		programId,
 		revisionId,
 		canEdit,
-		setSectionSaving,
+		setSaveStatus,
 	});
 	const options = useVehicleFilterOptions(rows.currentRow, form);
 	const { data: savedVehiclesResponse } = useProgramVehicles(programId, revisionId);
@@ -41,7 +41,7 @@ export function VehiclesForm() {
 		<FormProvider {...form}>
 			<Box
 				component="form"
-				onSubmit={form.handleSubmit(rows.onCommitRow)}
+				onSubmit={form.handleSubmit(rows.onCommitRow, () => setSaveStatus("invalid"))}
 				sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}
 			>
 				<VehicleFilterFields

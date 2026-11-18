@@ -19,6 +19,7 @@ import {
   geographyFormToRequest,
   geographyResponseToForm,
 } from "../model/geography.mapper";
+import { useProgramSectionSave } from "./use-program-section-save";
 import {
   type GeographyFormValues,
   type GeographyRule,
@@ -35,8 +36,6 @@ export function GeographyForm() {
     revisionId,
     isReadOnly,
     isMinorRevision,
-    registerSaveHandler,
-    setSectionSaving,
     updateSectionStatus,
   } = useProgramEditor();
   const canEdit = !isReadOnly && !isMinorRevision;
@@ -112,42 +111,33 @@ export function GeographyForm() {
   };
 
   const onSubmit = useCallback(async (values: GeographyFormValues) => {
-    if (!canEdit || programId == null || revisionId == null) return;
-
-    setSectionSaving(true);
-    try {
-      await updateGeography.mutateAsync({
-        programId,
-        revisionId,
-        payload: geographyFormToRequest(values),
-      });
-      updateSectionStatus("geography", "completed");
-      form.reset(values);
-    } finally {
-      setSectionSaving(false);
+    if (!canEdit || programId == null || revisionId == null) {
+      throw new Error("Geography cannot be saved without a program revision.");
     }
+
+    await updateGeography.mutateAsync({
+      programId,
+      revisionId,
+      payload: geographyFormToRequest(values),
+    });
+    updateSectionStatus("geography", "completed");
+    form.reset(values);
   }, [
     canEdit,
     form,
     programId,
     revisionId,
-    setSectionSaving,
     updateGeography,
     updateSectionStatus,
   ]);
 
-  useEffect(() => {
-    registerSaveHandler(async () => {
-      await form.handleSubmit(onSubmit)();
-    });
-    return () => registerSaveHandler(null);
-  }, [form, onSubmit, registerSaveHandler]);
+  const { handleSubmit } = useProgramSectionSave({ form, onSave: onSubmit, enabled: canEdit });
 
   return (
     <FormProvider {...form}>
       <Stack
         component="form"
-        onSubmit={form.handleSubmit(onSubmit)}
+        onSubmit={handleSubmit}
         spacing={2.5}
       >
         {isMinorRevision && (

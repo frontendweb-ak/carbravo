@@ -12,6 +12,7 @@ import type {
 } from "../api/setup.api";
 import type {
 	ProgramEditorMode,
+	ProgramSaveStatus,
 	ProgramSectionStatus,
 } from "../editor/program-editor-context";
 import {
@@ -48,6 +49,7 @@ interface UseSetupFormPersistenceOptions {
 		status: ProgramSectionStatus,
 	) => void;
 	registerSaveHandler: (handler: (() => Promise<void>) | null) => void;
+	setSaveStatus: (status: ProgramSaveStatus, error?: string | null) => void;
 }
 
 export function useSetupFormPersistence({
@@ -63,6 +65,7 @@ export function useSetupFormPersistence({
 	onCreated,
 	updateSectionStatus,
 	registerSaveHandler,
+	setSaveStatus,
 }: UseSetupFormPersistenceOptions): void {
 	const persistenceRef = useRef({
 		programId,
@@ -139,6 +142,7 @@ export function useSetupFormPersistence({
 		async (values: SetupFormOutput) => {
 			if (!canEdit || !mountedRef.current) return;
 
+			setSaveStatus("saving");
 			pendingSaveRef.current = values;
 			if (savingRef.current) return;
 
@@ -215,11 +219,20 @@ export function useSetupFormPersistence({
 					}
 				}
 
-				if (mountedRef.current) setSetupStatus("completed");
+				if (mountedRef.current) {
+					setSetupStatus("completed");
+					setSaveStatus("saved");
+				}
 			} catch (error) {
 				console.error("[SetupForm] autosave failed", error);
 
-				if (mountedRef.current) setSetupStatus("warning");
+				if (mountedRef.current) {
+					setSetupStatus("warning");
+					setSaveStatus(
+						"error",
+						error instanceof Error ? error.message : "Setup could not be saved.",
+					);
+				}
 			} finally {
 				savingRef.current = false;
 
@@ -244,6 +257,7 @@ export function useSetupFormPersistence({
 			updateSetup,
 			onCreated,
 			setSetupStatus,
+			setSaveStatus,
 		],
 	);
 
@@ -261,6 +275,7 @@ export function useSetupFormPersistence({
 			latestValuesRef.current = nextValues;
 			changeVersionRef.current += 1;
 			setSetupStatus("warning");
+			setSaveStatus("unsaved");
 
 			if (saveTimerRef.current !== null) {
 				window.clearTimeout(saveTimerRef.current);
@@ -272,6 +287,7 @@ export function useSetupFormPersistence({
 
 				const latestValues = latestValuesRef.current;
 				if (latestValues) {
+					// Autosave intentionally persists incomplete draft data.
 					void persistSetupRef.current(latestValues);
 				}
 			}, AUTO_SAVE_DELAY);
@@ -285,7 +301,7 @@ export function useSetupFormPersistence({
 				saveTimerRef.current = null;
 			}
 		};
-	}, [canEdit, form, setSetupStatus]);
+	}, [canEdit, form, setSetupStatus, setSaveStatus]);
 
 	useEffect(() => {
 		if (!canEdit) {
@@ -314,7 +330,10 @@ export function useSetupFormPersistence({
 				changeVersionRef.current += 1;
 				await persistSetupRef.current(values);
 			},
-			() => setSetupStatus("warning"),
+			() => {
+				setSetupStatus("warning");
+				setSaveStatus("invalid");
+			},
 		)();
 	};
 }

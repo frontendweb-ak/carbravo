@@ -13,6 +13,7 @@ import {
   mapIncentiveFormToComponents,
   mapProgramValuesToForm,
 } from "../model/incentive-values.mapper";
+import { useProgramSectionSave } from "./use-program-section-save";
 import {
   type IncentiveValuesFormValues,
   incentiveValuesFormSchema,
@@ -26,8 +27,6 @@ export function IncentiveValuesForm() {
     revisionId,
     isReadOnly,
     isMinorRevision,
-    registerSaveHandler,
-    setSectionSaving,
     updateSectionStatus,
   } = useProgramEditor();
 
@@ -48,42 +47,31 @@ export function IncentiveValuesForm() {
 
   const onSubmit = useCallback(async (values: IncentiveValuesFormValues) => {
     if (!canEdit || programId == null || revisionId == null || !valuesQuery.data) {
-      return;
+      throw new Error("Incentive values are not ready to save.");
     }
 
-    setSectionSaving(true);
-    try {
-      const components = mapIncentiveFormToComponents(values, valuesQuery.data);
-      await updateValues.mutateAsync({
-        programId,
-        revisionId,
-        payload: { components },
-      });
-      updateSectionStatus(
-        "incentive-values",
-        components.length > 0 ? "completed" : "warning",
-      );
-      form.reset(values);
-    } finally {
-      setSectionSaving(false);
-    }
+    const components = mapIncentiveFormToComponents(values, valuesQuery.data);
+    await updateValues.mutateAsync({
+      programId,
+      revisionId,
+      payload: { components },
+    });
+    updateSectionStatus(
+      "incentive-values",
+      components.length > 0 ? "completed" : "warning",
+    );
+    form.reset(values);
   }, [
     canEdit,
     form,
     programId,
     revisionId,
-    setSectionSaving,
     updateSectionStatus,
     updateValues,
     valuesQuery.data,
   ]);
 
-  useEffect(() => {
-    registerSaveHandler(async () => {
-      await form.handleSubmit(onSubmit)();
-    });
-    return () => registerSaveHandler(null);
-  }, [form, onSubmit, registerSaveHandler]);
+  const { handleSubmit } = useProgramSectionSave({ form, onSave: onSubmit, enabled: canEdit });
 
   const aprTerms = valuesQuery.data?.financeTerms ?? [];
 
@@ -91,7 +79,7 @@ export function IncentiveValuesForm() {
     <FormProvider {...form}>
       <Stack
         component="form"
-        onSubmit={form.handleSubmit(onSubmit)}
+        onSubmit={handleSubmit}
         spacing={2.5}
       >
         {isMinorRevision && (

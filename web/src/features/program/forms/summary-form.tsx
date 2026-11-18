@@ -8,11 +8,13 @@ export function SummaryForm() {
     summaryDraft,
     setSummaryDraft,
     updateSectionStatus,
+    setSaveStatus,
     isReadOnly,
   } = useProgramEditor();
 
   const handleSummaryChange = (value: string) => {
     setSummaryDraft(value);
+    setSaveStatus("unsaved");
     updateSectionStatus("summary", value.trim() ? "completed" : "warning");
   };
 

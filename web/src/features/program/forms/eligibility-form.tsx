@@ -21,6 +21,7 @@ import { useProgramEditor } from "../editor/program-editor-context";
 import { useProgramSetup, useUpdateProgramSetup } from "../hooks";
 import { mapSetupResponseToDto } from "../model/setup.mapper";
 import { type EligibilityFormValues, eligibilityFormSchema } from "../schema";
+import { useProgramSectionSave } from "./use-program-section-save";
 
 export function EligibilityForm() {
   const {
@@ -28,8 +29,6 @@ export function EligibilityForm() {
     revisionId,
     isReadOnly,
     isMinorRevision,
-    registerSaveHandler,
-    setSectionSaving,
     updateSectionStatus,
     eligibilityFootnotesDraft,
     setEligibilityFootnotesDraft,
@@ -69,48 +68,37 @@ export function EligibilityForm() {
 
   const onSubmit = useCallback(async (values: EligibilityFormValues) => {
     if (!canEdit || programId == null || revisionId == null || !setupQuery.data) {
-      return;
+      throw new Error("Eligibility data is not ready to save.");
     }
 
-    setSectionSaving(true);
-    try {
-      await updateSetup.mutateAsync({
-        programId,
-        revisionId,
-        payload: {
-          ...mapSetupResponseToDto(setupQuery.data),
-          financialProviderCode: values.financialProviderCode || null,
-          customerTypeCodes: [...values.customerTypeCodes],
-        },
-      });
-      updateSectionStatus("eligibility", "completed");
-      form.reset(values);
-    } finally {
-      setSectionSaving(false);
-    }
+    await updateSetup.mutateAsync({
+      programId,
+      revisionId,
+      payload: {
+        ...mapSetupResponseToDto(setupQuery.data),
+        financialProviderCode: values.financialProviderCode || null,
+        customerTypeCodes: [...values.customerTypeCodes],
+      },
+    });
+    updateSectionStatus("eligibility", "completed");
+    form.reset(values);
   }, [
     canEdit,
     form,
     programId,
     revisionId,
-    setSectionSaving,
     setupQuery.data,
     updateSectionStatus,
     updateSetup,
   ]);
 
-  useEffect(() => {
-    registerSaveHandler(async () => {
-      await form.handleSubmit(onSubmit)();
-    });
-    return () => registerSaveHandler(null);
-  }, [form, onSubmit, registerSaveHandler]);
+  const { handleSubmit } = useProgramSectionSave({ form, onSave: onSubmit, enabled: canEdit });
 
   return (
     <FormProvider {...form}>
       <Box
         component="form"
-        onSubmit={form.handleSubmit(onSubmit)}
+        onSubmit={handleSubmit}
         sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}
       >
         {isMinorRevision && (
