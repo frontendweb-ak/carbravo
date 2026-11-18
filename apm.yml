@@ -1,0 +1,11 @@
+name: carbravo
+version: 1.0.0
+description: CarBravo frontend application with portable feature modules and governed AI development workflows
+
+includes: auto
+
+dependencies:
+  apm: []
+  mcp: []
+
+scripts: {}
